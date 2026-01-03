@@ -322,17 +322,29 @@
     </div>
     
     <div id="gemini-modal" class="modal">
-        <div class="card rounded-lg p-8 w-full max-w-md m-4 text-center">
-            <h3 id="gemini-modal-title" class="text-2xl font-bold mb-4">✨ Fun Fact!</h3>
-            <div id="gemini-content" class="text-subtle mb-6 min-h-[100px] flex justify-center items-center">
-                <div class="loader"></div>
-            </div>
-            <button id="close-gemini-modal-btn" class="btn btn-secondary py-2 px-6" data-translate-key="closeButton">Close</button>
+    <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-md m-4 text-center relative overflow-hidden">
+        
+        <div class="mb-4 relative z-10 flex justify-center">
+            <i class="fa-solid fa-wand-magic-sparkles text-4xl glow-icon-effect"></i>
         </div>
+
+        <h3 id="gemini-modal-title" class="text-2xl font-bold mb-4 relative z-10">
+            Fun Fact
+        </h3>
+
+        <div id="gemini-content" class="mb-6 min-h-[100px] flex justify-center items-center relative z-10">
+            <div class="loader"></div>
+        </div>
+        
+        <button id="close-gemini-modal-btn" class="btn btn-secondary py-2 px-8 transition-all relative z-10" data-translate-key="closeButton">
+            CLOSE
+        </button>
     </div>
+</div>
     <script type="module" src="script.js"></script>
 </body>
 
 </html>
+
 
 
