@@ -501,3 +501,31 @@ main {
     color: var(--primary-color);
     transition: color 0.3s ease;
 }
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* Ukuran responsif: di mobile tidak memenuhi layar, di desktop tidak raksasa */
+    width: 85vw; 
+    max-width: 550px;
+    height: 85vw;
+    max-height: 550px;
+
+    /* Memanggil file gambar asli kamu */
+    background-image: url('globe-bg.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Atur kejelasan di sini */
+    opacity: 0.18;      /* Sudah cukup terlihat tapi tidak menabrak teks */
+    filter: blur(0px);  /* Tanpa blur agar detail bendera tajam */
+    
+    /* Layering agar berada di belakang konten */
+    z-index: -1;
+    pointer-events: none;
+}
