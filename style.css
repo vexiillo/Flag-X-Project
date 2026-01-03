@@ -582,8 +582,17 @@ body::before {
     }
 }
 
-/* Perbaikan warna loader agar tidak mengganggu pandangan */
+/* --- PERBAIKAN LOADER AGAR TIDAK ANEH --- */
+/* Kita hapus semua border-top/right/left yang saya kasih sebelumnya */
+/* Biarkan class .loader menggunakan style utama yang sudah Anda buat */
 .glass-fun-fact .loader {
-    border-top-color: var(--primary-color) !important;
-    border-right-color: transparent !important;
+    /* Pastikan warna teks dan primer tetap terbaca di mode glass */
+    border-color: var(--text-color);
+    border-bottom-color: var(--primary-color);
+    
+    /* Memastikan tidak ada sisa style dari percobaan sebelumnya yang merusak animasi */
+    border-top-color: var(--text-color) !important;
+    border-right-color: var(--text-color) !important;
+    border-left-color: var(--text-color) !important;
 }
+
