@@ -1204,9 +1204,11 @@ function initApp() {
                        : "Fun Fact";
 
     if (modalTitle) {
-        modalTitle.textContent = `✨ ${titleLabel}: ${itemName}`;
+        // HAPUS emoji '✨' di sini, karena kita sudah pakai ikon besar di HTML.
+        // Hasilnya akan menjadi: "Fun Fact: Indonesia" (contoh)
+        modalTitle.textContent = `${titleLabel}: ${itemName}`;
     }
-
+     
     try {
         // Perhatikan ada huruf 's' di belakang
 const response = await fetch('/get-fun-facts', { 
@@ -1273,4 +1275,5 @@ const response = await fetch('/get-fun-facts', {
 
     // Jalankan initApp HANYA SEKALI di sini
     initApp();
+
     
