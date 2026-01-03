@@ -1042,7 +1042,6 @@ function initApp() {
             titleKey = 'lib_unofficial_title'; 
             break;
         case 'historical': 
-            // Perbaikan filter historical agar konsisten
             data = historicalFlags.filter(h => h.country === subCategory);
             title = `${subCategory} Historical Flags`; 
             backScreen = 'historical-library-screen'; 
@@ -1070,7 +1069,7 @@ function initApp() {
         }
     }
 
-    // 3. Setup Tombol Kembali (Hapus state library saat kembali ke menu)
+    // 3. Setup Tombol Kembali
     const backBtn = document.getElementById('back-from-library-btn');
     if (backBtn) {
         backBtn.onclick = () => {
@@ -1111,12 +1110,22 @@ function initApp() {
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn';
         card.dataset.name = item.name.toLowerCase();
         
+           // --- LOGIKA TAMPILAN NAMA & SUB-INFO (TAHUN/CAPITAL) ---
+        let displayName = item.name;
+        let subText = item.capital || item.years || "";
+
+        // Hapus tahun di dalam kurung agar tidak double jika tahun ditampilkan di baris kedua
+        if (item.years && displayName.includes(`(${item.years})`)) {
+            displayName = displayName.replace(`(${item.years})`, "").trim();
+        }
+
         const infoHtml = `
-            <p class="font-semibold text-sm leading-tight">${item.name}</p>
-            ${item.year ? `<p class="text-subtle text-[10px] font-medium mt-1">${item.year}</p>` : ''}
-            ${item.capital ? `<p class="text-subtle text-[10px] font-medium mt-1">${item.capital}</p>` : ''}
+            <p class="font-semibold text-sm leading-tight w-full">${displayName}</p>
+            
+            <p class="text-subtle text-[10px] font-medium mt-1 truncate w-full">${subText || '&nbsp;'}</p>
         `;
-        
+        // --- END LOGIKA ---
+
         card.innerHTML = `
             <div class="flag-wrapper mb-2">
                 <img src="${item.flag}" alt="${item.name} flag" class="flag-img rounded" loading="lazy" />
@@ -1124,7 +1133,7 @@ function initApp() {
             <div class="flex-grow flex flex-col justify-center py-1 w-full">${infoHtml}</div>
             <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1 px-2 mt-2 w-full" 
                     onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
-                ✨ <span data-translate-key="funFact">Fun Fact</span>
+                ✨ <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
             </button>`;
         grid.appendChild(card);
     });
@@ -1277,3 +1286,4 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
