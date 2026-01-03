@@ -25,7 +25,7 @@ export async function onRequestPost(context) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{ 
-                        text: `Write 1 short unique fun fact about the flag of ${countryName}. Your response MUST be in ${targetLangName}. Maximum 2 sentences.` 
+                        text: `Write 1 short unique fun fact about the flag or the country itself of ${countryName}. Your response MUST be in ${targetLangName}. Maximum 2 sentences.` 
                     }]
                 }]
             })
