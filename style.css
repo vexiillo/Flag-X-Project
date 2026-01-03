@@ -1,0 +1,503 @@
+:root {
+  /* --- Dark Mode (Jeton-Inspired Violet/Magenta) --- */
+  /* Latar belakang lebih gelap dan keunguan, seperti Jeton */
+  --bg-color-dark: #100C1F;
+  --bg-color-light: #19152C;
+  
+  /* Warna primer "Jeton Violet" yang khas */
+  --primary-color: #7B47F5;
+  --primary-color-rgb: 123, 71, 245;
+  --primary-hover-color: #8F64F8;
+  
+  /* Warna sekunder baru yang selaras */
+  --secondary-color: #2A2440;
+  --secondary-color-rgb: 42, 36, 64;
+  --secondary-hover-color: #383158;
+  
+  /* Kaca yang disesuaikan dengan latar belakang baru */
+  --card-bg-color: rgba(42, 36, 64, 0.5); /* Semi-transparent glass */
+  --card-border-color: rgba(123, 71, 245, 0.2); /* Border 'glow' ungu */
+  
+  --text-color: #e2e8f0;
+  --subtle-text-color: #a0aec0;
+  --input-bg-color: rgba(42, 36, 64, 0.7);
+  
+  --success-color: #28a745;
+  --success-color-rgb: 40, 167, 69;
+  --error-color: #dc3545;
+  --error-color-rgb: 220, 53, 69;
+}
+
+html.light {
+  /* --- Light Mode Colors (Bright & Clean) --- */
+  /* Mode terang tidak diubah, fokus pada permintaan dark mode */
+  --bg-color-dark: #eef2f9;
+  --bg-color-light: #ffffff;
+  --primary-color: #6366f1;
+  --primary-color-rgb: 99, 102, 241;
+  --primary-hover-color: #7b7df3;
+  --secondary-color: #f3f4f6;
+  --secondary-color-rgb: 243, 244, 246;
+  --secondary-hover-color: #e5e7eb;
+  --card-bg-color: rgba(255, 255, 255, 0.6); 
+  --card-border-color: rgba(99, 102, 241, 0.2);
+  --text-color: #1f2937;
+  --subtle-text-color: #6b7280;
+  --input-bg-color: rgba(243, 244, 246, 0.8);
+  --success-color: #16a34a;
+  --success-color-rgb: 22, 163, 74;
+  --error-color: #ef4444;
+  --error-color-rgb: 239, 68, 69;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  /* Pola radial yang terinspirasi Jeton, fokus pada violet dan pink/magenta */
+  background-image: 
+    radial-gradient(at 15% 15%, hsla(258, 88%, 60%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, hsla(320, 78%, 55%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, hsla(258, 88%, 60%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, hsla(320, 78%, 55%, 0.15) 0px, transparent 50%),
+    linear-gradient(135deg, var(--bg-color-dark), var(--bg-color-light));
+  color: var(--text-color);
+  background-attachment: fixed;
+  transition: color 0.3s ease, background 0.5s ease;
+  min-height: 100vh;
+}
+
+/* --- Core Component Styling --- */
+.card {
+    background-color: var(--card-bg-color);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid var(--card-border-color);
+    /* Menambah 'glow' yang konsisten seperti Jeton */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--primary-color-rgb), 0.1);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+    border: none;
+    font-weight: 600;
+    border-radius: 0.5rem; /* 8px */
+}
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Tombol Utama dengan Gradient ala Jeton --- */
+.btn-primary { 
+    /* Menggunakan gradient seperti Jeton (Violet ke Magenta/Pink) */
+    background-image: linear-gradient(90deg, var(--primary-color) 0%, #EC41B1 100%); 
+    color: white;
+    background-size: 200% 100%;
+    transition: all 0.4s ease-in-out;
+}
+.btn-primary:hover { 
+    /* Efek hover yang lebih 'glowing' dengan animasi geser gradient */
+    background-position: 100% 0;
+    box-shadow: 0 0 25px rgba(var(--primary-color-rgb), 0.6), 0 0 20px rgba(236, 65, 177, 0.4);
+    transform: translateY(-3px);
+}
+
+.btn-secondary { 
+    background-color: var(--secondary-color); 
+    color: var(--text-color);
+}
+.btn-secondary:hover { 
+    background-color: var(--secondary-hover-color);
+    box-shadow: 0 0 15px rgba(var(--secondary-color-rgb), 0.3);
+}
+
+#library-search-input,
+.settings-input { 
+    background-color: var(--input-bg-color); 
+    border: 1px solid var(--card-border-color);
+    color: var(--text-color);
+}
+#library-search-input::placeholder {
+    color: var(--subtle-text-color);
+}
+
+/* 1. Aturan umum .screen */
+.screen {
+    display: none; 
+    width: 100% !important;
+    /* Hapus max-width: 600px dari sini agar tidak memukul rata semua halaman */
+    margin-left: auto;
+    margin-right: auto;
+    animation: slideDown 0.5s ease-out forwards;
+}
+
+/* 2. Berikan batas 600px HANYA untuk layar selain Library */
+/* Ini agar menu utama & quiz tetap rapi di tengah */
+.screen:not(#library-display-screen) {
+    max-width: 600px !important;
+}
+
+/* 3. Khusus untuk Library, berikan lebar maksimal yang besar */
+#library-display-screen {
+    max-width: 95% !important; /* Sekarang Library bisa melebar ke samping */
+}
+
+.screen.active { 
+    display: flex; 
+    flex-direction: column;
+    align-items: stretch; 
+    text-align: center;
+}
+
+/* 4. Khusus elemen teks/judul agar tetap di tengah secara visual */
+.screen.active h1, 
+.screen.active h2, 
+.screen.active p, 
+.screen.active .flex-center-custom {
+    align-self: center;
+}
+
+/* 5. Penyesuaian Grid Library agar pas di lebar 600px */
+#library-grid {
+    display: grid !important; /* Tetap pastikan dia grid */
+    width: 100% !important;
+    padding: 10px 0;
+}
+
+@media (max-width: 480px) {
+    #library-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* Memaksa semua kontainer layar library agar memenuhi lebar */
+#library-display-screen, 
+#library-grid,
+.screen {
+    width: 100% !important;
+    max-width: 95vw !important; /* Menggunakan viewport width */
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Mengatur agar item di dalam grid punya lebar yang pas */
+#library-grid > div {
+    width: 100% !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Specific Element Tweaks --- */
+#home-screen h1 {
+    /* Gradient judul disesuaikan dengan palet baru (Violet ke Pink) */
+    background: linear-gradient(90deg, var(--primary-hover-color), #EC41B1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    display: inline-block; /* Fix for gradient clipping */
+    padding-bottom: 0.2em; /* Fix for gradient clipping */
+}
+
+#totalscore-container {
+    background-color: var(--card-bg-color);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--card-border-color);
+}
+
+.text-subtle { color: var(--subtle-text-color); }
+
+/* Fun Fact Button (sudah bagus, hanya ganti warna) */
+.fun-fact-btn {
+  background: linear-gradient(270deg, var(--primary-color), #d53f8c, var(--primary-hover-color));
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  color: #fff;
+}
+.fun-fact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(var(--primary-color-rgb), 0.6);
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Quiz Answer Buttons */
+.option-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 0 12px rgba(var(--primary-color-rgb), 0.4);
+}
+.option-btn.correct {
+  background-color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+  color: #fff !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(var(--success-color-rgb), 0.6);
+}
+.option-btn.incorrect {
+  background-color: var(--error-color) !important;
+  border-color: var(--error-color) !important;
+  color: #fff !important;
+  animation: shake 0.5s;
+  box-shadow: 0 0 15px rgba(var(--error-color-rgb), 0.6);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Flag Image Styling */
+.flag-img {
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+#quiz-screen .flag-img {
+  max-height: clamp(8rem, 15vh, 12rem);
+  width: auto;
+  margin: 0 auto 1rem auto;
+}
+.flag-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+}
+#quiz-screen .flag-img.correct-flag {
+  box-shadow: 0 0 25px 5px rgba(var(--success-color-rgb), 0.7);
+  transform: scale(1.05);
+}
+#quiz-screen .flag-img.incorrect-flag {
+  box-shadow: 0 0 25px 5px rgba(var(--error-color-rgb), 0.7);
+}
+#library-display-screen img.flag-img,
+#library-categories-screen img.flag-img,
+#continent-library-screen img.flag-img,
+#subdivision-library-screen img.flag-img,
+#territory-library-screen img.flag-img,
+#historical-library-screen img.flag-img {
+  width: auto !important;
+  height: auto !important;
+  max-height: 6rem;
+  max-width: 100%;
+  object-fit: contain !important;
+  display: block;
+  margin: 0 auto;
+}
+    
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+.modal.active { display: flex; }
+.modal .card { animation: zoomIn 0.3s ease-out; }
+
+@keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.icon-text .fa-fw { margin-right: 0.75rem; }
+
+/* ============================================================
+   SETTINGS, PROFILE, & DISCLAIMER PANEL
+   ============================================================ */
+
+/* Properti Bersama (Sistem Kerja Panel) */
+#settings-panel, 
+#profile-panel, 
+#disclaimer-panel { 
+    display: none;
+    position: fixed;
+    z-index: 1000; 
+    max-height: 80vh; 
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+    /* Tambahkan max-width agar tidak jebol di HP */
+    max-width: 90vw; 
+}
+
+/* Ukuran Spesifik: Profile & Settings (Side Panels) */
+#settings-panel, 
+#profile-panel { 
+    width: 320px; 
+}
+
+/* Ukuran Spesifik: Disclaimer (Center Modal) - Dibuat Lebih Lebar */
+#disclaimer-panel { 
+    width: 480px; /* Ukuran ditingkatkan dari 320px ke 480px */
+}
+
+/* Pengaturan Posisi */
+#settings-panel { 
+    top: 80px; 
+    right: 20px; 
+}
+
+#profile-panel { 
+    top: 80px; 
+    left: 20px; 
+} 
+
+#disclaimer-panel { 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+}
+
+/* Aktivasi & Animasi */
+#settings-panel.active, 
+#profile-panel.active { 
+    display: block; 
+    animation: slideDown 0.3s ease-out;
+}
+
+#disclaimer-panel.active { 
+    display: block; 
+    animation: fadeInCenter 0.3s ease-out;
+}
+
+/* Update di style.css */
+
+#disclaimer-panel { 
+    /* Lebar tetap */
+    width: 480px; 
+    
+    /* PERBAIKAN: Gunakan variabel agar otomatis berubah saat Light Mode */
+    background-color: var(--card-bg-color) !important; 
+    
+    /* Efek blur tetap ada */
+    backdrop-filter: blur(25px) saturate(160%);
+    -webkit-backdrop-filter: blur(25px) saturate(160%);
+    
+    /* PERBAIKAN: Border mengikuti tema */
+    border: 1px solid var(--card-border-color);
+    
+    /* Bayangan mengikuti tema (lebih tipis di light mode agar elegan) */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Pastikan warna teks di dalam judul disclaimer juga mengikuti tema */
+#disclaimer-title {
+    color: var(--text-color);
+}
+
+/* Pastikan teks isi disclaimer menggunakan variabel warna teks yang tepat */
+#disclaimer-content {
+    color: var(--subtle-text-color);
+}
+
+/* Tambahan: Beri sedikit jarak pada tombol close di dalam panel agar tidak mepet */
+#disclaimer-panel .mt-4 {
+    margin-top: 1.5rem;
+}
+
+/* ============================================================
+   ANIMASI
+   ============================================================ */
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInCenter {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Utility tambahan agar konten utama (Quiz/Library) tetap di tengah */
+/* Update agar konten mulai dari atas, tapi tetap tengah secara horizontal */
+main {
+    width: 100%;
+    max-width: 100% !important; /* Memastikan tidak ada batasan lebar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    padding: 0 20px; /* Memberi sedikit jarak di pinggir agar tidak menempel sekali */
+}
+
+/* Ganti slideDownCenter kamu dengan ini */
+@keyframes slideDownCenter {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Jika ada fadeInScale, pastikan tidak ada translate -50% kecuali untuk MODAL */
+@keyframes fadeInScale {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Loader */
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--text-color);
+    /* Loader disesuaikan dengan warna primer baru */
+    border-bottom-color: var(--primary-color); 
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.col-span-full {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+/* Pastikan h3 di dalam grid punya line-height yang bagus */
+#library-grid h3 {
+    line-height: 1.5;
+    letter-spacing: 0.5px; /* Memberi sedikit ruang antar huruf agar tidak rapat */
+}
+
+/* Membuat ikon pensil menyala saat input difokuskan */
+.relative:focus-within .fa-pencil {
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}

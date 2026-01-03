@@ -1,0 +1,95 @@
+// DITARUH SETELAH <BODY>
+<div id="initial-loader" class="flex flex-col items-center justify-center">
+    <span class="loader"></span>
+    <p class="mt-4 font-bold animate-pulse">Memuat Bendera...</p>
+    <p id="loader-progress" class="text-[var(--primary-color)] text-sm font-mono mt-2">0%</p>
+</div>
+
+/* style.css */
+#initial-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    items-center: center;
+    justify-content: center;
+    
+    /* Gunakan background yang SAMA dengan body */
+    background-image: 
+        radial-gradient(at 15% 15%, hsla(258, 88%, 60%, 0.15) 0px, transparent 50%),
+        radial-gradient(at 80% 20%, hsla(320, 78%, 55%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 80%, hsla(258, 88%, 60%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, hsla(320, 78%, 55%, 0.15) 0px, transparent 50%),
+        linear-gradient(135deg, var(--bg-color-dark), var(--bg-color-light));
+    background-attachment: fixed;
+    
+    /* Warna teks mengikuti tema */
+    color: var(--text-color);
+    
+    /* Transisi untuk fade out */
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#initial-loader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+// DITARUH SETELAH GLOBAL STATE & ELEMENTS
+async function preloadFlags() {
+    // Gabungkan semua data
+    const allFlags = [
+        ...officialCountries, 
+        ...subdivisions, 
+        ...territories, 
+        ...unofficial,
+        ...historicalFlags,
+        ...worldOrganizations,
+        // PERBAIKAN: Gunakan Object.values().flat() untuk mengambil semua isi dari continentFlags
+        ...Object.values(continentFlags).flat() 
+    ];
+
+    const total = allFlags.length;
+    let loaded = 0;
+    const progressEl = document.getElementById('loader-progress');
+    const loader = document.getElementById('initial-loader');
+
+    // Fungsi untuk memuat satu gambar
+    const loadImage = (url) => {
+        return new Promise((resolve) => {
+            if (!url) return resolve(); // Jaga-jaga jika ada data tanpa URL
+            const img = new Image();
+            img.src = url;
+            img.onload = img.onerror = () => {
+                loaded++;
+                const percent = Math.round((loaded / total) * 100);
+                if (progressEl) progressEl.textContent = `${percent}%`;
+                resolve();
+            };
+        });
+    };
+
+    // PERBAIKAN: Gunakan properti .flag sesuai struktur data kamu
+    await Promise.all(allFlags.map(flag => loadImage(flag.flag)));
+
+    // Selesai, hilangkan loader
+    if (loader) {
+        loader.classList.add('fade-out');
+        setTimeout(() => {
+            loader.style.display = 'none'; // Sembunyikan agar tidak bisa diklik
+            // loader.remove(); // Atau hapus permanen
+        }, 500); 
+    }
+}
+
+// PENYESUAIAN INITAPP JIKA ADA LOADING AWAL
+function initApp() {
+    try {
+    	loadTheme();
+    	preloadFlags();
+        loadSettings();       
+        loadTotalScore();
+        renderQuizModes();
+        renderLibraryCategories();
+        

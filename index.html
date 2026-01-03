@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag-X: Flag Quiz & Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+</head>
+<body class="antialiased">
+    <div id="app-container" class="min-h-screen flex flex-col p-4 sm:p-6">
+        <header class="w-full max-w-[95%] mx-auto mb-6 flex justify-between items-center relative">
+            <div class="flex items-center gap-3">
+                <button id="profile-btn" class="p-0 rounded-full btn-secondary w-12 h-12 flex items-center justify-center border border-[var(--primary-color)] overflow-hidden relative">
+    <i id="user-icon-default" class="fa-solid fa-user text-xl text-subtle"></i>
+    
+    <img id="user-photo" src="" class="w-full h-full object-cover rounded-full hidden">
+</button>
+
+                <div id="totalscore-container" class="flex items-center gap-2 text-lg font-bold">
+                    <i class="fa-solid fa-crown text-yellow-400"></i>
+                    <span><span data-translate-key="totalScoreLabel">Total Score</span>: <span id="totalscore-value">0</span></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="theme-switcher" class="p-2 rounded-full btn-secondary w-11 h-11 flex items-center justify-center text-lg">
+                    <i id="sun-icon" class="fa-solid fa-sun"></i>
+                    <i id="moon-icon" class="fa-solid fa-moon hidden"></i>
+                </button>
+                <button id="settings-btn" class="p-2 rounded-full btn-secondary w-11 h-11 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <div id="profile-panel" class="card p-6 rounded-xl hidden">
+    <div id="auth-logged-out" class="flex flex-col items-center gap-4">
+        <div class="w-20 h-20 rounded-full bg-[var(--secondary-color)] flex items-center justify-center text-3xl border-2 border-[var(--card-border-color)]">
+            <i class="fa-solid fa-user-slash text-subtle"></i>
+        </div>
+        <p class="text-sm text-subtle text-center">Login to save your score to Leaderboard!</p>
+        <button id="login-google-btn" class="btn btn-primary w-full py-2 flex items-center justify-center gap-2 text-white">
+            <i class="fa-brands fa-google"></i> Login with Google
+        </button>
+    </div>
+
+    <div id="auth-logged-in" class="hidden flex flex-col items-center">
+    <div class="w-20 h-20 rounded-full border-2 border-[var(--primary-color)] mb-4 overflow-hidden shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.5)]">
+        <img id="user-panel-img" src="https://via.placeholder.com/150" alt="User Photo" class="w-full h-full object-cover">
+    </div>
+    
+    <div class="relative w-full mb-2 group">
+    <input type="text" id="username-input" 
+           class="w-full bg-[var(--input-bg-color)] border border-[var(--card-border-color)] rounded p-2 pl-10 pr-10 text-center font-bold focus:outline-none focus:border-[var(--primary-color)] transition-all"
+           placeholder="Your Name">
+    
+    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle pointer-events-none group-focus-within:text-[var(--primary-color)]">
+        <i class="fa-solid fa-pencil text-xs"></i>
+    </div>
+</div>
+
+    <div id="username-actions" class="flex gap-2 mb-4 hidden w-full">
+        <button id="save-username-btn" class="btn bg-green-600 text-white text-xs py-1 flex-1 rounded">Save</button>
+        <button id="cancel-username-btn" class="btn bg-red-600 text-white text-xs py-1 flex-1 rounded">Cancel</button>
+    </div>
+
+    <button id="logout-btn" class="btn border border-red-500 text-red-500 hover:bg-red-500 hover:text-white w-full py-2 transition-all flex items-center justify-center gap-2">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    <span data-translate-key="logoutBtn">Logout</span>
+</button>
+</div>
+</div>
+
+        <div id="settings-panel" class="card rounded-lg p-4">
+            <div class="mb-4">
+                <h4 class="font-bold mb-2" data-translate-key="settingsLanguage">Language</h4>
+                <div class="flex gap-4">
+                    <label class="flex items-center"><input type="radio" name="language" value="en" class="mr-2 settings-input"> English</label>
+                    <label class="flex items-center"><input type="radio" name="language" value="id" class="mr-2 settings-input"> Bahasa Indonesia</label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <h4 class="font-bold mb-2" data-translate-key="settingsDifficulty">Difficulty</h4>
+                <div class="flex justify-between">
+                    <label class="flex items-center"><input type="radio" name="difficulty" value="2" class="mr-2 settings-input"> <span data-translate-key="difficultyEasy">Easy</span></label>
+                    <label class="flex items-center"><input type="radio" name="difficulty" value="4" class="mr-2 settings-input"> <span data-translate-key="difficultyNormal">Normal</span></label>
+                    <label class="flex items-center"><input type="radio" name="difficulty" value="6" class="mr-2 settings-input"> <span data-translate-key="difficultyHard">Hard</span></label>
+                </div>
+            </div>
+            <div class="border-t border-[var(--card-border-color)] my-4"></div>
+            <div>
+                <h4 class="font-bold mb-2" data-translate-key="settingsContact">Contact</h4>
+                <div class="flex justify-center gap-6 text-2xl">
+                    <a href="#" class="text-subtle hover:text-[var(--text-color)] transition-colors"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="text-subtle hover:text-[var(--text-color)] transition-colors"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-subtle hover:text-[var(--text-color)] transition-colors"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <p class="text-center text-xs text-subtle mt-4">v.2.5</p>
+        </div>
+        
+        <div id="disclaimer-panel" class="card rounded-lg p-4">
+    <div class="mb-4 text-center">
+        <h4 class="font-bold mb-1" id="disclaimer-title" data-translate-key="disclaimerTitle">
+            Flag Accuracy Note
+        </h4>
+        <p class="text-xs text-subtle">Flag-X Info</p>
+        
+        <div class="border-t border-[var(--card-border-color)] my-4"></div>
+        
+        <div id="disclaimer-content" class="overflow-y-auto max-h-[50vh] pr-2 text-sm text-subtle text-justify">
+            <p id="disclaimer-text" class="leading-relaxed whitespace-pre-line" data-translate-key="disclaimerText">
+            </p>
+        </div>
+    </div>
+
+    <div class="border-t border-[var(--card-border-color)] my-4"></div>
+
+    <div class="mt-4">
+        <button id="close-disclaimer-btn" class="btn btn-secondary w-full py-2 text-sm" data-translate-key="closeButton" onclick="document.getElementById('disclaimer-panel').classList.remove('active')">
+            Close
+        </button>
+    </div>
+</div>
+
+        <main class="flex-grow flex flex-col items-center justify-center">        
+    <div id="home-screen" class="screen active w-full max-w-md text-center">
+        <h1 class="text-5xl sm:text-6xl font-bold mb-2">Flag-X</h1>
+        
+        <div class="flex items-center justify-center gap-2 mb-8">
+            <p class="text-subtle text-lg" data-translate-key="homeSubtitle">Test Your Global Knowledge</p>
+            <button id="info-btn" class="text-subtle hover:text-[var(--primary-color)] transition-colors focus:outline-none">
+                <i class="fa-solid fa-circle-info"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4">
+            <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play fa-fw"></i>
+                <span data-translate-key="homePlayQuiz">Play Quiz</span>
+            </button>
+            <button onclick="showScreen('library-categories-screen')" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-book fa-fw"></i>
+                <span data-translate-key="homeFlagLibrary">Flag Library</span>
+            </button>
+            <button id="open-leaderboard-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trophy fa-fw text-yellow-400"></i>
+                <span data-translate-key="homeLeaderboard">Leaderboard</span>
+            </button>
+        </div>
+    </div>
+
+            <div id="quiz-modes-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="quizModesTitle">Quiz Modes</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+                 <button onclick="showScreen('home-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToMenu">Back to Menu</button>
+            </div>
+
+            <div id="continent-clash-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="continentClashTitle">Choose a Continent</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <button onclick="showScreen('quiz-modes-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToQuizModes">Back to Quiz Modes</button>
+            </div>
+
+            <div id="quiz-screen" class="screen w-full max-w-xl">
+                <div class="card rounded-lg p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                        <div class="font-bold text-lg"><span data-translate-key="quizScore">Score</span>: <span id="score">0</span></div>
+                        <div id="timer" class="font-bold text-2xl text-[var(--error-color)]"></div>
+                        <div class="text-lg" id="question-counter"></div>
+                    </div>
+                    <div class="text-center">
+                        <p id="quiz-prompt" class="text-xl mb-4 h-12 flex items-center justify-center"></p>
+                        <div class="mb-6 mx-auto h-40 sm:h-52 w-full max-w-md">
+                            <div id="flag-display-quiz" class="flex justify-center items-center h-full"></div>
+                        </div>
+                        <div id="options-container" class="grid grid-cols-2 gap-4"></div>
+                        <button id="end-quiz-btn" class="btn mt-6 w-full bg-[var(--error-color)] hover:bg-[var(--error-color)] text-white py-2 px-4" data-translate-key="quizEnd">End Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="results-screen" class="screen w-full max-w-md text-center">
+                <div class="card rounded-lg p-8">
+                    <h2 class="text-3xl font-bold mb-4" data-translate-key="resultsTitle">Quiz Over!</h2>
+                    <p class="text-lg mb-2" data-translate-key="resultsFinalScore">Final Score:</p>
+                    <p class="text-5xl sm:text-6xl font-bold text-[var(--primary-color)] mb-6" id="final-score">0</p>
+                    <p class="text-subtle mb-6" id="results-message"></p>
+                    <div class="space-y-4">
+                        <button id="play-again-btn" class="btn w-full btn-primary text-white py-3 px-4 text-lg" data-translate-key="resultsPlayAgain">Play Again</button>
+                        <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-secondary py-3 px-4 text-lg" data-translate-key="backToQuizModes">Back to Menu</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="leaderboard-screen" class="screen w-full max-w-2xl text-center">
+                <h2 class="text-3xl font-bold mb-6 flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-trophy text-yellow-400"></i> 
+                    <span data-translate-key="leaderboardTitle">Top Players</span>
+                </h2>
+                
+                <div class="card rounded-lg overflow-hidden border border-[var(--card-border-color)] mb-6">
+                    <div class="grid grid-cols-12 gap-2 p-3 bg-[var(--secondary-color)] font-bold text-sm sm:text-base border-b border-[var(--card-border-color)]">
+                        <div class="col-span-2">#</div>
+                        <div class="col-span-7 text-left pl-2" data-translate-key="leaderboardUser">Player</div>
+                        <div class="col-span-3 text-right pr-2" data-translate-key="leaderboardScore">Score</div>
+                    </div>
+                    <div id="leaderboard-list" class="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        <div class="p-8"><div class="loader"></div></div>
+                    </div>
+                </div>
+                
+                <button onclick="showScreen('home-screen')" class="btn w-full btn-secondary py-2 px-4" data-translate-key="backToMenu">Back to Menu</button>
+            </div>
+
+            <div id="library-categories-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="libraryTitle">Flag Library</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+                <button onclick="showScreen('home-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToMenu">Back to Menu</button>
+            </div>
+            
+            <div id="continent-library-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="continentLibraryTitle">Choose a Continent</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <button onclick="showScreen('library-categories-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToLibrary">Back to Library</button>
+            </div>
+            <div id="subdivision-library-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="subdivisionSelectionTitle">Choose a Country</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <button onclick="showScreen('library-categories-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToLibrary">Back to Library</button>
+            </div>
+            <div id="territory-library-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="territorySelectionTitle">Choose a Country</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <button onclick="showScreen('library-categories-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToLibrary">Back to Library</button>
+            </div>          
+            <div id="historical-library-screen" class="screen w-full max-w-lg text-center">
+                <h2 class="text-3xl font-bold mb-6" data-translate-key="historicalSelectionTitle">Choose a Country</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <button onclick="showScreen('library-categories-screen')" class="btn mt-6 w-full btn-secondary py-2 px-4" data-translate-key="backToLibrary">Back to Library</button>
+            </div>
+
+            <div id="library-display-screen" class="screen w-full max-w-[95%] mx-auto">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+                    <h2 id="library-title-display" class="text-2xl sm:text-3xl font-bold"></h2>
+                    <button id="back-from-library-btn" class="btn btn-secondary py-2 px-4" data-translate-key="backButton">Back</button>
+                </div>
+                <div class="mb-6 relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-subtle">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="library-search-input" data-translate-key="searchPlaceholder" placeholder="Search for a flag..." class="w-full rounded-lg py-3 pl-12 pr-4 focus:ring-2 focus:ring-[var(--primary-color)] transition">
+                </div>
+                <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            </div>
+        </main>
+        
+        <footer class="w-full max-w-6xl mx-auto mt-8 text-center text-subtle text-sm">
+    <p data-translate-key="footer">© 2025 Flag-X. All Rights Reserved.</p>
+</footer>
+    </div>
+
+    <div id="end-quiz-modal" class="modal">
+        <div class="card rounded-lg p-8 w-full max-w-sm m-4 text-center">
+            <h3 class="text-2xl font-bold mb-4" data-translate-key="endQuizModalTitle">End Quiz?</h3>
+            <p class="text-subtle mb-6" data-translate-key="endQuizModalText">Are you sure you want to end the current quiz? Your score will be finalized.</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-end-quiz-btn" class="btn bg-[var(--error-color)] hover:bg-[var(--error-color)] text-white py-2 px-6" data-translate-key="endQuizModalYes">Yes, End</button>
+                <button id="cancel-end-quiz-btn" class="btn btn-secondary py-2 px-6" data-translate-key="endQuizModalCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="gemini-modal" class="modal">
+        <div class="card rounded-lg p-8 w-full max-w-md m-4 text-center">
+            <h3 id="gemini-modal-title" class="text-2xl font-bold mb-4">✨ Fun Fact!</h3>
+            <div id="gemini-content" class="text-subtle mb-6 min-h-[100px] flex justify-center items-center">
+                <div class="loader"></div>
+            </div>
+            <button id="close-gemini-modal-btn" class="btn btn-secondary py-2 px-6" data-translate-key="closeButton">Close</button>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
