@@ -1114,7 +1114,7 @@ function initApp() {
         let displayName = item.name;
         let subText = item.capital || item.years || "";
 
-        // Hapus tahun di dalam kurung agar tidak double jika tahun ditampilkan di baris kedua
+        // Bersihkan nama agar tidak double jika tahun ditampilkan di baris kedua
         if (item.years && displayName.includes(`(${item.years})`)) {
             displayName = displayName.replace(`(${item.years})`, "").trim();
         }
@@ -1122,7 +1122,7 @@ function initApp() {
         const infoHtml = `
             <p class="font-semibold text-sm leading-tight w-full">${displayName}</p>
             
-            <p class="text-subtle text-[10px] font-medium mt-1 truncate w-full">${subText || '&nbsp;'}</p>
+            <p class="text-subtle text-[10px] font-medium mt-1 w-full">${subText || '&nbsp;'}</p>
         `;
         // --- END LOGIKA ---
 
@@ -1286,4 +1286,5 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
