@@ -302,13 +302,13 @@ if (infoBtn) {
         renderQuizModes();
         renderLibraryCategories();
         
-        // Render Selectors
-        renderSelectorScreen('continent-clash-screen', Object.keys(continentFlags), (continent) => startQuiz('continent', continent));
-        renderSelectorScreen('continent-library-screen', Object.keys(continentFlags), (continent) => showLibrary('continent', continent));
-        renderSelectorScreen('subdivision-library-screen', Object.keys(subdivisionFlags), (country) => showLibrary('subdivisions', country));
-        renderSelectorScreen('territory-library-screen', Object.keys(territoryFlags), (country) => showLibrary('territories', country));
-        renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByCountry), (country) => showLibrary('historical', country));
-        
+        // Render Selectors dengan Urutan Abjad
+renderSelectorScreen('continent-clash-screen', Object.keys(continentFlags).sort(), (continent) => startQuiz('continent', continent));
+renderSelectorScreen('continent-library-screen', Object.keys(continentFlags).sort(), (continent) => showLibrary('continent', continent));
+renderSelectorScreen('subdivision-library-screen', Object.keys(subdivisionFlags).sort(), (country) => showLibrary('subdivisions', country));
+renderSelectorScreen('territory-library-screen', Object.keys(territoryFlags).sort(), (country) => showLibrary('territories', country));
+renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByCountry).sort(), (country) => showLibrary('historical', country));
+     
         const quizPromptEl = document.getElementById('quiz-prompt');
         if (quizPromptEl.dataset.translateKey) {
             const key = quizPromptEl.dataset.translateKey;
@@ -847,14 +847,8 @@ function initApp() {
         if (cachedPic) {
             const profileBtn = document.getElementById('profile-btn');
             if (profileBtn) profileBtn.innerHTML = `<img src="${cachedPic}" class="w-full h-full rounded-full object-cover">`;
-        }
-
-        renderSelectorScreen('continent-clash-screen', Object.keys(continentFlags), (continent) => startQuiz('continent', continent));
-        renderSelectorScreen('continent-library-screen', Object.keys(continentFlags), (continent) => showLibrary('continent', continent));
-        renderSelectorScreen('subdivision-library-screen', Object.keys(subdivisionFlags), (country) => showLibrary('subdivisions', country));
-        renderSelectorScreen('territory-library-screen', Object.keys(territoryFlags), (country) => showLibrary('territories', country));
-        renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByCountry), (country) => showLibrary('historical', country));
-
+        }        
+     
         // --- PEMULIHAN LAYAR & DATA ---
         const lastScreen = localStorage.getItem('lastActiveScreen');
 
@@ -1303,6 +1297,7 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
 
