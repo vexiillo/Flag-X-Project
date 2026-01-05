@@ -1121,22 +1121,38 @@ function initApp() {
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn';
         card.dataset.name = item.name.toLowerCase();
         
-           // --- LOGIKA TAMPILAN NAMA & SUB-INFO (TAHUN/CAPITAL) ---
-        let displayName = item.name;
-        let subText = item.capital || item.years || "";
+           // --- LOGIKA TAMPILAN NAMA & SUB-INFO (TAHUN/CAPITAL/COUNTRY) ---
+let displayName = item.name;
+let subText = "";
 
-        // Bersihkan nama agar tidak double jika tahun ditampilkan di baris kedua
-        if (item.years && displayName.includes(`(${item.years})`)) {
-            displayName = displayName.replace(`(${item.years})`, "").trim();
-        }
+// 1. Bersihkan nama dari tahun (jika ada) agar tidak double
+if (item.years && displayName.includes(`(${item.years})`)) {
+    displayName = displayName.replace(`(${item.years})`, "").trim();
+}
 
-        const infoHtml = `
-            <p class="font-semibold text-sm leading-tight w-full">${displayName}</p>
-            
-            <p class="text-subtle text-[10px] font-medium mt-1 w-full">${subText || '&nbsp;'}</p>
-        `;
-        // --- END LOGIKA ---
+// 2. Tentukan isi teks baris kedua
+if (item.years) {
+    subText = item.years;
+} else if (item.capital) {
+    subText = item.country ? `${item.capital}, ${item.country}` : item.capital;
+} else if (item.country) {
+    subText = item.country;
+}
 
+// 3. Render HTML tanpa truncate agar teks turun ke bawah (wrap)
+const infoHtml = `
+    <div class="flex flex-col w-full px-1">
+        <p class="font-semibold text-[13px] leading-tight break-words">
+            ${displayName}
+        </p>
+        
+        <p class="text-subtle text-[10px] font-medium mt-1 break-words">
+            ${subText || '&nbsp;'}
+        </p>
+    </div>
+`;
+// --- END LOGIKA ---
+     
         card.innerHTML = `
             <div class="flag-wrapper mb-2">
                 <img src="${item.flag}" alt="${item.name} flag" class="flag-img rounded" loading="lazy" />
@@ -1297,6 +1313,7 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
 
