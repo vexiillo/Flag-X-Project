@@ -53,15 +53,23 @@ function showScreen(screenId) {
 
     // --- DATA PROCESSING ---
     const groupDataByCountry = (dataArray) => {
-        return dataArray.reduce((acc, item) => {
-            const country = item.country;
-            if (!acc[country]) {
-                acc[country] = [];
-            }
-            acc[country].push(item);
+    const grouped = dataArray.reduce((acc, item) => {
+        const country = item.country;
+        if (!acc[country]) {
+            acc[country] = [];
+        }
+        acc[country].push(item);
+        return acc;
+    }, {});
+
+    // Urutkan nama negara (Key) secara abjad A-Z
+    return Object.keys(grouped)
+        .sort()
+        .reduce((acc, key) => {
+            acc[key] = grouped[key];
             return acc;
         }, {});
-    };
+};
     const subdivisionFlags = groupDataByCountry(subdivisions);
     const territoryFlags = groupDataByCountry(territories);
     const historicalFlagsByCountry = groupDataByCountry(historicalFlags);
@@ -1295,6 +1303,7 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
 
