@@ -489,49 +489,58 @@ function updateProfileUI(user, customName = null) {
 }
 
 // 2. Fungsi onAuthStateChanged (JANGAN DIBUANG, TAPI DIUPDATE)
+// Cari blok kode ini di script.js (sekitar baris 608) dan update isinya:
+
 if (auth) {
     onAuthStateChanged(auth, async (user) => {
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
-        const profileBtn = document.getElementById('profile-btn');
+        
+        // Cek apakah user sedang membuka layar leaderboard
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const isLeaderboardActive = leaderboardScreen && leaderboardScreen.classList.contains('active');
 
         if (user) {
+            // --- KONDISI LOGIN ---
             let nameToDisplay = user.displayName;
 
-            // Simpan foto profil ke localStorage untuk pre-loading berikutnya
-            if (user.photoURL) {
-                localStorage.setItem('cachedProfilePic', user.photoURL);
-            }
-
+            // ... (kode lama kamu untuk ambil username/cache foto biarkan saja) ...
+            if (user.photoURL) localStorage.setItem('cachedProfilePic', user.photoURL);
+            
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    if (userData.username) {
-                        nameToDisplay = userData.username;
-                    }
+                    if (userData.username) nameToDisplay = userData.username;
                 }
-            } catch (err) {
-                console.error("Error fetching custom name:", err);
-            }
+            } catch (err) { console.error(err); }
 
             updateProfileUI(user, nameToDisplay);
             await syncScoreToCloud(user);
             
-            const leaderboardScreen = document.getElementById('leaderboard-screen');
-            if (leaderboardScreen && leaderboardScreen.classList.contains('active')) {
-                loadLeaderboard(); 
-            }
-
             if (loginBtn) loginBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
 
+            // JIKA LOGIN & SEDANG DI LEADERBOARD -> LOAD DATA
+            if (isLeaderboardActive) {
+                loadLeaderboard(); 
+            }
+
         } else {
-            // Kondisi Logout - Hapus cache
+            // --- KONDISI GUEST (BELUM LOGIN/LOGOUT) ---
             localStorage.removeItem('cachedProfilePic');
             updateProfileUI(null);
+            
             if (loginBtn) loginBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
+
+            // --- PERBAIKAN UTAMA DI SINI ---
+            // Bug terjadi karena baris ini TIDAK ADA di kode aslimu.
+            // Saat refresh sebagai Guest, leaderboard tetap menampilkan loader bawaan HTML.
+            // Kita harus paksa panggil loadLeaderboard() agar tampilan "Terkunci/Lock" muncul.
+            if (isLeaderboardActive) {
+                loadLeaderboard();
+            }
         }
     });
 }
@@ -1286,5 +1295,6 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
