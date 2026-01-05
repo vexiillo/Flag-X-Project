@@ -1447,16 +1447,43 @@ export const territories = [
 
 // --- Category 4: Unofficial Regions ---
 export const unofficial = [
-  { name: "Abkhazia", flag: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Flag_of_the_Republic_of_Abkhazia.svg" },
-  { name: "Catalonia", flag: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg" },
-  { name: "Kurdistan", flag: "https://upload.wikimedia.org/wikipedia/commons/3/35/Flag_of_Kurdistan.svg" }
+  { 
+    name: "Abkhazia", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Flag_of_the_Republic_of_Abkhazia.svg", 
+    capital: "Sukhumi", 
+    country: "Georgia (claimed)" 
+  },
+  { 
+    name: "Catalonia", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg", 
+    capital: "Barcelona", 
+    country: "Spain" 
+  },
+  { 
+    name: "Kurdistan", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/3/35/Flag_of_Kurdistan.svg", 
+    capital: "Erbil", 
+    country: "Iraq / Turkey / Syria / Iran" 
+  }
 ];
 
 // --- Category 5: World Organizations ---
 export const worldOrganizations = [
-  { name: "United Nations", flag: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_the_United_Nations.svg" },
-  { name: "NATO", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_NATO.svg/960px-Flag_of_NATO.svg.png" },
-  { name: "European Union", flag: "https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg" }
+  { 
+    name: "United Nations", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_the_United_Nations.svg", 
+    capital: "New York City" 
+  },
+  { 
+    name: "NATO", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_NATO.svg/960px-Flag_of_NATO.svg.png", 
+    capital: "Brussels" 
+  },
+  { 
+    name: "European Union", 
+    flag: "https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg", 
+    capital: "Brussels" 
+  }
 ];
 
 // --- Category 6: Historical Flags ---
@@ -1484,4 +1511,5 @@ export const continentFlags = {
   "North America": [...northAmericaCountries].sort((a, b) => a.name.localeCompare(b.name)),
   "South America": [...southAmericaCountries].sort((a, b) => a.name.localeCompare(b.name)),
   Oceania: [...oceaniaCountries].sort((a, b) => a.name.localeCompare(b.name))
+
 };
