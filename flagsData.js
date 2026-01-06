@@ -1504,12 +1504,36 @@ export const historicalFlags = [
 ];
 
 // --- Category 7: Continent Flags ---
-export const continentFlags = {
-  Asia: [...centralAsiaCountries, ...eastAsiaCountries, ...southAsiaCountries, ...southeastAsiaCountries, ...westAsiaCountries].sort((a, b) => a.name.localeCompare(b.name)),
-  Europe: [...northernEuropeCountries, ...westernEuropeCountries, ...southernEuropeCountries, ...easternEuropeCountries].sort((a, b) => a.name.localeCompare(b.name)),
-  Africa: [...northernAfricaCountries, ...westernAfricaCountries, ...centralAfricaCountries, ...easternAfricaCountries, ...southernAfricaCountries].sort((a, b) => a.name.localeCompare(b.name)),
-  "North America": [...northAmericaCountries].sort((a, b) => a.name.localeCompare(b.name)),
-  "South America": [...southAmericaCountries].sort((a, b) => a.name.localeCompare(b.name)),
-  Oceania: [...oceaniaCountries].sort((a, b) => a.name.localeCompare(b.name))
 
+// Helper to add 'type' (sub-heading) and sort alphabetically
+const mapContinent = (arr, regionName) => 
+  [...arr].sort((a, b) => a.name.localeCompare(b.name))
+          .map(f => ({ ...f, type: regionName }));
+
+export const continentFlags = {
+  Asia: [
+    ...mapContinent(centralAsiaCountries, "Central Asia"),
+    ...mapContinent(eastAsiaCountries, "East Asia"),
+    ...mapContinent(southAsiaCountries, "South Asia"),
+    ...mapContinent(southeastAsiaCountries, "Southeast Asia"),
+    ...mapContinent(westAsiaCountries, "West Asia")
+  ],
+  Europe: [
+  ...mapContinent(easternEuropeCountries, "Eastern Europe"),
+    ...mapContinent(northernEuropeCountries, "Northern Europe"),    
+    ...mapContinent(southernEuropeCountries, "Southern Europe"),  
+...mapContinent(westernEuropeCountries, "Western Europe")  
+  ],
+  Africa: [
+  ...mapContinent(centralAfricaCountries, "Central Africa"),
+  ...mapContinent(easternAfricaCountries, "Eastern Africa"),
+    ...mapContinent(northernAfricaCountries, "Northern Africa"),
+    ...mapContinent(southernAfricaCountries, "Southern Africa"),
+    ...mapContinent(westernAfricaCountries, "Western Africa")      
+  ],
+  "North America": mapContinent(northAmericaCountries, "North America & Caribbean"),
+  "South America": mapContinent(southAmericaCountries, "South America"),
+  "Oceania": mapContinent(oceaniaCountries, "Oceania")
 };
+
+
