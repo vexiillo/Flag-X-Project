@@ -1091,9 +1091,84 @@ function initApp() {
 
     // 4. Render Grid Bendera
     const grid = document.getElementById('library-grid');
+function showLibrary(category, subCategory = null) {
+    // 0. SIMPAN state library
+    localStorage.setItem('libraryState', JSON.stringify({ category, subCategory }));
+    
+    let data = [], titleKey = '', title = '';
+    let backScreen = 'library-categories-screen';
+
+    // 1. Logika Pemilihan Data
+    switch(category) {
+        case 'official': 
+            data = [...officialCountries]; 
+            titleKey = 'lib_official_title'; 
+            break;
+        case 'subdivisions': 
+            data = subdivisions.filter(s => s.country === subCategory);
+            title = `${subCategory} Subdivisions`; 
+            backScreen = 'subdivision-library-screen'; 
+            break;
+        case 'territories': 
+            data = territories.filter(t => t.country === subCategory);
+            title = `${subCategory} Territories`; 
+            backScreen = 'territory-library-screen'; 
+            break;
+        case 'unofficial': 
+            data = [...unofficial]; 
+            titleKey = 'lib_unofficial_title'; 
+            break;
+        case 'historical': 
+            data = historicalFlags.filter(h => h.country === subCategory);
+            title = `${subCategory} Historical Flags`; 
+            backScreen = 'historical-library-screen'; 
+            break;
+        case 'organizations': 
+            data = [...worldOrganizations]; 
+            titleKey = 'lib_organizations_title'; 
+            break;
+        case 'continent': 
+            if (continentFlags[subCategory]) {
+                data = [...continentFlags[subCategory]]; 
+                // PENTING: Kita urutkan berdasarkan 'type' (Wilayah) agar Header muncul rapi
+                data.sort((a, b) => {
+                    const typeCompare = (a.type || '').localeCompare(b.type || '');
+                    if (typeCompare !== 0) return typeCompare;
+                    return a.name.localeCompare(b.name);
+                });
+            }
+            title = `${subCategory} Flags`; 
+            backScreen = 'continent-library-screen'; 
+            break;
+    }
+
+    // 2. Update Judul Screen
+    const titleEl = document.getElementById('library-title-display');
+    if (titleEl) {
+        if (titleKey) {
+            titleEl.dataset.translateKey = titleKey;
+            titleEl.textContent = (translations[settings.language] && translations[settings.language][titleKey]) || titleKey;
+        } else {
+            delete titleEl.dataset.translateKey; 
+            titleEl.textContent = title;
+        }
+    }
+
+    // 3. Setup Tombol Kembali
+    const backBtn = document.getElementById('back-from-library-btn');
+    if (backBtn) {
+        backBtn.onclick = () => {
+            localStorage.removeItem('libraryState');
+            showScreen(backScreen);
+        };
+    }
+
+    // 4. Render Grid Bendera
+    const grid = document.getElementById('library-grid');
     if (!grid) return;
     
     grid.innerHTML = '';
+    // Pastikan grid responsif
     grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full";
     
     if (!data || data.length === 0) {
@@ -1102,11 +1177,18 @@ function initApp() {
         return;
     }
 
-    let currentType = '';
+    // LOGIKA RENDER DENGAN STYLE ASLI
+    let currentType = null; 
+    
     data.forEach(item => {
+        // Cek apakah 'type' (Sub Judul) berubah
         if (item.type && item.type !== currentType) {
             currentType = item.type;
+            
             const subHeading = document.createElement('div');
+            
+            // --- KEMBALI KE STYLE ASLI (Subdivisions/Territories Style) ---
+            // Menggunakan margin top 10 (mt-10), text-xl, dan icon fa-layer-group
             subHeading.className = "col-span-full mt-10 mb-4 border-b-2 border-[var(--card-border-color)] pb-3";
             subHeading.innerHTML = `
                 <h3 class="text-xl font-bold text-[var(--primary-color)] flex items-center gap-3">
@@ -1117,42 +1199,37 @@ function initApp() {
             grid.appendChild(subHeading);
         }
 
+        // --- Render Kartu Bendera ---
         const card = document.createElement('div');
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn';
         card.dataset.name = item.name.toLowerCase();
         
-           // --- LOGIKA TAMPILAN NAMA & SUB-INFO (TAHUN/CAPITAL/COUNTRY) ---
-let displayName = item.name;
-let subText = "";
+        let displayName = item.name;
+        let subText = "";
 
-// 1. Bersihkan nama dari tahun (jika ada) agar tidak double
-if (item.years && displayName.includes(`(${item.years})`)) {
-    displayName = displayName.replace(`(${item.years})`, "").trim();
-}
+        if (item.years && displayName.includes(`(${item.years})`)) {
+            displayName = displayName.replace(`(${item.years})`, "").trim();
+        }
 
-// 2. Tentukan isi teks baris kedua
-if (item.years) {
-    subText = item.years;
-} else if (item.capital) {
-    subText = item.country ? `${item.capital}, ${item.country}` : item.capital;
-} else if (item.country) {
-    subText = item.country;
-}
+        if (item.years) {
+            subText = item.years;
+        } else if (item.capital) {
+            subText = item.country ? `${item.capital}, ${item.country}` : item.capital;
+        } else if (item.country) {
+            subText = item.country;
+        }
 
-// 3. Render HTML tanpa truncate agar teks turun ke bawah (wrap)
-const infoHtml = `
-    <div class="flex flex-col w-full px-1">
-        <p class="font-semibold text-[13px] leading-tight break-words">
-            ${displayName}
-        </p>
-        
-        <p class="text-subtle text-[10px] font-medium mt-1 break-words">
-            ${subText || '&nbsp;'}
-        </p>
-    </div>
-`;
-// --- END LOGIKA ---
-     
+        const infoHtml = `
+            <div class="flex flex-col w-full px-1">
+                <p class="font-semibold text-[13px] leading-tight break-words">
+                    ${displayName}
+                </p>
+                <p class="text-subtle text-[10px] font-medium mt-1 break-words">
+                    ${subText || '&nbsp;'}
+                </p>
+            </div>
+        `;
+
         card.innerHTML = `
             <div class="flag-wrapper mb-2">
                 <img src="${item.flag}" alt="${item.name} flag" class="flag-img rounded" loading="lazy" />
@@ -1170,7 +1247,7 @@ const infoHtml = `
     
     showScreen('library-display-screen');
 }
-
+     
     function checkAnswer(selectedOption) { 
         Array.from(document.getElementById('options-container').children).forEach(btn => btn.disabled = true); 
         
@@ -1313,6 +1390,7 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
 
