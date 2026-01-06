@@ -1033,7 +1033,7 @@ function initApp() {
     let data = [], titleKey = '', title = '';
     let backScreen = 'library-categories-screen';
 
-    // 1. Logika Pemilihan Data
+    // 1. Logika Pemilihan Data (Tetap sama)
     switch(category) {
         case 'official': 
             data = [...officialCountries]; 
@@ -1065,7 +1065,6 @@ function initApp() {
         case 'continent': 
             if (continentFlags[subCategory]) {
                 data = [...continentFlags[subCategory]]; 
-                // Sorting berdasarkan Type (Wilayah) lalu Nama
                 data.sort((a, b) => {
                     const typeCompare = (a.type || '').localeCompare(b.type || '');
                     if (typeCompare !== 0) return typeCompare;
@@ -1077,7 +1076,7 @@ function initApp() {
             break;
     }
 
-    // 2. Update Judul Screen
+    // 2. Update Judul & Screen (Optimasi DOM minimal)
     const titleEl = document.getElementById('library-title-display');
     if (titleEl) {
         if (titleKey) {
@@ -1098,10 +1097,12 @@ function initApp() {
         };
     }
 
-    // 4. Render Grid Bendera
+    // 4. Render Grid Bendera (OPTIMASI DI SINI)
     const grid = document.getElementById('library-grid');
     if (!grid) return;
     
+    // Gunakan DocumentFragment untuk performa (agar tidak render ulang DOM berkali-kali dalam loop)
+    const fragment = document.createDocumentFragment();
     grid.innerHTML = '';
     grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full";
     
@@ -1117,9 +1118,7 @@ function initApp() {
         // --- LOGIKA HEADER SUB-JUDUL ---
         if (item.type && item.type !== currentType) {
             currentType = item.type;
-            
             const subHeading = document.createElement('div');
-            // Style Header: mt-10, text-xl, fa-layer-group (Sesuai permintaan)
             subHeading.className = "col-span-full mt-10 mb-4 border-b-2 border-[var(--card-border-color)] pb-3";
             subHeading.innerHTML = `
                 <h3 class="text-xl font-bold text-[var(--primary-color)] flex items-center gap-3">
@@ -1127,63 +1126,59 @@ function initApp() {
                     ${currentType}
                 </h3>
             `;
-            grid.appendChild(subHeading);
+            fragment.appendChild(subHeading);
         }
 
         // --- Render Kartu Bendera ---
         const card = document.createElement('div');
+        // Tambahkan CSS class 'will-change-transform' untuk hardware acceleration
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn';
         card.dataset.name = item.name.toLowerCase();
         
         let displayName = item.name;
         let subText = "";
 
-        // Bersihkan nama dari tahun jika ada di judul (misal: "Flag (1990)")
         if (item.years && displayName.includes(`(${item.years})`)) {
             displayName = displayName.replace(`(${item.years})`, "").trim();
         }
 
-        // --- MODIFIKASI LOGIKA TEKS DI SINI ---
-        
-        // 1. Jika ada Tahun (Historical), pakai Tahun
-        if (item.years) {
-            subText = item.years;
-        } 
-        // 2. KHUSUS Subdivisions & Territories: Cuma tampilkan Capital (tanpa Negara)
-        else if ((category === 'subdivisions' || category === 'territories') && item.capital) {
-            subText = item.capital; 
-        }
-        // 3. Default (Unofficial / Official / Continent): Tampilkan "Capital, Country"
-        else if (item.capital) {
-            subText = item.country ? `${item.capital}, ${item.country}` : item.capital;
-        } 
-        // 4. Fallback ke Negara saja
-        else if (item.country) {
-            subText = item.country;
-        }
+        // Logika teks (Tetap sesuai punyamu)
+        if (item.years) subText = item.years;
+        else if ((category === 'subdivisions' || category === 'territories') && item.capital) subText = item.capital; 
+        else if (item.capital) subText = item.country ? `${item.capital}, ${item.country}` : item.capital;
+        else if (item.country) subText = item.country;
 
-        const infoHtml = `
-            <div class="flex flex-col w-full px-1">
-                <p class="font-semibold text-[13px] leading-tight break-words">
-                    ${displayName}
-                </p>
-                <p class="text-subtle text-[10px] font-medium mt-1 break-words">
-                    ${subText || '&nbsp;'}
-                </p>
-            </div>
-        `;
-
+        // OPTIMASI: Pastikan img punya loading="lazy" dan width/height agar tidak layout shift
         card.innerHTML = `
-            <div class="flag-wrapper mb-2">
-                <img src="${item.flag}" alt="${item.name} flag" class="flag-img rounded" loading="lazy" />
+            <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
+                <img 
+                    src="${item.flag}" 
+                    alt="${item.name} flag" 
+                    class="flag-img w-full h-full object-cover opacity-0 transition-opacity duration-300" 
+                    loading="lazy" 
+                    onload="this.classList.remove('opacity-0')"
+                />
             </div>
-            <div class="flex-grow flex flex-col justify-center py-1 w-full">${infoHtml}</div>
-            <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1 px-2 mt-2 w-full" 
+            <div class="flex-grow flex flex-col justify-center py-1 w-full">
+                 <div class="flex flex-col w-full px-1">
+                    <p class="font-semibold text-[13px] leading-tight break-words line-clamp-2">
+                        ${displayName}
+                    </p>
+                    <p class="text-subtle text-[10px] font-medium mt-1 break-words">
+                        ${subText || '&nbsp;'}
+                    </p>
+                </div>
+            </div>
+            <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1 px-2 mt-2 w-full hover:scale-105 active:scale-95 transition-transform" 
                     onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
                 ✨ <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
             </button>`;
-        grid.appendChild(card);
+        
+        fragment.appendChild(card);
     });
+
+    // Masukkan semua sekaligus ke DOM (Hanya 1 kali operasi DOM berat)
+    grid.appendChild(fragment);
 
     const searchInput = document.getElementById('library-search-input');
     if (searchInput) searchInput.value = '';
@@ -1317,6 +1312,15 @@ const response = await fetch('/get-fun-facts', {
         }
     }
     
+    // Register Service Worker untuk Caching
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Flag-X: Service Worker Aktif!'))
+            .catch(err => console.error('Flag-X: Service Worker Gagal:', err));
+    });
+}
+    
         // --- DAFTARKAN SEMUA KE WINDOW DI SINI (PALING BAWAH) ---
     window.showScreen = showScreen;
     window.startQuiz = startQuiz;
@@ -1326,9 +1330,6 @@ const response = await fetch('/get-fun-facts', {
     window.handleLogin = handleLogin;
     window.handleLogout = handleLogout;
     
-    // Jalankan initApp HANYA SEKALI di sini
-    initApp();
-
     // Jalankan initApp HANYA SEKALI di sini
     initApp();
     

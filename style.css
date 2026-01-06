@@ -596,3 +596,13 @@ body::before {
     border-left-color: var(--text-color) !important;
 }
 
+.flag-img {
+    content-visibility: auto; /* Membantu browser hanya merender yang terlihat di layar */
+    contain-intrinsic-size: 100px 60px; /* Memberi estimasi ukuran gambar sebelum dimuat */
+}
+.flag-img.opacity-0 {
+    opacity: 0;
+}
+.flag-img {
+    transition: opacity 0.3s ease-in-out;
+}
