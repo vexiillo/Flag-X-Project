@@ -1024,173 +1024,7 @@ function initApp() {
     document.getElementById('play-again-btn').onclick = () => startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode);
     showScreen('results-screen');
 }
-
-    function showLibrary(category, subCategory = null) {
-    // 0. SIMPAN state library ke localStorage agar saat refresh data tidak hilang
-    localStorage.setItem('libraryState', JSON.stringify({ category, subCategory }));
-    
-    let data = [], titleKey = '', title = '';
-    let backScreen = 'library-categories-screen';
-
-    // 1. Logika Pemilihan Data
-    switch(category) {
-        case 'official': 
-            data = officialCountries; 
-            titleKey = 'lib_official_title'; 
-            break;
-        case 'subdivisions': 
-            data = subdivisions.filter(s => s.country === subCategory);
-            title = `${subCategory} Subdivisions`; 
-            backScreen = 'subdivision-library-screen'; 
-            break;
-        case 'territories': 
-            data = territories.filter(t => t.country === subCategory);
-            title = `${subCategory} Territories`; 
-            backScreen = 'territory-library-screen'; 
-            break;
-        case 'unofficial': 
-            data = unofficial; 
-            titleKey = 'lib_unofficial_title'; 
-            break;
-        case 'historical': 
-            data = historicalFlags.filter(h => h.country === subCategory);
-            title = `${subCategory} Historical Flags`; 
-            backScreen = 'historical-library-screen'; 
-            break;
-        case 'organizations': 
-            data = worldOrganizations; 
-            titleKey = 'lib_organizations_title'; 
-            break;
-        case 'continent': 
-            data = continentFlags[subCategory]; 
-            title = `${subCategory} Flags`; 
-            backScreen = 'continent-library-screen'; 
-            break;
-    }
-
-    // 2. Update Judul Screen
-    const titleEl = document.getElementById('library-title-display');
-    if (titleEl) {
-        if (titleKey) {
-            titleEl.dataset.translateKey = titleKey;
-            titleEl.textContent = (translations[settings.language] && translations[settings.language][titleKey]) || titleKey;
-        } else {
-            delete titleEl.dataset.translateKey; 
-            titleEl.textContent = title;
-        }
-    }
-
-    // 3. Setup Tombol Kembali
-    const backBtn = document.getElementById('back-from-library-btn');
-    if (backBtn) {
-        backBtn.onclick = () => {
-            localStorage.removeItem('libraryState');
-            showScreen(backScreen);
-        };
-    }
-
-    // 4. Render Grid Bendera
-    const grid = document.getElementById('library-grid');
-function showLibrary(category, subCategory = null) {
-    // 0. SIMPAN state library
-    localStorage.setItem('libraryState', JSON.stringify({ category, subCategory }));
-    
-    let data = [], titleKey = '', title = '';
-    let backScreen = 'library-categories-screen';
-
-    // 1. Logika Pemilihan Data
-    switch(category) {
-        case 'official': 
-            data = [...officialCountries]; 
-            titleKey = 'lib_official_title'; 
-            break;
-        case 'subdivisions': 
-            data = subdivisions.filter(s => s.country === subCategory);
-            title = `${subCategory} Subdivisions`; 
-            backScreen = 'subdivision-library-screen'; 
-            break;
-        case 'territories': 
-            data = territories.filter(t => t.country === subCategory);
-            title = `${subCategory} Territories`; 
-            backScreen = 'territory-library-screen'; 
-            break;
-        case 'unofficial': 
-            data = [...unofficial]; 
-            titleKey = 'lib_unofficial_title'; 
-            break;
-        case 'historical': 
-            data = historicalFlags.filter(h => h.country === subCategory);
-            title = `${subCategory} Historical Flags`; 
-            backScreen = 'historical-library-screen'; 
-            break;
-        case 'organizations': 
-            data = [...worldOrganizations]; 
-            titleKey = 'lib_organizations_title'; 
-            break;
-        case 'continent': 
-            if (continentFlags[subCategory]) {
-                data = [...continentFlags[subCategory]]; 
-                // PENTING: Kita urutkan berdasarkan 'type' (Wilayah) agar Header muncul rapi
-                data.sort((a, b) => {
-                    const typeCompare = (a.type || '').localeCompare(b.type || '');
-                    if (typeCompare !== 0) return typeCompare;
-                    return a.name.localeCompare(b.name);
-                });
-            }
-            title = `${subCategory} Flags`; 
-            backScreen = 'continent-library-screen'; 
-            break;
-    }
-
-    // 2. Update Judul Screen
-    const titleEl = document.getElementById('library-title-display');
-    if (titleEl) {
-        if (titleKey) {
-            titleEl.dataset.translateKey = titleKey;
-            titleEl.textContent = (translations[settings.language] && translations[settings.language][titleKey]) || titleKey;
-        } else {
-            delete titleEl.dataset.translateKey; 
-            titleEl.textContent = title;
-        }
-    }
-
-    // 3. Setup Tombol Kembali
-    const backBtn = document.getElementById('back-from-library-btn');
-    if (backBtn) {
-        backBtn.onclick = () => {
-            localStorage.removeItem('libraryState');
-            showScreen(backScreen);
-        };
-    }
-
-    // 4. Render Grid Bendera
-    const grid = document.getElementById('library-grid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    // Pastikan grid responsif
-    grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full";
-    
-    if (!data || data.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-subtle">No flags available.</p>`;
-        showScreen('library-display-screen');
-        return;
-    }
-
-    // LOGIKA RENDER DENGAN STYLE ASLI
-    let currentType = null; 
-    
-    data.forEach(item => {
-        // Cek apakah 'type' (Sub Judul) berubah
-        if (item.type && item.type !== currentType) {
-            currentType = item.type;
-            
-            const subHeading = document.createElement('div');
-            
-            // --- KEMBALI KE STYLE ASLI (Subdivisions/Territories Style) ---
-            // Menggunakan margin top 10 (mt-10), text-xl, dan icon fa-layer-group
-            subHeading.className = "col-span-full mt-10 mb-4 border-b-2 border-[var(--card-border-color)] pb-3";
-            subHeading.innerHTML = `
+                                           
 function showLibrary(category, subCategory = null) {
     // 0. SIMPAN state library
     localStorage.setItem('libraryState', JSON.stringify({ category, subCategory }));
@@ -1359,7 +1193,7 @@ function showLibrary(category, subCategory = null) {
     function checkAnswer(selectedOption) { 
         Array.from(document.getElementById('options-container').children).forEach(btn => btn.disabled = true); 
         
-        const promptKey = document.getElementById('quiz-prompt').dataset.translateKey;
+        const promptKe = document.getElementById('quiz-prompt').dataset.translateKey;
         const isCapitalGuess = promptKey === 'quizPromptGuessCapital';
         const isYearGuess = promptKey === 'quizPromptYear';
 
@@ -1498,6 +1332,7 @@ const response = await fetch('/get-fun-facts', {
     initApp();
 
     
+
 
 
 
