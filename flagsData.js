@@ -281,41 +281,41 @@ const usFederal = [
   
  // --- CHINA ---
 const chinaProvinces = [
-  { name: "Anhui", capital: "Hefei", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d2/Flag_of_Anhui.png/960px-Flag_of_Anhui.png.png" },
-  { name: "Fujian", capital: "Fuzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bb/Flag_of_Fujian.svg/960px-Flag_of_Fujian.svg.png" },
-  { name: "Gansu", capital: "Lanzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/4/49/Flag_of_Gansu.svg/960px-Flag_of_Gansu.svg.png" },
-  { name: "Guangdong", capital: "Guangzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/7/74/Flag_of_Guangdong.jpg/960px-Flag_of_Guangdong.jpg.png" },
-  { name: "Guizhou", capital: "Guiyang", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b4/Flag_of_Guizhou.svg/960px-Flag_of_Guizhou.svg.png" },
-  { name: "Hainan", capital: "Haikou", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b7/Flag_of_Hainan.svg/960px-Flag_of_Hainan.svg.png" },
-  { name: "Hebei", capital: "Shijiazhuang", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9b/Flag_of_Hebei.svg/960px-Flag_of_Hebei.svg.png" },
-  { name: "Heilongjiang", capital: "Harbin", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8b/Flag_of_Heilongjiang.svg/960px-Flag_of_Heilongjiang.svg.png" },
-  { name: "Henan", capital: "Zhengzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/7/73/Flag_of_Henan_Province.svg/960px-Flag_of_Henan_Province.svg.png" },
-  { name: "Hubei", capital: "Wuhan", flag: "https://static.wikia.nocookie.net/vexillology/images/8/83/Flag_of_Hubei.svg/960px-Flag_of_Hubei.svg.png" },
-  { name: "Hunan", capital: "Changsha", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/Flag_of_Hunan.svg/960px-Flag_of_Hunan.svg.png" },
-  { name: "Jiangsu", capital: "Nanjing", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ae/Flag_of_Jiangsu.jpg/960px-Flag_of_Jiangsu.jpg.png" },
-  { name: "Jiangxi", capital: "Nanchang", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/Flag_of_Jiangxi.svg/960px-Flag_of_Jiangxi.svg.png" },
-  { name: "Jilin", capital: "Changchun", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6c/Jilin_flag.png/960px-Jilin_flag.png.png" },
-  { name: "Liaoning", capital: "Shenyang", flag: "https://static.wikia.nocookie.net/vexillology/images/4/46/Flag_of_Liaoning.svg/960px-Flag_of_Liaoning.svg.png" },
-  { name: "Qinghai", capital: "Xining", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f2/Flag_of_Qinghai.png/960px-Flag_of_Qinghai.png.png" },
-  { name: "Shaanxi", capital: "Xi'an", flag: "https://static.wikia.nocookie.net/vexillology/images/8/84/Flag_of_Shaanxi.png/960px-Flag_of_Shaanxi.png.png" },
-  { name: "Shandong", capital: "Jinan", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4f/Flag_of_Shandong.svg/960px-Flag_of_Shandong.svg.png" },
-  { name: "Shanxi", capital: "Taiyuan", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5e/Flag_of_Shanxi.jpg/960px-Flag_of_Shanxi.jpg.png" },
-  { name: "Sichuan", capital: "Chengdu", flag: "https://static.wikia.nocookie.net/vexillology/images/4/42/Flag_of_Sichuan.jpg/960px-Flag_of_Sichuan.jpg.png" },
-  { name: "Yunnan", capital: "Kunming", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8c/Flag_of_Yunnan.svg/960px-Flag_of_Yunnan.svg.png" },
-  { name: "Zhejiang", capital: "Hangzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8f/Flag_of_Zhejiang.png/960px-Flag_of_Zhejiang.png.png" }
+  { name: "Anhui", capital: "Hefei", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d2/Flag_of_Anhui.png/960px-Flag_of_Anhui.png.png", status: "Proposed" },
+  { name: "Fujian", capital: "Fuzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bb/Flag_of_Fujian.svg/960px-Flag_of_Fujian.svg.png", status: "Proposed" },
+  { name: "Gansu", capital: "Lanzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/4/49/Flag_of_Gansu.svg/960px-Flag_of_Gansu.svg.png", status: "Proposed" },
+  { name: "Guangdong", capital: "Guangzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/7/74/Flag_of_Guangdong.jpg/960px-Flag_of_Guangdong.jpg.png", status: "Proposed" },
+  { name: "Guizhou", capital: "Guiyang", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b4/Flag_of_Guizhou.svg/960px-Flag_of_Guizhou.svg.png", status: "Proposed" },
+  { name: "Hainan", capital: "Haikou", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b7/Flag_of_Hainan.svg/960px-Flag_of_Hainan.svg.png", status: "Proposed" },
+  { name: "Hebei", capital: "Shijiazhuang", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9b/Flag_of_Hebei.svg/960px-Flag_of_Hebei.svg.png", status: "Proposed" },
+  { name: "Heilongjiang", capital: "Harbin", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8b/Flag_of_Heilongjiang.svg/960px-Flag_of_Heilongjiang.svg.png", status: "Proposed" },
+  { name: "Henan", capital: "Zhengzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/7/73/Flag_of_Henan_Province.svg/960px-Flag_of_Henan_Province.svg.png", status: "Proposed" },
+  { name: "Hubei", capital: "Wuhan", flag: "https://static.wikia.nocookie.net/vexillology/images/8/83/Flag_of_Hubei.svg/960px-Flag_of_Hubei.svg.png", status: "Proposed" },
+  { name: "Hunan", capital: "Changsha", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/Flag_of_Hunan.svg/960px-Flag_of_Hunan.svg.png", status: "Proposed" },
+  { name: "Jiangsu", capital: "Nanjing", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ae/Flag_of_Jiangsu.jpg/960px-Flag_of_Jiangsu.jpg.png", status: "Proposed" },
+  { name: "Jiangxi", capital: "Nanchang", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/Flag_of_Jiangxi.svg/960px-Flag_of_Jiangxi.svg.png", status: "Proposed" },
+  { name: "Jilin", capital: "Changchun", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6c/Jilin_flag.png/960px-Jilin_flag.png.png", status: "Proposed" },
+  { name: "Liaoning", capital: "Shenyang", flag: "https://static.wikia.nocookie.net/vexillology/images/4/46/Flag_of_Liaoning.svg/960px-Flag_of_Liaoning.svg.png", status: "Proposed" },
+  { name: "Qinghai", capital: "Xining", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f2/Flag_of_Qinghai.png/960px-Flag_of_Qinghai.png.png", status: "Proposed" },
+  { name: "Shaanxi", capital: "Xi'an", flag: "https://static.wikia.nocookie.net/vexillology/images/8/84/Flag_of_Shaanxi.png/960px-Flag_of_Shaanxi.png.png", status: "Proposed" },
+  { name: "Shandong", capital: "Jinan", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4f/Flag_of_Shandong.svg/960px-Flag_of_Shandong.svg.png", status: "Proposed" },
+  { name: "Shanxi", capital: "Taiyuan", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5e/Flag_of_Shanxi.jpg/960px-Flag_of_Shanxi.jpg.png", status: "Proposed" },
+  { name: "Sichuan", capital: "Chengdu", flag: "https://static.wikia.nocookie.net/vexillology/images/4/42/Flag_of_Sichuan.jpg/960px-Flag_of_Sichuan.jpg.png", status: "Proposed" },
+  { name: "Yunnan", capital: "Kunming", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8c/Flag_of_Yunnan.svg/960px-Flag_of_Yunnan.svg.png", status: "Proposed" },
+  { name: "Zhejiang", capital: "Hangzhou", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8f/Flag_of_Zhejiang.png/960px-Flag_of_Zhejiang.png.png", status: "Proposed" }
 ];
 const chinaAutonomous = [
-  { name: "Guangxi", capital: "Nanning", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b1/Flag_of_Guangxi.svg/960px-Flag_of_Guangxi.svg.png" },
-  { name: "Inner Mongolia", capital: "Hohhot", flag: "https://static.wikia.nocookie.net/vexillology/images/6/62/Flag_of_the_Inner_Mongolian_People%27s_Party.svg/960px-Flag_of_the_Inner_Mongolian_People%27s_Party.svg.png" },
-  { name: "Ningxia", capital: "Yinchuan", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/Ningxia.png/960px-Flag_of_Ningxia.png.png" },
-  { name: "Tibet", capital: "Lhasa", flag: "https://static.wikia.nocookie.net/vexillology/images/0/03/Tibet.png/1600px-Tibet.png.png" },
-  { name: "Xinjiang", capital: "Ürümqi", flag: "https://static.wikia.nocookie.net/vexillology/images/4/46/Flag_of_Xinjiang.png/1600px-Flag_of_Xinjiang.png.png" }
+  { name: "Guangxi", capital: "Nanning", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b1/Flag_of_Guangxi.svg/960px-Flag_of_Guangxi.svg.png", status: "Proposed" },
+  { name: "Inner Mongolia", capital: "Hohhot", flag: "https://static.wikia.nocookie.net/vexillology/images/6/62/Flag_of_the_Inner_Mongolian_People%27s_Party.svg/960px-Flag_of_the_Inner_Mongolian_People%27s_Party.svg.png", status: "Proposed" },
+  { name: "Ningxia", capital: "Yinchuan", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/Ningxia.png/960px-Flag_of_Ningxia.png.png", status: "Proposed" },
+  { name: "Tibet", capital: "Lhasa", flag: "https://static.wikia.nocookie.net/vexillology/images/0/03/Tibet.png/1600px-Tibet.png.png", status: "Proposed" },
+  { name: "Xinjiang", capital: "Ürümqi", flag: "https://static.wikia.nocookie.net/vexillology/images/4/46/Flag_of_Xinjiang.png/1600px-Flag_of_Xinjiang.png.png", status: "Proposed" }
 ];
 const chinaMunicipalities = [
-  { name: "Beijing", capital: "Beijing", flag: "https://static.wikia.nocookie.net/vexillology/images/5/52/Beijing_FlagRedesign_S020730zm.svg/960px-Beijing_FlagRedesign_S020730zm.svg.png" },
-  { name: "Chongqing", capital: "Chongqing", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4a/Flag_of_Chongqing.svg/960px-Flag_of_Chongqing.svg.png" },
-  { name: "Shanghai", capital: "Shanghai", flag: "https://static.wikia.nocookie.net/vexillology/images/2/26/Flag_of_Shanghai.svg/960px-Flag_of_Shanghai.svg.png" },
-  { name: "Tianjin", capital: "Tianjin", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e0/Flag_of_Tianjin.svg/960px-Flag_of_Tianjin.svg.png" }
+  { name: "Beijing", capital: "Beijing", flag: "https://static.wikia.nocookie.net/vexillology/images/5/52/Beijing_FlagRedesign_S020730zm.svg/960px-Beijing_FlagRedesign_S020730zm.svg.png", status: "Proposed" },
+  { name: "Chongqing", capital: "Chongqing", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4a/Flag_of_Chongqing.svg/960px-Flag_of_Chongqing.svg.png", status: "Proposed" },
+  { name: "Shanghai", capital: "Shanghai", flag: "https://static.wikia.nocookie.net/vexillology/images/2/26/Flag_of_Shanghai.svg/960px-Flag_of_Shanghai.svg.png", status: "Proposed" },
+  { name: "Tianjin", capital: "Tianjin", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e0/Flag_of_Tianjin.svg/960px-Flag_of_Tianjin.svg.png", status: "Proposed" }
 ];
 
 // --- GERMANY ---
@@ -340,34 +340,34 @@ const germanyStates = [
 
 // --- INDIA ---
 const indiaStates = [
-  { name: "Andhra Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8e/Andhra_Pradesh.png/960px-Andhra_Pradesh.png.png" },
-  { name: "Arunachal Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/0/01/Arunachal_Pradesh.png/960px-Arunachal_Pradesh.png.png" },
-  { name: "Assam", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/Assam.png/1600px-Assam.png.png" },
-  { name: "Bihar", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1f/Bihar.png/1600px-Bihar.png.png" },
-  { name: "Chhattisgarh", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3c/Chhattisgarh.png/960px-Chhattisgarh.png.png" },
-  { name: "Goa", flag: "https://static.wikia.nocookie.net/vexillology/images/1/19/Flag_of_Goa.svg/960px-Flag_of_Goa.svg.png" },
-  { name: "Gujarat", flag: "https://static.wikia.nocookie.net/vexillology/images/5/53/Gujarat.png/960px-Gujarat.png.png" },
-  { name: "Haryana", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e9/Haryana.png/960px-Haryana.png.png" },
-  { name: "Himachal Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/4/44/Himachal_Pradesh.png/960px-Himachal_Pradesh.png.png" },
-  { name: "Jharkhand", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a3/Jharkhand.png/1600px-Jharkhand.png.png" },
-  { name: "Karnataka", flag: "https://static.wikia.nocookie.net/vexillology/images/1/18/Karnataka.png/1600px-Karnataka.png.png" },
-  { name: "Kerala", flag: "https://static.wikia.nocookie.net/vexillology/images/3/30/Kerala.png/1600px-Kerala.png.png" },
-  { name: "Madhya Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b0/Madhya_Pradesh.png/960px-Madhya_Pradesh.png.png" },
-  { name: "Maharashtra", flag: "https://static.wikia.nocookie.net/vexillology/images/e/ec/Maharashtra.png/960px-Maharashtra.png.png" },
-  { name: "Manipur", flag: "https://static.wikia.nocookie.net/vexillology/images/7/71/Manipur.png/1600px-Manipur.png.png" },
-  { name: "Meghalaya", flag: "https://static.wikia.nocookie.net/vexillology/images/6/65/Meghalaya.png/960px-Meghalaya.png.png" },
-  { name: "Mizoram", flag: "https://static.wikia.nocookie.net/vexillology/images/e/eb/Mizoram.png/960px-Mizoram.png.png" },
-  { name: "Nagaland", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9c/In_nagaland.png/960px-In_nagaland.png.png" },
-  { name: "Odisha", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f0/Odisha.png/960px-Odisha.png.png" },
-  { name: "Punjab", flag: "https://static.wikia.nocookie.net/vexillology/images/6/63/Punjab.png/1600px-Punjab.png.png" },
-  { name: "Rajasthan", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3d/Rajasthan.png/1600px-Rajasthan.png.png" },
-  { name: "Sikkim", flag: "https://static.wikia.nocookie.net/vexillology/images/8/83/1024px-Flag_of_Sikkim_%281967-1975%29.svg_%281%29.png/640px-1024px-Flag_of_Sikkim_%281967-1975%29.svg_%281%29.png.png" },
-  { name: "Tamil Nadu", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fd/Tamil_Nadu.png/960px-Tamil_Nadu.png.png" },
-  { name: "Telangana", flag: "https://static.wikia.nocookie.net/vexillology/images/4/48/Telangana.png/960px-Telangana.png.png" },
-  { name: "Tripura", flag: "https://static.wikia.nocookie.net/vexillology/images/9/94/Tripura.png/960px-Tripura.png.png" },
-  { name: "Uttar Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/1/18/Uttar_Pradesh.png/960px-Uttar_Pradesh.png.png" },
-  { name: "Uttarakhand", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bd/Uttarakhand.png/1600px-Uttarakhand.png.png" },
-  { name: "West Bengal", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0b/West_Bengal.png/1600px-West_Bengal.png.png" }
+  { name: "Andhra Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8e/Andhra_Pradesh.png/960px-Andhra_Pradesh.png.png", status: "Proposed" },
+  { name: "Arunachal Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/0/01/Arunachal_Pradesh.png/960px-Arunachal_Pradesh.png.png", status: "Proposed" },
+  { name: "Assam", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/Assam.png/1600px-Assam.png.png", status: "Proposed" },
+  { name: "Bihar", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1f/Bihar.png/1600px-Bihar.png.png", status: "Proposed" },
+  { name: "Chhattisgarh", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3c/Chhattisgarh.png/960px-Chhattisgarh.png.png", status: "Proposed" },
+  { name: "Goa", flag: "https://static.wikia.nocookie.net/vexillology/images/1/19/Flag_of_Goa.svg/960px-Flag_of_Goa.svg.png", status: "Proposed" },
+  { name: "Gujarat", flag: "https://static.wikia.nocookie.net/vexillology/images/5/53/Gujarat.png/960px-Gujarat.png.png", status: "Proposed" },
+  { name: "Haryana", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e9/Haryana.png/960px-Haryana.png.png", status: "Proposed" },
+  { name: "Himachal Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/4/44/Himachal_Pradesh.png/960px-Himachal_Pradesh.png.png", status: "Proposed" },
+  { name: "Jharkhand", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a3/Jharkhand.png/1600px-Jharkhand.png.png", status: "Proposed" },
+  { name: "Karnataka", flag: "https://static.wikia.nocookie.net/vexillology/images/1/18/Karnataka.png/1600px-Karnataka.png.png", status: "Proposed" },
+  { name: "Kerala", flag: "https://static.wikia.nocookie.net/vexillology/images/3/30/Kerala.png/1600px-Kerala.png.png", status: "Proposed" },
+  { name: "Madhya Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b0/Madhya_Pradesh.png/960px-Madhya_Pradesh.png.png", status: "Proposed" },
+  { name: "Maharashtra", flag: "https://static.wikia.nocookie.net/vexillology/images/e/ec/Maharashtra.png/960px-Maharashtra.png.png", status: "Proposed" },
+  { name: "Manipur", flag: "https://static.wikia.nocookie.net/vexillology/images/7/71/Manipur.png/1600px-Manipur.png.png", status: "Proposed" },
+  { name: "Meghalaya", flag: "https://static.wikia.nocookie.net/vexillology/images/6/65/Meghalaya.png/960px-Meghalaya.png.png", status: "Proposed" },
+  { name: "Mizoram", flag: "https://static.wikia.nocookie.net/vexillology/images/e/eb/Mizoram.png/960px-Mizoram.png.png", status: "Proposed" },
+  { name: "Nagaland", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9c/In_nagaland.png/960px-In_nagaland.png.png", status: "Proposed" },
+  { name: "Odisha", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f0/Odisha.png/960px-Odisha.png.png", status: "Proposed" },
+  { name: "Punjab", flag: "https://static.wikia.nocookie.net/vexillology/images/6/63/Punjab.png/1600px-Punjab.png.png", status: "Proposed" },
+  { name: "Rajasthan", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3d/Rajasthan.png/1600px-Rajasthan.png.png", status: "Proposed" },
+  { name: "Sikkim", flag: "https://static.wikia.nocookie.net/vexillology/images/8/83/1024px-Flag_of_Sikkim_%281967-1975%29.svg_%281%29.png/640px-1024px-Flag_of_Sikkim_%281967-1975%29.svg_%281%29.png.png", status: "Proposed" },
+  { name: "Tamil Nadu", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fd/Tamil_Nadu.png/960px-Tamil_Nadu.png.png", status: "Proposed" },
+  { name: "Telangana", flag: "https://static.wikia.nocookie.net/vexillology/images/4/48/Telangana.png/960px-Telangana.png.png", status: "Proposed" },
+  { name: "Tripura", flag: "https://static.wikia.nocookie.net/vexillology/images/9/94/Tripura.png/960px-Tripura.png.png", status: "Proposed" },
+  { name: "Uttar Pradesh", flag: "https://static.wikia.nocookie.net/vexillology/images/1/18/Uttar_Pradesh.png/960px-Uttar_Pradesh.png.png", status: "Proposed" },
+  { name: "Uttarakhand", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bd/Uttarakhand.png/1600px-Uttarakhand.png.png", status: "Proposed" },
+  { name: "West Bengal", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0b/West_Bengal.png/1600px-West_Bengal.png.png", status: "Proposed" }
 ];
 
 // --- JAPAN ---
@@ -679,6 +679,323 @@ const southKoreaSpecialCities = [
   { name: "Sejong (Special Self-Governing City)", capital: "Sejong", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Flag_of_Sejong_City.svg/960px-Flag_of_Sejong_City.svg.png" }
 ];
 
+// --- AFGHANISTAN ---
+const afghanistanProvinces = [
+  { name: "Badakhshan", capital: "Fayzabad", flag: "https://static.wikia.nocookie.net/vexillology/images/9/90/Badakhshan.jpeg/960px-Badakhshan.jpeg.png", status: "Proposed" },
+  { name: "Badghis", capital: "Qala i Naw", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0c/Flag_of_Badghis_Province.svg/960px-Flag_of_Badghis_Province.svg.png", status: "Proposed" },
+  { name: "Baghlan", capital: "Puli Khumri", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/Baghlan.jpeg/960px-Baghlan.jpeg.png", status: "Proposed" },
+  { name: "Balkh", capital: "Mazar-i-Sharif", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d6/Flag_of_Balkh.jpg/960px-Flag_of_Balkh.jpg.png", status: "Proposed" },
+  { name: "Bamyan", capital: "Bamyan", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3f/Bamyan.jpeg/960px-Bamyan.jpeg.png", status: "Proposed" },
+  { name: "Daykundi", capital: "Nili", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8a/Daykundi.jpeg/960px-Daykundi.jpeg.png", status: "Proposed" },
+  { name: "Farah", capital: "Farah", flag: "https://static.wikia.nocookie.net/vexillology/images/d/dc/Farah.jpeg/960px-Farah.jpeg.png", status: "Proposed" },
+  { name: "Faryab", capital: "Maymana", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ab/Flag_of_Faryab.png/960px-Flag_of_Faryab.png.png", status: "Proposed" },
+  { name: "Ghazni", capital: "Ghazni", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4d/Flag_of_Ghazni.png/960px-Flag_of_Ghazni.png.png", status: "Proposed" },
+  { name: "Ghor", capital: "Chaghcharan", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ac/Ghor.jpeg/960px-Ghor.jpeg.png", status: "Proposed" },
+  { name: "Helmand", capital: "Lashkargah", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f0/Flag_of_Helmand_Province.svg/960px-Flag_of_Helmand_Province.svg.png", status: "Proposed" },
+  { name: "Herat", capital: "Herat", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b9/Flag_of_Herat_Province.svg/960px-Flag_of_Herat_Province.svg.png", status: "Proposed" },
+  { name: "Jowzjan", capital: "Sheberghan", flag: "https://static.wikia.nocookie.net/vexillology/images/a/af/Jowzjan.jpeg/960px-Jowzjan.jpeg.png", status: "Proposed" },
+  { name: "Kabul", capital: "Kabul", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Kabul.svg/960px-Flag_of_Kabul.svg.png", status: "Proposed" },
+  { name: "Kandahar", capital: "Kandahar", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e1/Flag_of_Kandahar.png/960px-Kandahar.png.png", status: "Proposed" },
+  { name: "Kapisa", capital: "Mahmud-i-Raqi", flag: "https://static.wikia.nocookie.net/vexillology/images/2/26/Flag_of_Kapisa.jpg/960px-Flag_of_Kapisa.jpg.png", status: "Proposed" },
+  { name: "Khost", capital: "Khost", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ac/Khost.jpeg/960px-Khost.jpeg.png", status: "Proposed" },
+  { name: "Kunar", capital: "Asadabad", flag: "https://static.wikia.nocookie.net/vexillology/images/4/46/Flag_of_Kunar.jpg/960px-Flag_of_Kunar.jpg.png", status: "Proposed" },
+  { name: "Kunduz", capital: "Kunduz", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e5/Kunduz.jpeg/960px-Kunduz.jpeg.png", status: "Proposed" },
+  { name: "Laghman", capital: "Mihtarlam", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5a/Laghman_Province.jpeg/960px-Laghman_Province.jpeg.png", status: "Proposed" },
+  { name: "Logar", capital: "Pul-i-Alam", flag: "https://static.wikia.nocookie.net/vexillology/images/1/17/Flag_of_Logar.jpg/960px-Flag_of_Logar.jpg.png", status: "Proposed" },
+  { name: "Maidan Wardak", capital: "Maidan Shar", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d7/Flag_of_Wardak.jpg/960px-Flag_of_Wardak.jpg.png", status: "Proposed" },
+  { name: "Nangarhar", capital: "Jalalabad", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fa/Flag_of_Nangarhar.png/960px-Flag_of_Nangarhar.png.png", status: "Proposed" },
+  { name: "Nimruz", capital: "Zaranj", flag: "https://static.wikia.nocookie.net/vexillology/images/2/26/Flag_of_Nimruz_Province.svg/960px-Flag_of_Nimruz_Province.svg.png", status: "Proposed" },
+  { name: "Nuristan", capital: "Parun", flag: "https://static.wikia.nocookie.net/vexillology/images/3/30/Flag_of_Nuristan.png/960px-Flag_of_Nuristan.png.png", status: "Proposed" },
+  { name: "Paktia", capital: "Gardez", flag: "https://static.wikia.nocookie.net/vexillology/images/f/ff/Flag_of_Paktia.png/960px-Flag_of_Paktia.png.png", status: "Proposed" },
+  { name: "Paktika", capital: "Sharana", flag: "https://static.wikia.nocookie.net/vexillology/images/9/93/Flag_of_Paktika.png/960px-Flag_of_Paktika.png.png", status: "Proposed" },
+  { name: "Panjshir", capital: "Bazarak", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9c/Flag_flown_in_Panjshir_%282019%29.svg/960px-Flag_flown_in_Panjshir_%282019%29.svg.png", status: "Proposed" },
+  { name: "Parwan", capital: "Charikar", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a5/Flag_of_Parwan.png/960px-Flag_of_Parwan.png.png", status: "Proposed" },
+  { name: "Samangan", capital: "Aybak", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6d/Samangan.jpeg/960px-Samangan.jpeg.png", status: "Proposed" },
+  { name: "Sar-e Pol", capital: "Sar-e Pol", flag: "https://static.wikia.nocookie.net/vexillology/images/2/2d/Flag_of_Sar-e-Pol.png/960px-Flag_of_Sar-e-Pol.png.png", status: "Proposed" },
+  { name: "Takhar", capital: "Taloqan", flag: "https://static.wikia.nocookie.net/vexillology/images/c/cf/Flag_of_Takhar_Province.svg/960px-Flag_of_Takhar_Province.svg.png", status: "Proposed" },
+  { name: "Urozgan", capital: "Tarin Kowt", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6b/Flag_of_Oruzgan.png/960px-Flag_of_Oruzgan.png.png", status: "Proposed" },  
+  { name: "Zabul", capital: "Qalat", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3c/Flag_of_Zabul.jpg/960px-Flag_of_Zabul.jpg.png", status: "Proposed" }
+];
+
+// --- ALBANIA ---
+const albaniaCounties = [
+  { name: "Berat", capital: "Berat", flag: "https://static.wikia.nocookie.net/vexillology/images/4/49/Flag_of_Berat.svg/960px-Flag_of_Berat.svg.png" },
+  { name: "Dibër", capital: "Peshkopi", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/ALB_Qarku_i_Dibr%C3%ABs_flag.svg/960px-ALB_Qarku_i_Dibr%C3%ABs_flag.svg.png" },
+  { name: "Durrës", capital: "Durrës", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Flag_of_Durr%C3%ABs.svg/960px-Flag_of_Durr%C3%ABs.svg.png" },
+  { name: "Elbasan", capital: "Elbasan", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4d/Flag_of_Elbasan.svg/960px-Flag_of_Elbasan.svg.png" },
+  { name: "Fier", capital: "Fier", flag: "https://static.wikia.nocookie.net/vexillology/images/e/eb/Flag_of_Fier.png/960px-Flag_of_Fier.png.png" },
+  { name: "Gjirokastër", capital: "Gjirokastër", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8d/Flag_of_Gjirokast%C3%ABr_County.png/960px-Flag_of_Gjirokast%C3%ABr_County.png.png" },
+  { name: "Korçë", capital: "Korçë", flag: "https://static.wikia.nocookie.net/vexillology/images/2/2b/Flag_of_Kor%C3%A7%C3%AB.svg/960px-Flag_of_Kor%C3%A7%C3%AB.svg.png" },
+  { name: "Kukës", capital: "Kukës", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7e/Flag_of_Kuk%C3%ABs.svg/960px-Flag_of_Kuk%C3%ABs.svg.png" },
+  { name: "Lezhë", capital: "Lezhë", flag: "https://static.wikia.nocookie.net/vexillology/images/5/53/Flag_of_Lezhe.png/960px-Flag_of_Lezhe.png.png" },
+  { name: "Shkodër", capital: "Shkodër", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f0/Flag_of_Shkoder_County.png/960px-Flag_of_Shkoder_County.png.png" },
+  { name: "Tirana", capital: "Tirana", flag: "https://static.wikia.nocookie.net/vexillology/images/1/13/Flag_of_Tiran%C3%AB.svg/960px-Flag_of_Tiran%C3%AB.svg.png" },
+  { name: "Vlorë", capital: "Vlorë", flag: "https://static.wikia.nocookie.net/vexillology/images/3/30/Flag_of_Vlor%C3%AB.svg/960px-Flag_of_Vlor%C3%AB.svg.png" }
+];
+
+// --- ALGERIA ---
+const algeriaProvinces = [
+  { name: "Adrar", capital: "Adrar", flag: "https://static.wikia.nocookie.net/vexillology/images/d/da/Adrar.jpeg/960px-Adrar.jpeg.png", status: "Proposed" },
+  { name: "Aïn Defla", capital: "Aïn Defla", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bc/Ain_Defla.jpeg/960px-Ain_Defla.jpeg.png", status: "Proposed" },
+  { name: "Aïn Témouchent", capital: "Aïn Témouchent", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b9/A%C3%AFn_T%C3%A9mouchent_Province.png/960px-A%C3%AFn_T%C3%A9mouchent_Province.png.png", status: "Proposed" },
+  { name: "Algiers", capital: "Algiers", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b4/Algiers_Province_FlagDesign_bilalodes.png/960px-Algiers_Province_FlagDesign_bilalodes.png.png", status: "Proposed" },
+  { name: "Annaba", capital: "Annaba", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b2/Annaba.jpeg/960px-Annaba.jpeg.png", status: "Proposed" },
+  { name: "Batna", capital: "Batna", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d5/Batna.jpeg/960px-Batna.jpeg.png", status: "Proposed" },
+  { name: "Béchar", capital: "Béchar", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d2/B%C3%A9char_Province.png/960px-B%C3%A9char_Province.png.png", status: "Proposed" },
+  { name: "Béjaïa", capital: "Béjaïa", flag: "https://static.wikia.nocookie.net/vexillology/images/9/98/Bejala.jpeg/960px-Bejala.jpeg.png", status: "Proposed" },
+  { name: "Béni Abbès", capital: "Béni Abbès", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1c/Beni_Abbes.png/960px-Beni_Abbes.png.png", status: "Proposed" },
+  { name: "Biskra", capital: "Biskra", flag: "https://static.wikia.nocookie.net/vexillology/images/4/48/Biskra.jpeg/960px-Biskra.jpeg.png", status: "Proposed" },
+  { name: "Blida", capital: "Blida", flag: "https://static.wikia.nocookie.net/vexillology/images/d/df/Blida.jpeg/960px-Blida.jpeg.png", status: "Proposed" },
+  { name: "Bordj Badji Mokhtar", capital: "Bordj Badji Mokhtar", flag: "https://static.wikia.nocookie.net/vexillology/images/c/c8/Bordj_Badji_Mokhtar.png/960px-Bordj_Badji_Mokhtar.png.png", status: "Proposed" },
+  { name: "Bordj Bou Arréridj", capital: "Bordj Bou Arréridj", flag: "https://static.wikia.nocookie.net/vexillology/images/8/81/Bordj_Bou_Arreridj.png/960px-Bordj_Bou_Arreridj.png.png", status: "Proposed" },
+  { name: "Bouïra", capital: "Bouïra", flag: "https://static.wikia.nocookie.net/vexillology/images/7/74/Bouira.jpeg/960px-Bouira.jpeg.png", status: "Proposed" },
+  { name: "Boumerdès", capital: "Boumerdès", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e0/Boumerdes.jpeg/960px-Boumerdes.jpeg.png", status: "Proposed" },
+  { name: "Chlef", capital: "Chlef", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0a/Chlef.jpeg/960px-Chlef.jpeg.png", status: "Proposed" },
+  { name: "Constantine", capital: "Constantine", flag: "https://static.wikia.nocookie.net/vexillology/images/4/40/Constantine.jpeg/960px-Constantine.jpeg.png", status: "Proposed" },  
+  { name: "Djanet", capital: "Djanet", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d2/Djanet.png/960px-Djanet.png.png", status: "Proposed" },
+  { name: "Djelfa", capital: "Djelfa", flag: "https://static.wikia.nocookie.net/vexillology/images/9/94/Djelfa.jpeg/960px-Djelfa.jpeg.png", status: "Proposed" },
+  { name: "El Bayadh", capital: "El Bayadh", flag: "https://static.wikia.nocookie.net/vexillology/images/d/da/El_Bayadh.jpeg/960px-El_Bayadh.jpeg.png", status: "Proposed" },
+  { name: "El Meniaa", capital: "El Meniaa", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/El_Menia_Province.png/960px-El_Menia_Province.png.png", status: "Proposed" },
+  { name: "El M'Ghair", capital: "El M'Ghair", flag: "https://static.wikia.nocookie.net/vexillology/images/6/64/El_M%27Ghair.png/960px-El_M%27Ghair.png.png", status: "Proposed" },
+  { name: "El Oued", capital: "El Oued", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b5/El_Oued.jpeg/960px-El_Oued.jpeg.png", status: "Proposed" },
+  { name: "El Tarf", capital: "El Tarf", flag: "https://static.wikia.nocookie.net/vexillology/images/0/03/Flag_of_El_Taref_Province.svg/960px-Flag_of_El_Taref_Province.svg.png", status: "Proposed" },
+  { name: "Ghardaïa", capital: "Ghardaïa", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8b/Ghardaia.jpeg/960px-Ghardaia.jpeg.png", status: "Proposed" },
+  { name: "Guelma", capital: "Guelma", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7b/Guelma.jpeg/960px-Guelma.jpeg.png", status: "Proposed" },
+  { name: "Illizi", capital: "Illizi", flag: "https://static.wikia.nocookie.net/vexillology/images/5/59/Illizi.jpeg/960px-Illizi.jpeg.png", status: "Proposed" },
+  { name: "In Guezzam", capital: "In Guezzam", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fd/In_Guezzam.png/960px-In_Guezzam.png.png", status: "Proposed" },
+  { name: "In Salah", capital: "In Salah", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b4/In_Salah_Province.png/960px-In_Salah_Province.png.png", status: "Proposed" },
+  { name: "Jijel", capital: "Jijel", flag: "https://static.wikia.nocookie.net/vexillology/images/c/cd/Jijel.jpeg/960px-Jijel.jpeg.png", status: "Proposed" },
+  { name: "Khenchela", capital: "Khenchela", flag: "https://static.wikia.nocookie.net/vexillology/images/2/28/Khenchela.jpeg/960px-Khenchela.jpeg.png", status: "Proposed" },
+  { name: "Laghouat", capital: "Laghouat", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8b/Laghouat.jpeg/960px-Laghouat.jpeg.png", status: "Proposed" },
+  { name: "Mascara", capital: "Mascara", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4b/Mascara.jpeg/960px-Mascara.jpeg.png", status: "Proposed" },
+  { name: "Médéa", capital: "Médéa", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fc/Medea.jpeg/960px-Medea.jpeg.png", status: "Proposed" },
+  { name: "Mila", capital: "Mila", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a0/Mila.jpeg/960px-Mila.jpeg.png", status: "Proposed" },
+  { name: "Mostaganem", capital: "Mostaganem", flag: "https://static.wikia.nocookie.net/vexillology/images/1/10/Mostaganem.jpeg/960px-Mostaganem.jpeg.png", status: "Proposed" },
+  { name: "M'Sila", capital: "M'Sila", flag: "https://static.wikia.nocookie.net/vexillology/images/4/41/MSila.jpeg/960px-MSila.jpeg.png", status: "Proposed" },
+  { name: "Naâma", capital: "Naâma", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0e/Naama.jpeg/960px-Naama.jpeg.png", status: "Proposed" },
+  { name: "Oran", capital: "Oran", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0b/Flag_of_Oran_2.png/960px-Flag_of_Oran_2.png.png", status: "Proposed" },
+  { name: "Ouargla", capital: "Ouargla", flag: "https://static.wikia.nocookie.net/vexillology/images/d/da/Ouargla.jpeg/960px-Ouargla.jpeg.png", status: "Proposed" },
+  { name: "Ouled Djellal", capital: "Ouled Djellal", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a5/Ouled_Djellal.png/960px-Ouled_Djellal.png.png", status: "Proposed" },
+  { name: "Oum El Bouaghi", capital: "Oum El Bouaghi", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e3/Oum_El_Bouaghi.png/960px-Oum_El_Bouaghi.png.png", status: "Proposed" },
+  { name: "Relizane", capital: "Relizane", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b4/Relizane.jpeg/960px-Relizane.jpeg.png", status: "Proposed" },
+  { name: "Saïda", capital: "Saïda", flag: "https://static.wikia.nocookie.net/vexillology/images/9/92/Saida.jpeg/960px-Saida.jpeg.png", status: "Proposed" },
+  { name: "Sétif", capital: "Sétif", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d8/Setif.jpeg/960px-Setif.jpeg.png", status: "Proposed" },
+  { name: "Sidi Bel Abbès", capital: "Sidi Bel Abbès", flag: "https://static.wikia.nocookie.net/vexillology/images/9/96/Sidi_Bel_Abbes.jpeg/960px-Sidi_Bel_Abbes.jpeg.png", status: "Proposed" },
+  { name: "Skikda", capital: "Skikda", flag: "https://static.wikia.nocookie.net/vexillology/images/b/ba/Skikda.jpeg/960px-Skikda.jpeg.png", status: "Proposed" },
+  { name: "Souk Ahras", capital: "Souk Ahras", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8e/Souk_Ahras.jpeg/960px-Souk_Ahras.jpeg.png", status: "Proposed" },
+  { name: "Tamanrasset", capital: "Tamanrasset", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0a/Tamanrasset.jpeg/960px-Tamanrasset.jpeg.png", status: "Proposed" },
+  { name: "Tébessa", capital: "Tébessa", flag: "https://static.wikia.nocookie.net/vexillology/images/2/29/Tebessa.jpeg/960px-Tebessa.jpeg.png", status: "Proposed" },
+  { name: "Tiaret", capital: "Tiaret", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7b/Tiaret.jpeg/960px-Tiaret.jpeg.png", status: "Proposed" },
+  { name: "Timimoun", capital: "Timimoun", flag: "https://static.wikia.nocookie.net/vexillology/images/3/36/Timimoun.png/960px-Timimoun.png.png", status: "Proposed" },
+  { name: "Tindouf", capital: "Tindouf", flag: "https://static.wikia.nocookie.net/vexillology/images/c/c2/Tindouf.jpeg/960px-Tindouf.jpeg.png", status: "Proposed" },
+  { name: "Tipaza", capital: "Tipaza", flag: "https://static.wikia.nocookie.net/vexillology/images/0/09/Tipaza.png/960px-Tipaza.png.png", status: "Proposed" },
+  { name: "Tissemsilt", capital: "Tissemsilt", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8c/Tissemslit.jpeg/960px-Tissemslit.jpeg.png", status: "Proposed" },
+  { name: "Tizi Ouzou", capital: "Tizi Ouzou", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b6/Tizi_Ouzou.jpeg/960px-Tizi_Ouzou.jpeg.png", status: "Proposed" },
+  { name: "Tlemcen", capital: "Tlemcen", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b2/Tlemcen.jpeg/960px-Tlemcen.jpeg.png", status: "Proposed" },
+  { name: "Touggourt", capital: "Touggourt", flag: "https://static.wikia.nocookie.net/vexillology/images/3/31/Flag_of_Touggourt.webp/960px-Flag_of_Touggourt.webp.png", status: "Proposed" }
+];
+
+// --- ANDORRA ---
+const andorraParishes = [
+  { name: "Andorra la Vella", capital: "Andorra la Vella", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Flag_of_Andorra_la_Vella.svg/960px-Flag_of_Andorra_la_Vella.svg.png" },
+  { name: "Canillo", capital: "Canillo", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Hypothetical_flag_of_Canillo.svg/960px-Hypothetical_flag_of_Canillo.svg.png" },
+  { name: "Encamp", capital: "Encamp", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Hypothetical_flag_of_Encamp.svg/960px-Hypothetical_flag_of_Encamp.svg.png" },
+  { name: "Escaldes-Engordany", capital: "Escaldes-Engordany", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Hypothetical_flag_of_Escaldes-Engordany.svg/960px-Hypothetical_flag_of_Escaldes-Engordany.svg.png" },
+  { name: "La Massana", capital: "La Massana", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Hypothetical_flag_of_La_Massana.svg/960px-Hypothetical_flag_of_La_Massana.svg.png" },
+  { name: "Ordino", capital: "Ordino", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Hypothetical_flag_of_Ordino.svg/960px-Hypothetical_flag_of_Ordino.svg.png" },
+  { name: "Sant Julià de Lòria", capital: "Sant Julià de Lòria", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Hypothetical_flag_of_San_Juli%C3%A1n_de_Loria.svg/1024px-Hypothetical_flag_of_San_Juli%C3%A1n_de_Loria.svg.png" }
+];
+
+// --- ANGOLA ---
+const angolaProvinces = [
+  { name: "Bengo", capital: "Caxito", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f5/Bengo_Province_V2.png/960px-Bengo_Province_V2.png.png", status: "Proposed" },
+  { name: "Benguela", capital: "Benguela", flag: "https://static.wikia.nocookie.net/vexillology/images/a/ae/Bandeira_da_Benguela.gif/960px-Bandeira_da_Benguela.gif.png", status: "Proposed" },
+  { name: "Bié", capital: "Kuito", flag: "https://static.wikia.nocookie.net/vexillology/images/1/11/Bie_Province_V2.png/960px-Bie_Province_V2.png.png", status: "Proposed" },
+  { name: "Cabinda", capital: "Cabinda", flag: "https://static.wikia.nocookie.net/vexillology/images/c/c4/Flag_of_the_Republic_of_Cabinda.svg/960px-Flag_of_the_Republic_of_Cabinda.svg.png", status: "Proposed" },
+  { name: "Cuando Cubango", capital: "Menongue", flag: "https://static.wikia.nocookie.net/vexillology/images/2/25/Cuando.png/960px-Cuando.png.png", status: "Proposed" },
+  { name: "Cuanza Norte", capital: "N'dalatando", flag: "https://static.wikia.nocookie.net/vexillology/images/a/af/CuanzaNorteV2.png/960px-CuanzaNorteV2.png.png", status: "Proposed" },
+  { name: "Cuanza Sul", capital: "Sumbe", flag: "https://static.wikia.nocookie.net/vexillology/images/9/96/CuanzaSulV2.png/960px-CuanzaSulV2.png.png", status: "Proposed" },
+  { name: "Cunene", capital: "Ondjiva", flag: "https://static.wikia.nocookie.net/vexillology/images/c/c0/CuneneV2.png/960px-CuneneV2.png.png", status: "Proposed" },
+  { name: "Huambo", capital: "Huambo", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8e/Bandeira_do_Huambo.png/960px-Bandeira_do_Huambo.png.png", status: "Proposed" },
+  { name: "Huíla", capital: "Lubango", flag: "https://static.wikia.nocookie.net/vexillology/images/8/85/Huila_ProvinceV2.png/960px-Huila_ProvinceV2.png.png", status: "Proposed" },
+  { name: "Luanda", capital: "Luanda", flag: "https://static.wikia.nocookie.net/vexillology/images/8/88/Flag_of_Portuguese_Luanda.svg/960px-Flag_of_Portuguese_Luanda.svg.png", status: "Proposed" },
+  { name: "Lunda Norte", capital: "Dundo", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fa/LundaNorteV2.png/960px-LundaNorteV2.png.png", status: "Proposed" },
+  { name: "Lunda Sul", capital: "Saurimo", flag: "https://static.wikia.nocookie.net/vexillology/images/6/68/LundaSulV2.png/960px-LundaSulV2.png.png", status: "Proposed" },
+  { name: "Malanje", capital: "Malanje", flag: "https://static.wikia.nocookie.net/vexillology/images/d/dc/MalanjeV2.png/960px-MalanjeV2.png.png", status: "Proposed" },
+  { name: "Moxico", capital: "Luena", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/MoxicoV2.png/960px-MoxicoV2.png.png", status: "Proposed" },
+  { name: "Namibe", capital: "Moçâmedes", flag: "https://static.wikia.nocookie.net/vexillology/images/2/27/NamibeV2.png/960px-NamibeV2.png.png", status: "Proposed" },
+  { name: "Uíge", capital: "Uíge", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fd/UigeV2.png/960px-UigeV2.png.png", status: "Proposed" },
+  { name: "Zaire", capital: "M'banza-Kongo", flag: "https://static.wikia.nocookie.net/vexillology/images/9/96/ZaireProvinceV2.png/960px-ZaireProvinceV2.png.png", status: "Proposed" }
+];
+
+// --- ANTIGUA AND BARBUDA ---
+const antiguaParishes = [
+  { name: "Saint George", capital: "Piggots", flag: "https://static.wikia.nocookie.net/vexillology/images/2/29/SaintGeorgeAntiguaAndBarbuda.png/960px-SaintGeorgeAntiguaAndBarbuda.png.png", status: "Proposed" },
+  { name: "Saint John", capital: "Saint John's", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4a/SaintJohnAntiguaAndBarbuda.png/960px-SaintJohnAntiguaAndBarbuda.png.png", status: "Proposed" },
+  { name: "Saint Mary", capital: "Bolans", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5b/SaintMaryAntiguaAndBarbuda.png/960px-SaintMaryAntiguaAndBarbuda.png.png", status: "Proposed" },
+  { name: "Saint Paul", capital: "Falmouth", flag: "https://static.wikia.nocookie.net/vexillology/images/a/aa/SaintPaulAntiguaAndBarbuda.png/960px-SaintPaulAntiguaAndBarbuda.png.png", status: "Proposed" },
+  { name: "Saint Peter", capital: "Parham", flag: "https://static.wikia.nocookie.net/vexillology/images/5/58/SaintPeterAntiguaAndBarbuda.png/960px-SaintPeterAntiguaAndBarbuda.png.png", status: "Proposed" },
+  { name: "Saint Philip", capital: "Freetown", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d8/SaintPhilipAntiguaAndBarbuda.png/960px-SaintPhilipAntiguaAndBarbuda.png.png", status: "Proposed" }
+];
+const antiguaDependencies = [
+  { name: "Barbuda", capital: "Codrington", flag: "https://static.wikia.nocookie.net/vexillology/images/c/c3/Flag_of_Barbuda.svg/960px-Flag_of_Barbuda.svg.png", status: "Proposed" },
+  { name: "Redonda", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/2/27/Flag_of_the_Kingdom_of_Redonda.svg/960px-Flag_of_the_Kingdom_of_Redonda.svg.png", status: "Proposed" }
+];
+
+// --- ARGENTINA ---
+const argentinaProvinces = [
+  { name: "Buenos Aires", capital: "La Plata", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Bandera_de_la_Provincia_de_Buenos_Aires.svg/960px-Bandera_de_la_Provincia_de_Buenos_Aires.svg.png" },
+  { name: "Catamarca", capital: "San Fernando", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Bandera_de_la_Provincia_de_Catamarca.svg/960px-Bandera_de_la_Provincia_de_Catamarca.svg.png" },
+  { name: "Chaco", capital: "Resistencia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bandera_de_la_Provincia_del_Chaco.svg/960px-Bandera_de_la_Provincia_del_Chaco.svg.png" },
+  { name: "Chubut", capital: "Rawson", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Bandera_de_la_Provincia_del_Chubut.svg/960px-Bandera_de_la_Provincia_del_Chubut.svg.png" },
+  { name: "Córdoba", capital: "Córdoba", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Bandera_de_la_Provincia_de_C%C3%B3rdoba_2014.svg/960px-Bandera_de_la_Provincia_de_C%C3%B3rdoba_2014.svg.png" },
+  { name: "Corrientes", capital: "Corrientes", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bandera_de_la_Provincia_de_Corrientes.svg/960px-Bandera_de_la_Provincia_de_Corrientes.svg.png" },
+  { name: "Entre Ríos", capital: "Paraná", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Bandera_de_la_Provincia_de_Entre_R%C3%ADos.svg/960px-Bandera_de_la_Provincia_de_Entre_R%C3%ADos.svg.png" },
+  { name: "Formosa", capital: "Formosa", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Bandera_de_la_Provincia_de_Formosa.svg/960px-Bandera_de_la_Provincia_de_Formosa.svg.png" },
+  { name: "Jujuy", capital: "San Salvador", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Bandera_de_la_Provincia_de_Jujuy.svg/960px-Bandera_de_la_Provincia_de_Jujuy.svg.png" },
+  { name: "La Pampa", capital: "Santa Rosa", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Bandera_de_la_Provincia_de_La_Pampa.svg/960px-Bandera_de_la_Provincia_de_La_Pampa.svg.png" },
+  { name: "La Rioja", capital: "La Rioja", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Bandera_de_la_Provincia_de_La_Rioja.svg/960px-Bandera_de_la_Provincia_de_La_Rioja.svg.png" },
+  { name: "Mendoza", capital: "Mendoza", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Bandera_de_la_Provincia_de_Mendoza.svg/960px-Bandera_de_la_Provincia_de_Mendoza.svg.png" },
+  { name: "Misiones", capital: "Posadas", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Bandera_de_la_Provincia_de_Misiones.svg/960px-Bandera_de_la_Provincia_de_Misiones.svg.png" },
+  { name: "Neuquén", capital: "Neuquén", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Bandera_de_la_Provincia_del_Neuquen.svg/960px-Bandera_de_la_Provincia_del_Neuquen.svg.png" },
+  { name: "Río Negro", capital: "Viedma", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Bandera_de_la_Provincia_del_R%C3%ADo_Negro.svg/960px-Bandera_de_la_Provincia_del_R%C3%ADo_Negro.svg.png" },
+  { name: "Salta", capital: "Salta", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Bandera_de_la_Provincia_de_Salta.svg/960px-Bandera_de_la_Provincia_de_Salta.svg.png" },
+  { name: "San Juan", capital: "San Juan", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Flag_of_the_San_Juan_Province.svg/960px-Flag_of_the_San_Juan_Province.svg.png" },
+  { name: "San Luis", capital: "San Luis", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Bandera_de_la_Provincia_de_San_Luis.svg/960px-Bandera_de_la_Provincia_de_San_Luis.svg.png" },
+  { name: "Santa Cruz", capital: "Río Gallegos", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Bandera_de_la_Provincia_de_Santa_Cruz.svg/960px-Bandera_de_la_Provincia_de_Santa_Cruz.svg.png" },
+  { name: "Santa Fe", capital: "Santa Fe", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Bandera_de_la_Provincia_de_Santa_Fe.svg/960px-Bandera_de_la_Provincia_de_Santa_Fe.svg.png" },
+  { name: "Santiago del Estero", capital: "Santiago del Estero", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Bandera_de_la_Provincia_de_Santiago_del_Estero.svg/960px-Bandera_de_la_Provincia_de_Santiago_del_Estero.svg.png" },
+  { name: "Tierra del Fuego", capital: "Ushuaia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Bandera_de_la_Provincia_de_Tierra_del_Fuego.svg/960px-Bandera_de_la_Provincia_de_Tierra_del_Fuego.svg.png" },
+  { name: "Tucumán", capital: "San Miguel", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Bandera_de_la_Provincia_de_Tucum%C3%A1n.svg/960px-Bandera_de_la_Provincia_de_Tucum%C3%A1n.svg.png" }
+];
+const argentinaAutonomousCity = [
+  { name: "Buenos Aires City", capital: "Buenos Aires", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Bandera_de_la_Ciudad_de_Buenos_Aires.svg/960px-Bandera_de_la_Ciudad_de_Buenos_Aires.svg.png" }
+];
+
+// --- ARMENIA ---
+const armeniaProvinces = [
+  { name: "Aragatsotn", capital: "Ashtarak", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7f/Aragatsotn_Province.png/960px-Aragatsotn_Province.png.png", status: "Proposed" },
+  { name: "Ararat", capital: "Artashat", flag: "https://static.wikia.nocookie.net/vexillology/images/6/67/Ararat_Province.png/960px-Ararat_Province.png.png", status: "Proposed" },
+  { name: "Armavir", capital: "Armavir", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e1/Armavir_Province.png/960px-Armavir_Province.png.png", status: "Proposed" },
+  { name: "Gegharkunik", capital: "Gavar", flag: "https://static.wikia.nocookie.net/vexillology/images/2/22/Flags-of-provinces-of-armenia-v0-ndzyqck1zyda1.webp/960px-Flags-of-provinces-of-armenia-v0-ndzyqck1zyda1.webp.png", status: "Proposed" },
+  { name: "Kotayk", capital: "Hrazdan", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f4/Flags-of-provinces-of-armenia-v0-xdfne5q2zyda1.webp/960px-Flags-of-provinces-of-armenia-v0-xdfne5q2zyda1.webp.png", status: "Proposed" },
+  { name: "Lori", capital: "Vanadzor", flag: "https://static.wikia.nocookie.net/vexillology/images/1/14/Flags-of-provinces-of-armenia-v0-vhqu03a5zyda1.webp/960px-Flags-of-provinces-of-armenia-v0-vhqu03a5zyda1.webp.png", status: "Proposed" },
+  { name: "Shirak", capital: "Gyumri", flag: "https://static.wikia.nocookie.net/vexillology/images/0/01/Province_of_Shirak.png/960px-Province_of_Shirak.png.png", status: "Proposed" },
+  { name: "Syunik", capital: "Kapan", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d4/Province_of_Syunik.png/960px-Province_of_Syunik.png.png", status: "Proposed" },
+  { name: "Tavush", capital: "Ijevan", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a3/Province_of_Tavush.png/960px-Province_of_Tavush.png.png", status: "Proposed" },
+  { name: "Vayots Dzor", capital: "Yeghegnadzor", flag: "https://static.wikia.nocookie.net/vexillology/images/8/82/Flags-of-provinces-of-armenia-v0-brigun37zyda1.webp/960px-Flags-of-provinces-of-armenia-v0-brigun37zyda1.webp.png", status: "Proposed" }
+];
+const armeniaSpecialCity = [
+  { name: "Yerevan", capital: "Yerevan", flag: "https://static.wikia.nocookie.net/vexillology/images/4/43/Flag_of_Yerevan.svg/960px-Flag_of_Yerevan.svg.png" }
+];
+
+// --- AUSTRALIA ---
+const australiaStates = [
+  { name: "New South Wales", capital: "Sydney", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Flag_of_New_South_Wales.svg/960px-Flag_of_New_South_Wales.svg.png" },
+  { name: "Queensland", capital: "Brisbane", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Flag_of_Queensland.svg/960px-Flag_of_Queensland.svg.png" },
+  { name: "South Australia", capital: "Adelaide", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Flag_of_South_Australia.svg/960px-Flag_of_South_Australia.svg.png" },
+  { name: "Tasmania", capital: "Hobart", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Flag_of_Tasmania.svg/960px-Flag_of_Tasmania.svg.png" },
+  { name: "Victoria", capital: "Melbourne", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Flag_of_Victoria_%28Australia%29.svg/960px-Flag_of_Victoria_%28Australia%29.svg.png" },
+  { name: "Western Australia", capital: "Perth", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Flag_of_Western_Australia.svg/960px-Flag_of_Western_Australia.svg.png" }
+];
+const australiaInternalTerritories = [
+  { name: "Australian Capital Territory", capital: "Canberra", flag: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8c/Flag_of_the_Australian_Capital_Territory.svg/960px-Flag_of_the_Australian_Capital_Territory.svg.png" },
+  { name: "Northern Territory", capital: "Darwin", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_the_Northern_Territory.svg/960px-Flag_of_the_Northern_Territory.svg.png" }
+];
+
+// --- AUSTRIA ---
+const austriaStates = [
+  { name: "Burgenland", capital: "Eisenstadt", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Flag_of_Burgenland.svg/1024px-Flag_of_Burgenland.svg.png" },
+  { name: "Carinthia", capital: "Klagenfurt", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Flag_of_Carinthia.svg/1024px-Flag_of_Carinthia.svg.png" },
+  { name: "Lower Austria", capital: "Sankt Pölten", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Flag_of_Lower_Austria.svg/1024px-Flag_of_Lower_Austria.svg.png" },
+  { name: "Salzburg", capital: "Salzburg", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Flag_of_Salzburg.svg/1024px-Flag_of_Salzburg.svg.png" },
+  { name: "Styria", capital: "Graz", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Flag_of_Styria.svg/1024px-Flag_of_Styria.svg.png" },
+  { name: "Tyrol", capital: "Innsbruck", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Flag_of_Tyrol.svg/1024px-Flag_of_Tyrol.svg.png" },
+  { name: "Upper Austria", capital: "Linz", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Flag_of_Upper_Austria.svg/1024px-Flag_of_Upper_Austria.svg.png" },
+  { name: "Vienna", capital: "Vienna", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Flag_of_Vienna.svg/1024px-Flag_of_Vienna.svg.png" },
+  { name: "Vorarlberg", capital: "Bregenz", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Flag_of_Vorarlberg.svg/1024px-Flag_of_Vorarlberg.svg.png" }
+];
+
+// --- AZERBAIJAN ---
+const azerbaijanDistricts = [
+  { name: "Absheron", capital: "Xirdalan", flag: "https://static.wikia.nocookie.net/vexillology/images/b/ba/AbsheronDistrict2.webp/960px-AbsheronDistrict2.webp.png", status: "Proposed" },
+  { name: "Aghdam", capital: "Aghdam", flag: "https://static.wikia.nocookie.net/vexillology/images/f/ff/Flag_of_Aghdam.svg/960px-Flag_of_Aghdam.svg.png", status: "Proposed" },
+  { name: "Aghdara", capital: "Aghdara", flag: "https://static.wikia.nocookie.net/vexillology/images/4/4a/AghdaraDistrict.png/960px-AghdaraDistrict.png.png", status: "Proposed" },
+  { name: "Aghdash", capital: "Aghdash", flag: "https://static.wikia.nocookie.net/vexillology/images/8/84/Agdash_District_%282%29.webp/960px-Agdash_District_%282%29.webp.png", status: "Proposed" },
+  { name: "Aghjabadi", capital: "Aghjabadi", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e7/Aghjabadi_District.webp/960px-Aghjabadi_District.webp.png", status: "Proposed" },
+  { name: "Aghstafa", capital: "Aghstafa", flag: "https://static.wikia.nocookie.net/vexillology/images/b/ba/Aghstafa_District.webp/960px-Aghstafa_District.webp.png", status: "Proposed" },
+  { name: "Aghsu", capital: "Aghsu", flag: "https://static.wikia.nocookie.net/vexillology/images/3/33/Agsu_District.webp/960px-Agsu_District.webp.png", status: "Proposed" },
+  { name: "Astara", capital: "Astara", flag: "https://static.wikia.nocookie.net/vexillology/images/8/88/Flag_of_Astara%2C_Azerbaijan.svg/960px-Flag_of_Astara%2C_Azerbaijan.svg.png", status: "Proposed" },
+  { name: "Balakan", capital: "Balakan", flag: "https://static.wikia.nocookie.net/vexillology/images/5/57/Balakan_District.webp/960px-Balakan_District.webp.png", status: "Proposed" },
+  { name: "Barda", capital: "Barda", flag: "https://static.wikia.nocookie.net/vexillology/images/0/08/Barda_District.webp/960px-Barda_District.webp.png", status: "Proposed" },
+  { name: "Beylagan", capital: "Beylagan", flag: "https://static.wikia.nocookie.net/vexillology/images/6/63/Flag_of_Beylagan_%28city%29.svg/960px-Flag_of_Beylagan_%28city%29.svg.png", status: "Proposed" },
+  { name: "Bilasuvar", capital: "Bilasuvar", flag: "https://static.wikia.nocookie.net/vexillology/images/8/86/Bilasuvar_District.webp/960px-Bilasuvar_District.webp.png", status: "Proposed" },
+  { name: "Dashkasan", capital: "Dashkasan", flag: "https://static.wikia.nocookie.net/vexillology/images/9/95/Flag_of_Dashkasan.jpg/960px-Flag_of_Dashkasan.jpg.png", status: "Proposed" },
+  { name: "Fuzuli", capital: "Fuzuli", flag: "https://static.wikia.nocookie.net/vexillology/images/b/b1/Fuzuli_District.png/960px-Fuzuli_District.png.png", status: "Proposed" },
+  { name: "Gadabay", capital: "Gadabay", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8b/Gadabay_District.webp/960px-Gadabay_District.webp.png", status: "Proposed" },
+  { name: "Gobustan", capital: "Gobustan", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7a/Gobustan_District.webp/960px-Gobustan_District.webp.png", status: "Proposed" },
+  { name: "Goranboy", capital: "Goranboy", flag: "https://static.wikia.nocookie.net/vexillology/images/2/2c/Flag_of_Goranboy_%28city%29.svg/960px-Flag_of_Goranboy_%28city%29.svg.png", status: "Proposed" },
+  { name: "Goychay", capital: "Goychay", flag: "https://static.wikia.nocookie.net/vexillology/images/3/37/Goychay_District.webp/960px-Goychay_District.webp.png", status: "Proposed" },
+  { name: "Goygol", capital: "Goygol", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fa/Goygol_District.webp/960px-Goygol_District.webp.png", status: "Proposed" },
+  { name: "Hajigabul", capital: "Hajigabul", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f7/Hajigabul_District.webp/960px-Hajigabul_District.webp.png", status: "Proposed" },
+  { name: "Imishli", capital: "Imishli", flag: "https://static.wikia.nocookie.net/vexillology/images/3/39/Imishli_District.webp/960px-Imishli_District.webp.png", status: "Proposed" },
+  { name: "Ismayilli", capital: "Ismayilli", flag: "https://static.wikia.nocookie.net/vexillology/images/8/80/Ismayilli_District.webp/960px-Ismayilli_District.webp.png", status: "Proposed" },
+  { name: "Jabrayil", capital: "Jabrayil", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a4/JabrayilDistrict.png/960px-JabrayilDistrict.png.png", status: "Proposed" },
+  { name: "Jalilabad", capital: "Jalilabad", flag: "https://static.wikia.nocookie.net/vexillology/images/5/54/Jalilabad_District.webp/960px-Jalilabad_District.webp.png", status: "Proposed" },
+  { name: "Kalbajar", capital: "Kalbajar", flag: "https://static.wikia.nocookie.net/vexillology/images/1/18/Kalbajar_District.webp/960px-Kalbajar_District.webp.png", status: "Proposed" },
+  { name: "Khachmaz", capital: "Khachmaz", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e8/Flag_of_Khachmaz_%28city%29.svg/960px-Flag_of_Khachmaz_%28city%29.svg.png", status: "Proposed" },
+  { name: "Khizi", capital: "Khizi", flag: "https://static.wikia.nocookie.net/vexillology/images/e/ed/Khizi_District_3.png/960px-Khizi_District_3.png.png", status: "Proposed" },
+  { name: "Khojaly", capital: "Khojaly", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6f/KhojalyDistrict.png/960px-KhojalyDistrict.png.png", status: "Proposed" },
+  { name: "Khojavend", capital: "Khojavend", flag: "https://static.wikia.nocookie.net/vexillology/images/3/39/KhojavendDistrict.png/960px-KhojavendDistrict.png.png", status: "Proposed" },
+  { name: "Kurdamir", capital: "Kurdamir", flag: "https://static.wikia.nocookie.net/vexillology/images/3/37/Kurdamir_District.webp/960px-Kurdamir_District.webp.png", status: "Proposed" },
+  { name: "Lachin", capital: "Lachin", flag: "https://static.wikia.nocookie.net/vexillology/images/8/8e/LachinDistrict.png/960px-LachinDistrict.png.png", status: "Proposed" },
+  { name: "Lankaran", capital: "Lankaran", flag: "https://static.wikia.nocookie.net/vexillology/images/6/60/Lankaran_District.png/960px-Lankaran_District.png.png", status: "Proposed" },
+  { name: "Lerik", capital: "Lerik", flag: "https://static.wikia.nocookie.net/vexillology/images/9/95/Lerik_District.webp/960px-Lerik_District.webp.png", status: "Proposed" },
+  { name: "Masally", capital: "Masally", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a5/Masally_District.webp/960px-Masally_District.webp.png", status: "Proposed" },
+  { name: "Neftchala", capital: "Neftchala", flag: "https://static.wikia.nocookie.net/vexillology/images/0/02/Neftchala_District.webp/960px-Neftchala_District.webp.png", status: "Proposed" },
+  { name: "Oghuz", capital: "Oghuz", flag: "https://static.wikia.nocookie.net/vexillology/images/6/65/Oghuz_District.webp/960px-Oghuz_District.webp.png", status: "Proposed" },
+  { name: "Qabala", capital: "Qabala", flag: "https://static.wikia.nocookie.net/vexillology/images/f/fe/Qabala_District.webp/960px-Qabala_District.webp.png", status: "Proposed" },
+  { name: "Qakh", capital: "Qakh", flag: "https://static.wikia.nocookie.net/vexillology/images/9/99/Qakh_District.webp/960px-Qakh_District.webp.png", status: "Proposed" },
+  { name: "Qazakh", capital: "Qazakh", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5b/Flag_of_Gazakh.jpg/960px-Flag_of_Gazakh.jpg.png", status: "Proposed" },
+  { name: "Quba", capital: "Quba", flag: "https://static.wikia.nocookie.net/vexillology/images/4/42/Quba_District.webp/960px-Quba_District.webp.png", status: "Proposed" },
+  { name: "Qubadli", capital: "Qubadli", flag: "https://static.wikia.nocookie.net/vexillology/images/d/d6/Qubadli_District.webp/960px-Qubadli_District.webp.png", status: "Proposed" },
+  { name: "Qusar", capital: "Qusar", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5a/Qusar_District.webp/960px-Qusar_District.webp.png", status: "Proposed" },
+  { name: "Saatly", capital: "Saatly", flag: "https://static.wikia.nocookie.net/vexillology/images/0/07/Saatly_District.webp/960px-Saatly_District.webp.png", status: "Proposed" },
+  { name: "Sabirabad", capital: "Sabirabad", flag: "https://static.wikia.nocookie.net/vexillology/images/5/55/Sabirabad_District.webp/960px-Sabirabad_District.webp.png", status: "Proposed" },
+  { name: "Salyan", capital: "Salyan", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1c/Salyan_District.webp/960px-Salyan_District.webp.png", status: "Proposed" },
+  { name: "Samukh", capital: "Samukh", flag: "https://static.wikia.nocookie.net/vexillology/images/2/24/Samukh_District.webp/960px-Samukh_District.webp.png", status: "Proposed" },
+  { name: "Shabran", capital: "Shabran", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a1/Shabran_Distric.webp/960px-Shabran_Distric.webp.png", status: "Proposed" },
+  { name: "Shaki", capital: "Shaki", flag: "https://static.wikia.nocookie.net/vexillology/images/4/44/ShakiDistrict.png/960px-ShakiDistrict.png.png", status: "Proposed" },
+  { name: "Shamakhi", capital: "Shamakhi", flag: "https://static.wikia.nocookie.net/vexillology/images/0/0c/Shamakhi_District.webp/960px-Shamakhi_District.webp.png", status: "Proposed" },
+  { name: "Shamkir", capital: "Shamkir", flag: "https://static.wikia.nocookie.net/vexillology/images/d/dc/Shamkir_District.webp/960px-Shamkir_District.webp.png", status: "Proposed" },
+  { name: "Shusha", capital: "Shusha", flag: "https://static.wikia.nocookie.net/vexillology/images/7/7e/ShushaDistrict.png/960px-ShushaDistrict.png.png", status: "Proposed" },
+  { name: "Siyazan", capital: "Siyazan", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5f/Siyazan_District.webp/960px-Siyazan_District.webp.png", status: "Proposed" },
+  { name: "Tartar", capital: "Tartar", flag: "https://static.wikia.nocookie.net/vexillology/images/0/09/Tartar_District.webp/960px-Tartar_District.webp.png", status: "Proposed" },
+  { name: "Tovuz", capital: "Tovuz", flag: "https://static.wikia.nocookie.net/vexillology/images/3/3b/Flag_of_Tovuz%2C_Azerbaijan.svg/960px-Flag_of_Tovuz%2C_Azerbaijan.svg.png", status: "Proposed" },
+  { name: "Ujar", capital: "Ujar", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6f/Ujar_District.webp/960px-Ujar_District.webp.png", status: "Proposed" },
+  { name: "Yardimli", capital: "Yardimli", flag: "https://static.wikia.nocookie.net/vexillology/images/c/ce/Yardimli_District.webp/960px-Yardimli_District.webp.png", status: "Proposed" },
+  { name: "Yevlakh", capital: "Yevlakh", flag: "https://static.wikia.nocookie.net/vexillology/images/5/5e/Yevlakh_District.png/960px-Yevlakh_District.png.png", status: "Proposed" },
+  { name: "Zagatala", capital: "Zagatala", flag: "https://static.wikia.nocookie.net/vexillology/images/b/bf/ZagatalaDistrict.png/960px-ZagatalaDistrict.png.png", status: "Proposed" },
+  { name: "Zangilan", capital: "Zangilan", flag: "https://static.wikia.nocookie.net/vexillology/images/5/53/Zangilan_District.png/960px-Zangilan_District.png.png", status: "Proposed" },
+  { name: "Zardab", capital: "Zardab", flag: "https://static.wikia.nocookie.net/vexillology/images/c/ca/Zardab_District.webp/960px-Zardab_District.webp.png", status: "Proposed" }
+];
+const azerbaijanIndependentCities = [
+  { name: "Baku", capital: "Baku", flag: "https://static.wikia.nocookie.net/vexillology/images/e/eb/Flag_of_Baku.svg/960px-Flag_of_Baku.svg.png", status: "Proposed" },
+  { name: "Ganja", capital: "Ganja", flag: "", status: "Proposed" },
+  { name: "Khankendi", capital: "Khankendi", flag: "", status: "Proposed" },
+  { name: "Lankaran City", capital: "Lankaran", flag: "", status: "Proposed" },
+  { name: "Mingachevir", capital: "Mingachevir", flag: "", status: "Proposed" },
+  { name: "Naftalan", capital: "Naftalan", flag: "", status: "Proposed" },
+  { name: "Shaki City", capital: "Shaki", flag: "", status: "Proposed" },
+  { name: "Shirvan", capital: "Shirvan", flag: "", status: "Proposed" },
+  { name: "Shusha City", capital: "Shusha", flag: "", status: "Proposed" },
+  { name: "Sumqayit", capital: "Sumqayit", flag: "", status: "Proposed" },
+  { name: "Yevlakh City", capital: "Yevlakh", flag: "", status: "Proposed" }
+];
+const azerbaijanAutonomousRepublic = [
+  { name: "Nakhchivan", capital: "Nakhchivan City", flag: "https://static.wikia.nocookie.net/vexillology/images/9/9c/Unofficial_Nakhchivan_Flag.png/960px-Unofficial_Nakhchivan_Flag.png.png", status: "Proposed" }
+];
+
 // --- TERRITORIES ---
 // --- USA ---
 const usTerritories = [
@@ -689,15 +1006,15 @@ const usTerritories = [
   { name: "United States Virgin Islands", capital: "Charlotte Amalie", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Flag_of_the_United_States_Virgin_Islands.svg/960px-Flag_of_the_United_States_Virgin_Islands.svg.png" }
 ];
 const usMinorOutlyingIslands = [
-  { name: "Baker Island", flag: "https://static.wikia.nocookie.net/vexillology/images/7/75/Flag_of_Baker_Island.svg/960px-Flag_of_Baker_Island.svg.png" },
-  { name: "Howland Island", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f8/Flag_of_Howland_Island.jpg/960px-Flag_of_Howland_Island.jpg.png" },
-  { name: "Jarvis Island", flag: "https://static.wikia.nocookie.net/vexillology/images/7/74/Flag_of_jarvis_island.svg/960px-Flag_of_jarvis_island.svg.png" },
-  { name: "Johnston Atoll", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e5/Flag_of_Johnston_Atoll_%28local%29.svg/960px-Flag_of_Johnston_Atoll_%28local%29.svg.png" },
-  { name: "Kingman Reef", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6d/Unofficial_flag_of_Kingman_Reef.svg/960px-Unofficial_flag_of_Kingman_Reef.svg.png" },
-  { name: "Midway Atoll", flag: "https://static.wikia.nocookie.net/vexillology/images/2/2a/Flag_of_the_Midway_Islands_%28local%29.svg/960px-Flag_of_the_Midway_Islands_%28local%29.svg.png" },
-  { name: "Navassa Island", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1b/Flag_of_Navassa_Island_%28local%29.svg/960px-Flag_of_Navassa_Island_%28local%29.svg.png" },
-  { name: "Palmyra Atoll", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a3/Flag_of_Palmyra_Atoll_%28local%29.svg/960px-Flag_of_Palmyra_Atoll_%28local%29.svg.png" },
-  { name: "Wake Island", flag: "https://static.wikia.nocookie.net/vexillology/images/4/47/Flag_of_Wake_Island.svg/960px-Flag_of_Wake_Island.svg.png" }
+  { name: "Baker Island", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/7/75/Flag_of_Baker_Island.svg/960px-Flag_of_Baker_Island.svg.png" },
+  { name: "Howland Island", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/f/f8/Flag_of_Howland_Island.jpg/960px-Flag_of_Howland_Island.jpg.png" },
+  { name: "Jarvis Island", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/7/74/Flag_of_jarvis_island.svg/960px-Flag_of_jarvis_island.svg.png" },
+  { name: "Johnston Atoll", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/e/e5/Flag_of_Johnston_Atoll_%28local%29.svg/960px-Flag_of_Johnston_Atoll_%28local%29.svg.png" },
+  { name: "Kingman Reef", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/6/6d/Unofficial_flag_of_Kingman_Reef.svg/960px-Unofficial_flag_of_Kingman_Reef.svg.png" },
+  { name: "Midway Atoll", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/2/2a/Flag_of_the_Midway_Islands_%28local%29.svg/960px-Flag_of_the_Midway_Islands_%28local%29.svg.png" },
+  { name: "Navassa Island", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/1/1b/Flag_of_Navassa_Island_%28local%29.svg/960px-Flag_of_Navassa_Island_%28local%29.svg.png" },
+  { name: "Palmyra Atoll", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/a/a3/Flag_of_Palmyra_Atoll_%28local%29.svg/960px-Flag_of_Palmyra_Atoll_%28local%29.svg.png" },
+  { name: "Wake Island", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/4/47/Flag_of_Wake_Island.svg/960px-Flag_of_Wake_Island.svg.png" }
 ];
 
 // --- CHINA ---
@@ -784,6 +1101,17 @@ const russiaClaimedTerritories = [
   { name: "Luhansk People's Republic", capital: "Luhansk", flag: "https://upload.wikimedia.org/wikipedia/commons/0/04/Flag_of_the_Luhansk_People%27s_Republic.svg" },
   { name: "Kherson Oblast", capital: "Henichesk (de facto)", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Flag_of_Kherson_Oblast_%28Russia%29.svg/960px-Flag_of_Kherson_Oblast_%28Russia%29.svg.png" },
   { name: "Zaporozhye Oblast", capital: "Melitopol (de facto)", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_the_Russian_administered_Zaporizhzhia_Oblast.svg/960px-Flag_of_the_Russian_administered_Zaporizhzhia_Oblast.svg.png" }
+];
+
+// --- AUSTRALIA EXTERNAL TERRITORIES ---
+const australiaExternalTerritories = [
+  { name: "Ashmore and Cartier Islands", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/e/ef/Flag_of_the_Ashmore_and_Cartier_Islands.png/960px-Flag_of_the_Ashmore_and_Cartier_Islands.png.png", status: "Proposed" },
+  { name: "Australian Antarctic Territory", capital: "Uninhabited", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Flag_of_the_Australian_Antarctic_Territory_%28unofficial%29.svg/960px-Flag_of_the_Australian_Antarctic_Territory_%28unofficial%29.svg.png", status: "Proposed" },
+  { name: "Christmas Island", capital: "Flying Fish Cove", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Flag_of_Christmas_Island.svg/960px-Flag_of_Christmas_Island.svg.png" },
+  { name: "Cocos (Keeling) Islands", capital: "West Island", flag: "https://upload.wikimedia.org/wikipedia/en/thumb/7/74/Flag_of_the_Cocos_%28Keeling%29_Islands.svg/960px-Flag_of_the_Cocos_%28Keeling%29_Islands.svg.png" },
+  { name: "Coral Sea Islands", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/b/ba/Flag_of_Coral_Sea_Islands_%28SagoShader2021%29.svg/960px-Flag_of_Coral_Sea_Islands_%28SagoShader2021%29.svg.png", status: "Proposed" },
+  { name: "Heard Island and McDonald Islands", capital: "Uninhabited", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Unofficial_or_fictitious_Flag_of_Heard_Island_and_McDonald_Islands.svg/960px-Unofficial_or_fictitious_Flag_of_Heard_Island_and_McDonald_Islands.svg.png", status: "Proposed" },
+  { name: "Norfolk Island", capital: "Kingston", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Flag_of_Norfolk_Island.svg/960px-Flag_of_Norfolk_Island.svg.png" }
 ];
 
 // --- HISTORICAL FLAGS ---
@@ -1100,6 +1428,37 @@ export const southKoreaHistorical = [
   { name: "South Korea", years: "1948–2011", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Flag_of_South_Korea.svg/1024px-Flag_of_South_Korea.svg.png" }
 ];
 
+// --- AFGHANISTAN ---
+const afghanistanHistorical = [
+  { name: "Hotak Empire", years: "1709–1738", flag: "https://upload.wikimedia.org/wikipedia/commons/8/81/Flag_of_the_Hotak_Empire.svg" },
+  { name: "Durrani Empire", years: "1747–1842", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Flag_of_the_Durrani_Empire.svg" },
+  { name: "Emirate of Afghanistan", years: "1880–1901", flag: "https://upload.wikimedia.org/wikipedia/commons/3/30/Flag_of_Afghanistan_%281880%E2%80%931901%29.svg" },
+  { name: "Emirate of Afghanistan", years: "1901–1919", flag: "https://upload.wikimedia.org/wikipedia/commons/2/23/Flag_of_Afghanistan_%281901%E2%80%931919%29.svg" },
+  { name: "Kingdom of Afghanistan", years: "1926–1928", flag: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Flag_of_Afghanistan_%281926%E2%80%931928%29.svg" },
+  { name: "Kingdom of Afghanistan", years: "1928–1929", flag: "https://upload.wikimedia.org/wikipedia/commons/c/c8/Flag_of_Afghanistan_%281928%29.svg" },
+  { name: "Kingdom of Afghanistan", years: "1930–1973", flag: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Flag_of_Afghanistan_%281930%E2%80%931973%29.svg" },
+  { name: "Republic of Afghanistan", years: "1974–1978", flag: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Flag_of_Afghanistan_%281974%E2%80%931978%29.svg" },
+  { name: "Democratic Republic of Afghanistan", years: "1978–1980", flag: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Flag_of_Afghanistan_%281978%E2%80%931980%29.svg" },
+  { name: "Republic of Afghanistan (Communist Era)", years: "1987–1992", flag: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Flag_of_Afghanistan_%281987%E2%80%931992%29.svg" },
+  { name: "Islamic State of Afghanistan", years: "1992–1996", flag: "https://upload.wikimedia.org/wikipedia/commons/1/19/Flag_of_Afghanistan_%281992%E2%80%931996%29.svg" },
+  { name: "Islamic Emirate of Afghanistan (Taliban)", years: "1996–2001", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Flag_of_the_Taliban.svg" },
+  { name: "Transitional Administration", years: "2002–2004", flag: "https://upload.wikimedia.org/wikipedia/commons/d/d5/Flag_of_Afghanistan_%282002%E2%80%932004%29.svg" },
+  { name: "Islamic Republic of Afghanistan", years: "2004–2021", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_the_Islamic_Republic_of_Afghanistan.svg" },
+  { name: "Islamic Emirate of Afghanistan (Current)", years: "2021–present", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Flag_of_the_Taliban.svg" }
+];
+
+// --- ALBANIA ---
+const albaniaHistorical = [
+  { name: "Principality of Albania", years: "1914", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Flag_of_Albania_%281914%29.svg/960px-Flag_of_Albania_%281914%29.svg.png" },
+  { name: "Albanian Republic", years: "1925–1928", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Flag_of_Albania_%281926%E2%80%931928%29.svg/960px-Flag_of_Albania_%281926%E2%80%931928%29.svg.png" },
+  { name: "Kingdom of Albania (Zog I)", years: "1928–1939", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_Albania_%281934%E2%80%931939%29.svg/960px-Flag_of_Albania_%281934%E2%80%931939%29.svg.png" },
+  { name: "Albania under Italy", years: "1939–1943", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Albania_%281939%E2%80%931943%29.svg/960px-Flag_of_Albania_%281939%E2%80%931943%29.svg.png" },
+  { name: "Albania under Germany", years: "1943–1944", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_Albania_%281934%E2%80%931939%29.svg/960px-Flag_of_Albania_%281934%E2%80%931939%29.svg.png" },
+  { name: "Democratic Government of Albania", years: "1944–1946", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Flag_of_Albania_%281944%E2%80%931946%29.svg/960px-Flag_of_Albania_%281944%E2%80%931946%29.svg.png" },
+  { name: "People's Socialist Republic of Albania", years: "1946–1992", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Flag_of_Albania_%281946%E2%80%931992%29.svg/960px-Flag_of_Albania_%281946%E2%80%931992%29.svg.png" },
+  { name: "Republic of Albania", years: "1992–present", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Flag_of_Albania.svg/960px-Flag_of_Albania.svg.png" }
+];
+
 // --- CONTINENTS ---
 // --- ASIA ---
 
@@ -1412,7 +1771,46 @@ export const subdivisions = [
   ...southKoreaProvinces.map(s => ({ ...s, country: "South Korea", type: "Provinces" })),
   ...southKoreaMetropolitanCities.map(s => ({ ...s, country: "South Korea", type: "Metropolitan Cities" })),
   ...southKoreaSpecialCities.map(s => ({ ...s, country: "South Korea", type: "Special Cities" })),
-];
+
+// Afghanistan
+  ...afghanistanProvinces.map(s => ({ ...s, country: "Afghanistan", type: "Provinces" })),
+  
+  // Albania
+  ...albaniaCounties.map(s => ({ ...s, country: "Albania", type: "Counties" })),
+  
+    // Algeria
+  ...algeriaProvinces.map(s => ({ ...s, country: "Algeria", type: "Provinces" })),
+  
+  // Andorra
+  ...andorraParishes.map(s => ({ ...s, country: "Andorra", type: "Parishes" })),
+  
+  // Andorra
+  ...angolaProvinces.map(s => ({ ...s, country: "Angola", type: "Provinces" })),
+  
+  // Antigua and Barbuda
+  ...antiguaParishes.map(s => ({ ...s, country: "Antigua and Barbuda", type: "Parishes" })),
+  ...antiguaDependencies.map(s => ({ ...s, country: "Antigua and Barbuda", type: "Dependencies" })),
+  
+  // Argentina
+  ...argentinaProvinces.map(s => ({ ...s, country: "Argentina", type: "Provinces" })),
+  ...argentinaAutonomousCity.map(s => ({ ...s, country: "Argentina", type: "Autonomous City" })),
+  
+  // Armenia
+  ...armeniaProvinces.map(s => ({ ...s, country: "Armenia", type: "Provinces" })),
+  ...armeniaSpecialCity.map(s => ({ ...s, country: "Armenia", type: "Special City" })),
+  
+  // Australia
+  ...australiaStates.map(s => ({ ...s, country: "Australia", type: "States" })),
+  ...australiaInternalTerritories.map(s => ({ ...s, country: "Australia", type: "Internal Territories" })),
+  
+  // Austria
+  ...austriaStates.map(s => ({ ...s, country: "Austria", type: "States" })),
+  
+  // Azerbaijan
+  ...azerbaijanDistricts.map(s => ({ ...s, country: "Azerbaijan", type: "Districts" })),
+  ...azerbaijanIndependentCities.map(s => ({ ...s, country: "Azerbaijan", type: "Independent Cities" })),
+  ...azerbaijanAutonomousRepublic.map(s => ({ ...s, country: "Azerbaijan", type: "Autonomous Republic" })),
+  ];
 
 // --- Category 3: Territories ---
 export const territories = [
@@ -1443,6 +1841,9 @@ export const territories = [
   
   // Russia
   ...russiaClaimedTerritories.map(s => ({ ...s, country: "Russia", type: "Claimed Territories" })),
+  
+  // Russia
+  ...australiaExternalTerritories.map(s => ({ ...s, country: "Australia", type: "External Territories" })),
 ];
 
 // --- Category 4: Unofficial Regions ---
@@ -1501,6 +1902,8 @@ export const historicalFlags = [
   ...russiaHistorical.map(f => ({ ...f, year: getYear(f.name), country: "Russia" })),
   ...mexicoHistorical.map(f => ({ ...f, year: getYear(f.name), country: "Mexico" })),
   ...southKoreaHistorical.map(f => ({ ...f, year: getYear(f.name), country: "South Korea" })),
+  ...afghanistanHistorical.map(f => ({ ...f, year: getYear(f.name), country: "Afghanistan"})),
+  ...albaniaHistorical.map(f => ({ ...f, year: getYear(f.name), country: "Albania"})),
 ];
 
 // --- Category 7: Continent Flags ---
