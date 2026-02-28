@@ -606,3 +606,57 @@ body::before {
 .flag-img {
     transition: opacity 0.3s ease-in-out;
 }
+
+/* --- STATUS BADGES SYSTEM --- */
+.status-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-bottom-left-radius: 8px; /* Lengkungan hanya di pojok kiri bawah badge */
+    z-index: 10;
+    letter-spacing: 0.5px;
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+}
+
+/* Merah (Untuk status: "Unofficial" atau "Fan-made") */
+.badge-unofficial {
+    background: linear-gradient(135deg, #dc3545, #a71d2a);
+    color: white;
+}
+
+/* Oranye/Emas (Untuk status: "Reconstruction") */
+.badge-warning {
+    background: linear-gradient(135deg, #fd7e14, #d35400);
+    color: white;
+}
+
+/* Biru (Untuk status: "Proposed") */
+.badge-info {
+    background: linear-gradient(135deg, #0dcaf0, #0aa2c0);
+    color: #fff; /* Teks hitam agar kontras dengan biru muda */
+}
+
+/* Label untuk Negara dengan Pengakuan Terbatas (Taiwan, Kosovo, dll) */
+.badge-limited {
+    background: linear-gradient(135deg, #6366f1, #4338ca); /* Indigo */
+    color: white;
+}
+
+/* Label untuk Bendera yang benar-benar tidak asli/fan-made */
+.badge-unofficial {
+    background: linear-gradient(135deg, #4b5563, #1f2937); /* Abu-abu gelap/Charcoal */
+    color: white;
+}
+
+/* Warna khusus untuk Historical (Coklat Emas Tua / Sepia) */
+.badge-historical {
+    background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
+    color: #ffffff;
+    border-bottom-left-radius: 8px;
+}
+
