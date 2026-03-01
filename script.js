@@ -437,15 +437,15 @@ if (infoBtn) {
 
         en: {
 
-            totalScoreLabel: "Total Score", homeSubtitle: "Test Your Global Knowledge", homePlayQuiz: "Play Quiz", homeFlagLibrary: "Flag Library",
+            totalScoreLabel: "Total XP", homeSubtitle: "Test Your Global Knowledge", homePlayQuiz: "Play Quiz", homeFlagLibrary: "Flag Library",
 
             quizModesTitle: "Quiz Modes", backToMenu: "Back to Menu", continentClashTitle: "Choose a Continent", backToQuizModes: "Back to Quiz Modes",
 
-            quizScore: "Score", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "Final Score:", resultsPlayAgain: "Play Again",
+            quizScore: "XP", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Results:", resultsPlayAgain: "Play Again",
 
             libraryTitle: "Flag Library", continentLibraryTitle: "Choose a Continent", backToLibrary: "Back to Library", backButton: "Back",
 
-            endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your score will be finalized.",
+            endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your XP will be finalized.",
 
             endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X © 2025. All Rights Reserved.",
 
@@ -453,11 +453,11 @@ if (infoBtn) {
 
             quizPromptFlag: "Which flag is this?", quizPromptGuessCapital: "What is the capital of {countryName}?", quizPromptYear: "Which year is this flag from?",
 
-            resultsMessage: "You answered {score} questions correctly.", 
+            resultsMessage: "You gained {score} XP!", 
 
-            survivalResultMessage: "You survived {questions} questions and scored {score}!",
+            survivalResultMessage: "You survived {questions} questions and gained {score} XP!", 
 
-            comboResultMessage: "You survived the Combo Challenge for {questions} questions and scored {score}!",
+            comboResultMessage: "You survived the Combo Challenge for {questions} questions and gained {score} XP!",
 
             viewDetailBtn: "View Detail", funFact: "Fun Fact", closeButton: "Close", geminiError: "Sorry, failed to generate fun facts. Please try again later.", searchPlaceholder: "Search for a flag...",
 
@@ -499,7 +499,7 @@ if (infoBtn) {
 
             leaderboardUser: "Player",
 
-            leaderboardScore: "Score",
+            leaderboardScore: "XP",
 
             disclaimerTitle: "Flag Accuracy Note",
 
@@ -509,15 +509,15 @@ if (infoBtn) {
 
         id: {
 
-            totalScoreLabel: "Skor Total", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
+            totalScoreLabel: "Total XP", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
 
             quizModesTitle: "Mode Kuis", backToMenu: "Kembali ke Menu", continentClashTitle: "Pilih Benua", backToQuizModes: "Kembali ke Mode Kuis",
 
-            quizScore: "Skor", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "Skor Akhir:", resultsPlayAgain: "Main Lagi",
+            quizScore: "XP", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "Hasil XP:", resultsPlayAgain: "Main Lagi",
 
             libraryTitle: "Pustaka Bendera", continentLibraryTitle: "Pilih Benua", backToLibrary: "Kembali ke Pustaka", backButton: "Kembali",
 
-            endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? Skor Anda akan difinalisasi.",
+            endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? XP Anda akan difinalisasi.",
 
             endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X © 2025. Hak Cipta Dilindungi.",
 
@@ -525,11 +525,11 @@ if (infoBtn) {
 
             quizPromptFlag: "Bendera apakah ini?", quizPromptGuessCapital: "Apakah ibu kota dari {countryName}?", quizPromptYear: "Bendera ini dari tahun berapa?",
 
-            resultsMessage: "Anda menjawab {score} pertanyaan dengan benar.",
+            resultsMessage: "Anda mendapatkan {score} XP!",
 
-            survivalResultMessage: "Anda bertahan {questions} pertanyaan dan mendapat skor {score}!",
+            survivalResultMessage: "Anda bertahan {questions} pertanyaan dan mendapat {score} XP!",
 
-            comboResultMessage: "Anda bertahan di Tantangan Kombo selama {questions} pertanyaan dan mendapat skor {score}!",
+            comboResultMessage: "Anda bertahan di Tantangan Kombo selama {questions} pertanyaan dan mendapat {score} XP!",
 
             viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeButton: "Tutup", geminiError: "Maaf, saya tidak bisa mengambil fakta saat ini. Silakan coba lagi nanti.", searchPlaceholder: "Cari bendera...",
 
@@ -557,7 +557,7 @@ if (infoBtn) {
 
             // NEW TRANSLATIONS
 
-            loginPrompt: "Masuk untuk simpan skor ke papan peringkat global!",
+            loginPrompt: "Masuk untuk simpan XP ke papan peringkat global!",
 
             loginBtn: "Masuk dengan Google",
 
@@ -571,7 +571,7 @@ if (infoBtn) {
 
             leaderboardUser: "Pemain",
 
-            leaderboardScore: "Skor",
+            leaderboardScore: "XP",
 
             disclaimerTitle: "Catatan Akurasi Bendera",
 
@@ -661,31 +661,30 @@ renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByC
 
     }
 
-
+function updateLevelUI(xp) {
+    const level = Math.floor(xp / 500) + 1;
+    const levelBadge = document.getElementById('level-badge');
+    if (levelBadge) {
+        levelBadge.textContent = `Lv. ${level}`;
+    }
+}
 
     function loadTotalScore() {
-
-        totalscoreValueEl.textContent = localStorage.getItem('flagx-totalscore') || 0;
-
-    }
-
-    
+    const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    totalscoreValueEl.textContent = xp;
+    updateLevelUI(xp); // Tambahkan baris ini
+}
 
     // UPDATED: addToTotalScore with Firestore Sync
 
     async function addToTotalScore(scoreFromQuiz) {
 
-        // 1. Update LocalStorage
-
-        const currentTotal = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-
-        const newTotal = currentTotal + scoreFromQuiz;
-
-        localStorage.setItem('flagx-totalscore', newTotal);
-
-        totalscoreValueEl.textContent = newTotal;
-
-
+        // 1. Update LocalStorage       
+    const currentTotal = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const newTotal = currentTotal + scoreFromQuiz;
+    localStorage.setItem('flagx-totalscore', newTotal);
+    totalscoreValueEl.textContent = newTotal;
+    updateLevelUI(newTotal); // Tambahkan baris ini
 
         // 2. Update Firestore if Logged In
 
@@ -712,8 +711,6 @@ renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByC
         }
 
     }
-
-
 
     // --- AUTH & DATABASE FUNCTIONS ---
 
@@ -840,15 +837,13 @@ const handleLogout = async () => {
 
         }
 
-
-
         // Update Local
 
         localStorage.setItem('flagx-totalscore', finalScore);
 
         totalscoreValueEl.textContent = finalScore;
-
-
+        
+        updateLevelUI(finalScore); // Tambahkan baris ini
 
         // Update Cloud
 
@@ -1198,7 +1193,8 @@ if (auth) {
 
                 const isMe = auth.currentUser && auth.currentUser.uid === doc.id;
 
-                
+                 // Tambahkan baris ini untuk menghitung level pemain
+                const userLevel = Math.floor((data.totalScore || 0) / 500) + 1;
 
                 let rankDisplay = rank;
 
@@ -1217,32 +1213,21 @@ if (auth) {
                 
 
                 html += `
-
                 <div class="${rowClass}">
-
                     <div class="col-span-2 font-bold text-center ${rankColor}">${rankDisplay}</div>
-
                     <div class="col-span-7 flex items-center gap-3 pl-2 overflow-hidden">
-
                         <img src="${data.photoURL || 'https://ui-avatars.com/api/?name='+data.username}" class="w-8 h-8 rounded-full border border-[var(--card-border-color)] object-cover" loading="lazy">
-
-                        <span class="truncate font-semibold ${isMe ? 'text-[var(--primary-color)]' : ''}">${data.username || 'Anonymous'}</span>
-
+                        <span class="truncate font-semibold flex items-center gap-2 ${isMe ? 'text-[var(--primary-color)]' : ''}">
+                            ${data.username || 'Anonymous'}
+                            <span class="text-[9px] bg-[var(--primary-color)] text-white px-1.5 py-0.5 rounded shadow-sm">Lv.${userLevel}</span>
+                        </span>
                     </div>
-
                     <div class="col-span-3 text-right font-mono font-bold pr-2">${data.totalScore}</div>
-
                 </div>`;
-
                 rank++;
-
             });
 
-
-
             listContainer.innerHTML = html;
-
-
 
         } catch (error) {
 
@@ -2209,15 +2194,15 @@ function initApp() {
         const correctButton = Array.from(document.getElementById('options-container').children).find(b => b.textContent == correctId); 
         const flagImg = document.querySelector("#flag-display-quiz img");
 
-        if (selectedId === correctId) { 
+            if (selectedId === correctId) { 
         // --- JAWABAN BENAR ---        
-        sfxCorrect.play(); // <--- TAMBAHKAN INI
+        sfxCorrect.play(); 
         
-        currentQuiz.score++; 
+        currentQuiz.score += 10; // <--- UBAH DARI currentQuiz.score++ MENJADI += 10
         document.getElementById('score').textContent = currentQuiz.score; 
         if(selectedButton) selectedButton.classList.add('correct'); 
         if(flagImg) flagImg.classList.add('correct-flag');
-
+          
     } else { 
         // --- JAWABAN SALAH ---
         if ("vibrate" in navigator) navigator.vibrate(100); // Haptic peringatan
