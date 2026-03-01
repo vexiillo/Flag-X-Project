@@ -62,7 +62,7 @@ body {
   color: var(--text-color);
   background-attachment: fixed;
   transition: color 0.3s ease, background 0.5s ease;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* --- Core Component Styling --- */
@@ -73,7 +73,7 @@ body {
     border: 1px solid var(--card-border-color);
     /* Menambah 'glow' yang konsisten seperti Jeton */
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--primary-color-rgb), 0.1);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;   
 }
 
 .btn {
@@ -138,12 +138,15 @@ body {
 /* 2. Berikan batas 600px HANYA untuk layar selain Library */
 /* Ini agar menu utama & quiz tetap rapi di tengah */
 .screen:not(#library-display-screen) {
-    max-width: 600px !important;
+    max-width: 600px !important;   
 }
 
 /* 3. Khusus untuk Library, berikan lebar maksimal yang besar */
 #library-display-screen {
     max-width: 95% !important; /* Sekarang Library bisa melebar ke samping */
+ /* --- TAMBAHKAN 2 BARIS INI --- */
+    margin-top: 0 !important;      /* Memastikan tidak ada jarak berlebih di atas */
+    margin-bottom: auto !important; /* Mendorong ruang kosong ke bawah agar layar naik ke atas */
 }
 
 .screen.active { 
@@ -165,7 +168,7 @@ body {
 #library-grid {
     display: grid !important; /* Tetap pastikan dia grid */
     width: 100% !important;
-    padding: 10px 0;
+    padding: 10px 0;    
 }
 
 @media (max-width: 480px) {
@@ -444,10 +447,10 @@ body {
 main {
     width: 100%;
     max-width: 100% !important; /* Memastikan tidak ada batasan lebar */
-    display: flex;
+    display: flex;   
     flex-direction: column;
     align-items: center;
-    flex-grow: 1;
+    flex-grow: 1;    
     padding: 0 20px; /* Memberi sedikit jarak di pinggir agar tidak menempel sekali */
 }
 
@@ -659,4 +662,3 @@ body::before {
     color: #ffffff;
     border-bottom-left-radius: 8px;
 }
-
