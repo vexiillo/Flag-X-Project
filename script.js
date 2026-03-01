@@ -2295,9 +2295,12 @@ function initApp() {
 
     geminiModal.classList.add('active');
 
-    geminiContentEl.innerHTML = '<div class="flex justify-center py-4"><div class="loader"></div></div>';
-
-    
+    geminiContentEl.innerHTML = `
+    <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
+        <div class="loader"></div>
+        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
+    </div>
+`;
 
     // PERBAIKAN: Ambil langsung dari variabel settings (tanpa window.)
 
