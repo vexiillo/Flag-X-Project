@@ -358,6 +358,7 @@
 
         <div id="gemini-content" class="mb-6 min-h-[100px] flex justify-center items-center relative z-10">
             <div class="loader"></div>
+            <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
         </div>
         
         <button id="close-gemini-modal-btn" class="btn btn-secondary py-2 px-8 transition-all relative z-10" data-translate-key="closeButton">
@@ -365,6 +366,61 @@
         </button>
     </div>
 </div>
+
+            <div id="detail-modal" class="modal">
+        <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-md m-4 text-center relative overflow-hidden">
+            
+            <div class="mb-4 relative z-10 flex justify-center">
+                <img id="detail-flag-img" src="" class="h-28 w-auto mx-auto rounded shadow-lg object-cover border border-[var(--card-border-color)]" alt="Flag">
+            </div>
+
+            <h3 id="detail-modal-title" class="text-2xl font-bold mb-4 relative z-10"></h3>
+
+            <div id="detail-content" class="mb-6 min-h-[100px] flex flex-col justify-center items-center relative z-10">
+                
+                <div id="detail-loader" class="flex flex-col items-center justify-center hidden">
+                    <div class="loader"></div>
+                    <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Details...</p>
+                </div>
+                
+                <div id="detail-data" class="hidden text-left space-y-4 text-sm w-full">
+                    <div class="grid grid-cols-2 gap-3 border-b border-[var(--card-border-color)] pb-4">
+                        <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
+                            <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Capital</span>
+                            <span id="detail-capital" class="font-semibold"></span>
+                        </div>
+                        <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
+                            <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Established</span>
+                            <span id="detail-established" class="font-semibold"></span>
+                        </div>
+                        <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
+                            <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Population</span>
+                            <span id="detail-population" class="font-semibold"></span>
+                        </div>
+                        <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
+                            <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Region</span>
+                            <span id="detail-region" class="font-semibold"></span>
+                        </div>
+                        <div class="col-span-2 bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
+                            <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Primary Language</span>
+                            <span id="detail-language" class="font-semibold"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-[rgba(var(--primary-color-rgb),0.1)] p-3 rounded-lg border border-[var(--card-border-color)]">
+                        <h4 class="font-bold text-[var(--primary-color)] mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-flag"></i> Vexillology Corner
+                        </h4>
+                        <p id="detail-vexillology" class="text-sm leading-relaxed text-[var(--text-color)]"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="close-detail-modal-btn" class="btn btn-secondary py-2 px-8 transition-all relative z-10" data-translate-key="closeButton">
+                CLOSE
+            </button>
+        </div>
+    </div>
 
     <script type="module" src="script.js" defer></script>
 </body>

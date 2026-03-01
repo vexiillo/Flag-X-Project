@@ -459,7 +459,7 @@ if (infoBtn) {
 
             comboResultMessage: "You survived the Combo Challenge for {questions} questions and scored {score}!",
 
-            funFact: "Fun Fact", closeButton: "Close", geminiError: "Sorry, I couldn't fetch a fact right now. Please try again later.", searchPlaceholder: "Search for a flag...",
+            viewDetailBtn: "View Detail", funFact: "Fun Fact", closeButton: "Close", geminiError: "Sorry, failed to generate fun facts. Please try again later.", searchPlaceholder: "Search for a flag...",
 
             mode_classic_title: "Classic Mode", mode_classic_desc: "Guess 20 official country flags. No time limit.",
 
@@ -531,7 +531,7 @@ if (infoBtn) {
 
             comboResultMessage: "Anda bertahan di Tantangan Kombo selama {questions} pertanyaan dan mendapat skor {score}!",
 
-            funFact: "Fakta Menarik", closeButton: "Tutup", geminiError: "Maaf, saya tidak bisa mengambil fakta saat ini. Silakan coba lagi nanti.", searchPlaceholder: "Cari bendera...",
+            viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeButton: "Tutup", geminiError: "Maaf, saya tidak bisa mengambil fakta saat ini. Silakan coba lagi nanti.", searchPlaceholder: "Cari bendera...",
 
             mode_classic_title: "Mode Klasik", mode_classic_desc: "Tebak 20 bendera negara resmi. Tanpa batas waktu.",
 
@@ -1491,6 +1491,10 @@ document.addEventListener('click', (e) => {
     document.getElementById('confirm-end-quiz-btn').addEventListener('click', () => { endQuizModal.classList.remove('active'); endQuiz(); });
 
     document.getElementById('close-gemini-modal-btn').addEventListener('click', () => geminiModal.classList.remove('active'));
+   
+    document.getElementById('close-detail-modal-btn').addEventListener('click', () => {
+    document.getElementById('detail-modal').classList.remove('active');
+});
 
     document.getElementById('library-search-input').addEventListener('input', filterLibrary);
 
@@ -2139,7 +2143,7 @@ function initApp() {
             subText = item.country;
         }
 
-        // --- 4. RENDER KARTU ---
+                // --- 4. RENDER KARTU ---
         const card = document.createElement('div');
         // Relative & overflow-hidden wajib agar badge Proposed/Recon rapi di pojok
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
@@ -2167,13 +2171,18 @@ function initApp() {
                     </p>
                 </div>
             </div>
-            <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1 px-2 mt-2 w-full hover:scale-105 active:scale-95 transition-transform" 
-                    onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
-                ✨ <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
-            </button>`;
+            <div class="flex flex-col gap-1 mt-2 w-full">
+                <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md" 
+                        onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
+                    📖 <span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
+                </button>
+                <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md" 
+                        onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
+                    ✨ <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
+                </button>
+            </div>`;
         
-        fragment.appendChild(card);
-    });
+        fragment.appendChild(card); });
 
     grid.appendChild(fragment);
     const searchInput = document.getElementById('library-search-input');
@@ -2360,29 +2369,118 @@ const response = await fetch('/get-fun-facts', {
 
 
 
-    } catch (error) {
-
+        } catch (error) {
         console.error("Fetch error:", error);
 
-        
-
-        // Pesan error juga mengambil dari translations
-
-        const errorMsg = (translations[currentLang] && translations[currentLang].geminiError) 
-
+        // Ambil pesan dari sistem translasi
+        const errorText = (translations[currentLang] && translations[currentLang].geminiError)       
                          ? translations[currentLang].geminiError 
-
                          : (currentLang === 'id' ? "Gagal memuat fakta. Silakan coba lagi." : "Connection error. Please try again.");
 
-                         
+        // Bersihkan konten lama (menghapus loader)
+        geminiContentEl.innerHTML = '';
 
-        geminiContentEl.textContent = errorMsg;
+        // Buat elemen pesan error dengan styling yang identik dengan Detail Modal
+        const errorPara = document.createElement('p');
+        // text-sm: Ukuran font kecil yang sama
+        // py-6: Padding agar posisi teks di tengah secara vertikal
+        // font-medium: Ketebalan teks
+        // opacity-80: Agar warna tidak terlalu mencolok (elegan)
+        errorPara.className = 'text-center py-4 text-sm font-medium';
+        errorPara.textContent = errorText;
 
+        // Masukkan ke dalam container modal
+        geminiContentEl.appendChild(errorPara);
     }
-
 }
 
+// --- AI FLAG DETAIL LOGIC (With Caching) ---
+async function getFlagDetail(itemName, flagUrl) {
+    if (!itemName) return;
 
+    const modal = document.getElementById('detail-modal');
+    const titleEl = document.getElementById('detail-modal-title');
+    const flagImgEl = document.getElementById('detail-flag-img');
+    const loaderEl = document.getElementById('detail-loader');
+    const dataContainer = document.getElementById('detail-data');
+
+    // 1. Reset & Persiapan Awal
+    // Hapus pesan error lama jika ada
+    const oldError = modal.querySelector('.error-message');
+    if (oldError) oldError.remove();
+
+    titleEl.textContent = itemName;
+    flagImgEl.src = flagUrl;
+    loaderEl.classList.remove('hidden');
+    dataContainer.classList.add('hidden');
+    modal.classList.add('active');
+
+    const currentLang = settings.language || 'en';
+    const cacheKey = `flag_detail_${currentLang}_${itemName}`;
+
+    // Fungsi Helper untuk Menampilkan Data ke UI
+    const renderData = (data) => {
+        loaderEl.classList.add('hidden');
+        dataContainer.classList.remove('hidden');
+        
+        document.getElementById('detail-capital').textContent = data.capital || '-';
+        document.getElementById('detail-established').textContent = data.established || '-';
+        document.getElementById('detail-population').textContent = data.population || '-';
+        document.getElementById('detail-region').textContent = data.region || '-';
+        document.getElementById('detail-language').textContent = data.language || '-';
+        document.getElementById('detail-vexillology').textContent = data.vexillology || 'No info.';
+    };
+
+    // 2. Cek Cache di LocalStorage
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+        setTimeout(() => renderData(JSON.parse(cachedData)), 300);
+        return;
+    }
+
+    // 3. Panggil API jika tidak ada di Cache
+    try {
+        const response = await fetch('/get-flag-details', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ countryName: itemName, language: currentLang })
+        });
+
+        if (!response.ok) throw new Error('API Error');
+
+        const result = await response.json();
+        
+        // Simpan ke cache agar hemat kuota
+        localStorage.setItem(cacheKey, JSON.stringify(result));
+        
+        // Tampilkan data
+        renderData(result);
+
+        } catch (error) {
+        console.error("Fetch detail error:", error);
+        loaderEl.classList.add('hidden');
+        
+        // Tampilkan pesan error ke user tanpa warna merah (menyesuaikan tema default)
+        const errorMsg = document.createElement('p');
+        // PERUBAHAN: text-[var(--error-color)] dihapus
+        errorMsg.className = 'error-message text-center py-4 text-sm font-medium';
+        errorMsg.textContent = 'Sorry, failed to generate details. Please try again later.';
+        dataContainer.parentNode.insertBefore(errorMsg, dataContainer);
+    }    
+}
+
+    // Fungsi helper untuk mengisi teks ke dalam HTML
+    function populateDetailUI(data) {
+        loaderEl.classList.add('hidden');
+        dataContainer.classList.remove('hidden');
+        
+        document.getElementById('detail-capital').textContent = data.capital || 'N/A';
+        document.getElementById('detail-established').textContent = data.established || 'N/A';
+        document.getElementById('detail-population').textContent = data.population || 'N/A';
+        document.getElementById('detail-region').textContent = data.region || 'N/A';
+        document.getElementById('detail-language').textContent = data.language || 'N/A';
+        document.getElementById('detail-vexillology').textContent = data.vexillology || 'No specific vexillology info provided.';
+    }
 
         // --- UTILITY FUNCTIONS (PINDAHKAN KE SINI) ---
 
@@ -2454,14 +2552,14 @@ if ('serviceWorker' in navigator) {
 };
 
     window.getFunFact = getFunFact;
+    
+    window.getFlagDetail = getFlagDetail;  
 
     window.toggleTheme = toggleTheme;
 
     window.handleLogin = handleLogin;
 
     window.handleLogout = handleLogout;
-
-    
 
     // Jalankan initApp HANYA SEKALI di sini
 
