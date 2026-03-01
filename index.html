@@ -157,7 +157,7 @@
                     <a href="#" class="text-subtle hover:text-[var(--text-color)] transition-colors"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
-            <p class="text-center text-xs text-subtle mt-4">v.2.5</p>
+            <p class="text-center text-xs text-subtle mt-4">v.2.5 (Beta Version)</p>
         </div>
         
         <div id="disclaimer-panel" class="card rounded-lg p-4">
@@ -431,7 +431,31 @@
             </button>
         </div>
     </div>
+    
+        <div id="level-up-modal" class="modal">
+        <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-sm m-4 text-center relative overflow-hidden">
+            <div class="mb-2 relative z-10 flex justify-center">
+                <i class="fa-solid fa-angles-up text-6xl text-yellow-400 glow-icon-effect" style="filter: drop-shadow(0 0 15px #FFD700);"></i>
+            </div>
 
+            <h3 id="level-up-text" class="text-4xl font-black mb-1 text-transparent bg-clip-text relative z-10" style="-webkit-text-stroke: 1px rgba(255,255,255,0.1);">
+    LEVEL UP!
+</h3>
+            
+            <p class="text-subtle mb-6 relative z-10 font-medium">
+                You've reached <span id="new-level-display" class="font-bold text-[var(--primary-color)] text-2xl ml-1">Lv. ?</span>
+            </p>
+
+            <button id="close-level-up-btn" class="btn btn-primary py-3 px-8 w-full transition-all relative z-10 text-lg font-bold shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.5)]">
+                AWESOME!
+            </button>
+        </div>
+    </div>  
+
+    <button id="scroll-to-top-btn" class="btn btn-primary" aria-label="Scroll to top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+    
     <script type="module" src="script.js" defer></script>
 </body>
 </html>

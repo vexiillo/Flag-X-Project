@@ -190,7 +190,14 @@ const closeDisclaimerBtn = document.getElementById('close-disclaimer-btn');
 
 const closeDisclaimerX = document.getElementById('close-disclaimer-x');
 
-
+// Fungsi untuk menghitung level progresif berdasarkan XP
+function calculateLevel(xp) {
+    if (xp < 5000) return Math.floor(xp / 500) + 1;           // Lv 1 - 10
+    if (xp < 20000) return 10 + Math.floor((xp - 5000) / 1000); // Lv 11 - 25
+    if (xp < 57500) return 25 + Math.floor((xp - 20000) / 2500); // Lv 26 - 40
+    if (xp < 102500) return 40 + Math.floor((xp - 57500) / 5000); // Lv 41 - 49
+    return 50; // MAX LEVEL
+}
 
     function toggleTheme() {
 
@@ -320,8 +327,6 @@ function loadTheme() {
 
 }
 
-
-
      // --- EVENT LISTENERS (YANG SUDAH DIPERBAIKI) ---
 
     
@@ -422,7 +427,27 @@ if (infoBtn) {
 
     }
 
+    // --- SCROLL TO TOP LOGIC ---
+    const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
 
+    if (scrollToTopBtn) {
+        // Deteksi scroll: Munculkan tombol jika layar di-scroll lebih dari 300px
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        });
+
+        // Aksi klik: Kembali ke atas dengan efek halus (smooth)
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }  
 
     // Listener Theme Switcher (Sudah Benar, biarkan saja)
 
@@ -661,10 +686,16 @@ renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByC
     }
 
 function updateLevelUI(xp) {
-    const level = Math.floor(xp / 500) + 1;
-    const levelBadge = document.getElementById('level-badge');
+    const level = calculateLevel(xp); // Menggunakan fungsi terpusat
+    const levelBadge = document.querySelector('.absolute.-bottom-4'); // Mengambil div badge level dari header HTML
     if (levelBadge) {
-        levelBadge.textContent = `Lv. ${level}`;
+        levelBadge.textContent = level === 50 ? 'MAX Lv.' : `Lv. ${level}`;
+        
+        // Opsional: Ganti warna kalau max level!
+        if (level === 50) {
+            levelBadge.classList.add('bg-yellow-500'); 
+            levelBadge.classList.remove('bg-[var(--primary-color)]');
+        }
     }
 }
 
@@ -1193,7 +1224,7 @@ if (auth) {
                 const isMe = auth.currentUser && auth.currentUser.uid === doc.id;
 
                  // Tambahkan baris ini untuk menghitung level pemain
-                const userLevel = Math.floor((data.totalScore || 0) / 500) + 1;
+                const userLevel = calculateLevel(data.totalScore || 0);
 
                 let rankDisplay = rank;
 
@@ -1480,147 +1511,81 @@ document.addEventListener('click', (e) => {
     document.getElementById('detail-modal').classList.remove('active');
 });
 
+document.getElementById('close-level-up-btn').addEventListener('click', () => {
+        document.getElementById('level-up-modal').classList.remove('active');
+    });
+
     document.getElementById('library-search-input').addEventListener('input', filterLibrary);
 
 
 
                 function startQuiz(mode, subMode = null) {
-
-    // 1. Reset State Kuis
-
+    // Reset State Kuis
     currentQuiz = { 
-
         ...currentQuiz, 
-
         mode: mode, 
-
         lastMode: mode, 
-
         lastSubMode: subMode, 
-
         score: 0, 
-
         questionNumber: 0, 
-
         timeLeft: 0, 
-
         lives: (mode === 'survival' || mode === 'combo') ? 1 : 999 
-
     };
 
+    // Fungsi pembantu untuk mengacak array
+    const shuffle = (array) => [...array].sort(() => 0.5 - Math.random());
 
-
-    // 2. Tentukan Dataset & Aturan Main
-
+    // Tentukan Dataset & Langsung Acak di Awal
     switch (mode) {
-
         case 'classic': 
-
-            currentQuiz.dataset = [...officialCountries]; 
-
+            currentQuiz.dataset = shuffle(officialCountries); 
             currentQuiz.totalQuestions = 20; 
-
             break;
-
         case 'continent': 
-
-            currentQuiz.dataset = [...continentFlags[subMode]]; 
-
+            currentQuiz.dataset = shuffle(continentFlags[subMode]); 
             currentQuiz.totalQuestions = 20; 
-
             break;
-
         case 'capitalGuess': 
-
-            currentQuiz.dataset = [...officialCountries.filter(f => f.capital)]; 
-
+            currentQuiz.dataset = shuffle(officialCountries.filter(f => f.capital)); 
             currentQuiz.totalQuestions = 20; 
-
             break;
-
         case 'yearGuess': 
-
-            currentQuiz.dataset = [...historicalFlags]; 
-
+            currentQuiz.dataset = shuffle(historicalFlags); 
             currentQuiz.totalQuestions = 20; 
-
             break;
-
         case 'timeAttack': 
-
-            currentQuiz.dataset = [...officialCountries, ...subdivisions, ...territories]; 
-
+            currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions, ...territories]); 
             currentQuiz.totalQuestions = Infinity; 
-
             currentQuiz.timeLeft = 60; 
-
             break;
-
         case 'survival': 
-
-            currentQuiz.dataset = [...officialCountries, ...subdivisions]; 
-
+            currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions]); 
             currentQuiz.totalQuestions = 30; 
-
             break;
-
         case 'combo': 
-
+            currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions]); // Tambahkan dataset default untuk combo
             currentQuiz.totalQuestions = Infinity; 
-
             currentQuiz.timeLeft = 90; 
-
             break;
-
     }
 
-
-
-    // 3. Update UI Awal
-
+    // Update UI Awal
     const scoreEl = document.getElementById('score');
-
     if (scoreEl) scoreEl.textContent = "0";
 
-
-
     const timerEl = document.getElementById('timer');
-
     const hasTimer = currentQuiz.timeLeft > 0;
-
     
-
     if (timerEl) {
-
         timerEl.style.display = hasTimer ? 'block' : 'none';
-
         timerEl.textContent = currentQuiz.timeLeft;
-
     }
 
-
-
-    // 4. Jalankan Timer jika diperlukan
-
-    if (hasTimer) {
-
-        startTimer(); 
-
-    }
-
-
-
-    // 5. Pindah Layar & Muat Pertanyaan Pertama
-
-    // Pastikan fungsi showScreen sudah terdaftar di window juga
+    if (hasTimer) startTimer(); 
 
     showScreen('quiz-screen');
-
     loadQuestion();
-
 }
-
-
 
     // --- INIT APP ---
 
@@ -1738,51 +1703,52 @@ function initApp() {
 
 } // <--- KURUNG KURAWAL INI YANG HILANG SEBELUMNYA
 
-
-
     function loadQuestion() {
-        if (currentQuiz.questionNumber >= currentQuiz.totalQuestions) { endQuiz(); return; }
+    // Cek apakah kuis selesai
+    if (currentQuiz.questionNumber >= currentQuiz.totalQuestions || currentQuiz.dataset.length === 0) { 
+        endQuiz(); 
+        return; 
+    }
 
-        currentQuiz.questionNumber++;
-        updateQuestionCounter();
+    currentQuiz.questionNumber++;
+    updateQuestionCounter();
 
-        // --- LOGIKA PROGRESS BAR (Sembunyi jika Infinite) ---
-        const progressWrapper = document.getElementById('quiz-progress-wrapper');
-        const progressFill = document.getElementById('quiz-progress-fill');
-        
-        if (progressWrapper && progressFill) {
-            if (currentQuiz.totalQuestions === Infinity) {
-                progressWrapper.style.display = 'none'; // Sembunyikan untuk Time Attack & Combo
-            } else {
-                progressWrapper.style.display = 'block'; // Tampilkan untuk mode lain
-                const percentage = (currentQuiz.questionNumber / currentQuiz.totalQuestions) * 100;
-                progressFill.style.width = `${percentage}%`;
-            }
-        }
-
-        const optionsContainer = document.getElementById('options-container');
-        const flagDisplayQuiz = document.getElementById('flag-display-quiz');
-        
-        optionsContainer.className = `grid gap-4 grid-cols-2 ${settings.difficulty > 4 ? 'lg:grid-cols-3' : ''}`;
-        optionsContainer.innerHTML = '';
-        flagDisplayQuiz.innerHTML = '';
-
-        if (currentQuiz.mode === 'combo') {
-            loadComboQuestion();
-            return;
-        }
-        
-        const questionPool = [...currentQuiz.dataset];
-        if (questionPool.length === 0) { endQuiz(); return; }
-        const shuffledPool = questionPool.sort(() => 0.5 - Math.random());
-
-        if (currentQuiz.mode === 'capitalGuess') {
-            generateCapitalQuestion(shuffledPool);
+    // Logika Progress Bar
+    const progressWrapper = document.getElementById('quiz-progress-wrapper');
+    const progressFill = document.getElementById('quiz-progress-fill');
+    
+    if (progressWrapper && progressFill) {
+        if (currentQuiz.totalQuestions === Infinity) {
+            progressWrapper.style.display = 'none';
         } else {
-            generateFlagQuestion(shuffledPool, currentQuiz.mode === 'yearGuess');
+            progressWrapper.style.display = 'block';
+            const percentage = (currentQuiz.questionNumber / currentQuiz.totalQuestions) * 100;
+            progressFill.style.width = `${percentage}%`;
         }
     }
+
+    const optionsContainer = document.getElementById('options-container');
+    const flagDisplayQuiz = document.getElementById('flag-display-quiz');
     
+    optionsContainer.className = `grid gap-4 grid-cols-2 ${settings.difficulty > 4 ? 'lg:grid-cols-3' : ''}`;
+    optionsContainer.innerHTML = '';
+    flagDisplayQuiz.innerHTML = '';
+
+    if (currentQuiz.mode === 'combo') {
+        loadComboQuestion();
+        return;
+    }
+    
+    // AMBIL SATU SOAL DAN HAPUS DARI DATASET (Mencegah Duplikat)
+    const nextQuestion = currentQuiz.dataset.shift();
+
+    if (currentQuiz.mode === 'capitalGuess') {
+        generateCapitalQuestion(nextQuestion);
+    } else {
+        generateFlagQuestion(nextQuestion, currentQuiz.mode === 'yearGuess');
+    }
+}
+
     function loadComboQuestion() {
 
         const questionTypes = ['flag', 'capital', 'year'];
@@ -1815,179 +1781,131 @@ function initApp() {
 
     }
 
+    function generateCapitalQuestion(targetData) {
+    const quizPromptEl = document.getElementById('quiz-prompt');
+    const flagDisplayQuiz = document.getElementById('flag-display-quiz');
+    const optionsContainer = document.getElementById('options-container');
 
-
-    function generateCapitalQuestion(pool) {
-
-        const quizPromptEl = document.getElementById('quiz-prompt');
-
-        const flagDisplayQuiz = document.getElementById('flag-display-quiz');
-
-        const optionsContainer = document.getElementById('options-container');
-
-
-
-        currentQuiz.correctAnswer = pool.shift();
-
-        quizPromptEl.dataset.translateKey = 'quizPromptGuessCapital';
-
-        quizPromptEl.dataset.countryName = currentQuiz.correctAnswer.name;
-
-        quizPromptEl.textContent = translations[settings.language].quizPromptGuessCapital.replace('{countryName}', currentQuiz.correctAnswer.name);
-
-        flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag of ${currentQuiz.correctAnswer.name}" class="flag-img mx-auto" loading="lazy" />`;
-
-        
-
-        let options = [currentQuiz.correctAnswer.capital];
-
-        const distractorCapitals = capitalGuessData.filter(c => c.capital !== currentQuiz.correctAnswer.capital).map(c => c.capital).sort(() => 0.5 - Math.random());
-
-        while(options.length < settings.difficulty && distractorCapitals.length > 0) options.push(distractorCapitals.shift());
-
-        
-
-        options.sort(() => 0.5 - Math.random()).forEach(capitalName => {
-
-            const button = document.createElement('button');
-
-            button.textContent = capitalName;
-
-            button.className = 'option-btn btn w-full btn-secondary py-3 px-4';
-
-            button.onclick = () => checkAnswer(capitalName);
-
-            optionsContainer.appendChild(button);
-
-        });
-
-    }
-
-
-
-    function generateFlagQuestion(pool, isYear = false) {
-
-        const quizPromptEl = document.getElementById('quiz-prompt');
-
-        const flagDisplayQuiz = document.getElementById('flag-display-quiz');
-
-        const optionsContainer = document.getElementById('options-container');
-
-        const answerKey = isYear ? 'years' : 'name';
-
-        
-
-        currentQuiz.correctAnswer = pool.shift();
-
-        quizPromptEl.dataset.translateKey = isYear ? 'quizPromptYear' : 'quizPromptFlag';
-
-        quizPromptEl.textContent = translations[settings.language][quizPromptEl.dataset.translateKey];
-
-        flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag of ${currentQuiz.correctAnswer.name}" class="flag-img mx-auto" loading="lazy" />`;
-
-        
-
-        let options = [currentQuiz.correctAnswer];
-
-        const distractorPool = pool.filter(item => item.name !== currentQuiz.correctAnswer.name);
-
-        while (options.length < settings.difficulty && distractorPool.length > 0) {
-
-            options.push(distractorPool.shift());
-
-        }
-
-
-
-        options = options.filter(opt => opt && opt[answerKey]);
-
-
-
-        options.sort(() => 0.5 - Math.random()).forEach(option => {
-
-            const button = document.createElement('button');
-
-            button.textContent = option[answerKey] || "????";
-
-            button.className = 'option-btn btn w-full btn-secondary py-3 px-4';
-
-            button.onclick = () => checkAnswer(option);
-
-            optionsContainer.appendChild(button);
-
-        });
-
-    }
-
+    currentQuiz.correctAnswer = targetData;
     
-
-    function endQuiz() {
-
-    clearInterval(currentQuiz.timerId);
-
-    addToTotalScore(currentQuiz.score);
-
+    quizPromptEl.dataset.translateKey = 'quizPromptGuessCapital';
+    quizPromptEl.dataset.countryName = currentQuiz.correctAnswer.name;
+    quizPromptEl.textContent = translations[settings.language].quizPromptGuessCapital.replace('{countryName}', currentQuiz.correctAnswer.name);
     
-
-    // Update UI Score
-
-    document.getElementById('final-score').textContent = currentQuiz.score;
-
-    const resultsMessageEl = document.getElementById('results-message');
-
+    flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag" class="flag-img mx-auto" loading="lazy" />`;
     
+    let options = [currentQuiz.correctAnswer.capital];
+    
+    // Ambil pengecoh (distractor) dari data global agar tidak mengganggu antrean kuis
+    const distractorCapitals = officialCountries
+        .filter(c => c.capital && c.capital !== currentQuiz.correctAnswer.capital)
+        .map(c => c.capital)
+        .sort(() => 0.5 - Math.random());
 
-    // Logika Pesan
-
-    let msgText = "";
-
-    if ((currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') && currentQuiz.lives <= 0) {
-
-        const key = currentQuiz.mode === 'combo' ? 'comboResultMessage' : 'survivalResultMessage';
-
-        msgText = translations[settings.language][key]
-
-            .replace('{questions}', currentQuiz.questionNumber - 1)
-
-            .replace('{score}', currentQuiz.score);
-
-    } else {
-
-        msgText = translations[settings.language].resultsMessage.replace('{score}', currentQuiz.score);
-
+    while(options.length < settings.difficulty && distractorCapitals.length > 0) {
+        options.push(distractorCapitals.shift());
     }
-
-    resultsMessageEl.textContent = msgText;
-
-
-
-    // --- KODE BARU: SIMPAN DATA HASIL AGAR TAHAN REFRESH ---
-
-    const resultData = {
-
-        score: currentQuiz.score,
-
-        msg: msgText,
-
-        lastMode: currentQuiz.lastMode,       // Penting agar tombol "Play Again" jalan
-
-        lastSubMode: currentQuiz.lastSubMode  // Penting agar tombol "Play Again" jalan
-
-    };
-
-    localStorage.setItem('lastQuizResult', JSON.stringify(resultData));
-
-    // -------------------------------------------------------
-
-
-
-    document.getElementById('play-again-btn').onclick = () => startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode);
-
-    showScreen('results-screen');
-
+    
+    options.sort(() => 0.5 - Math.random()).forEach(capitalName => {
+        const button = document.createElement('button');
+        button.textContent = capitalName;
+        button.className = 'option-btn btn w-full btn-secondary py-3 px-4';
+        button.onclick = () => checkAnswer(capitalName);
+        optionsContainer.appendChild(button);
+    });
 }
 
+function generateFlagQuestion(targetData, isYear = false) {
+    const quizPromptEl = document.getElementById('quiz-prompt');
+    const flagDisplayQuiz = document.getElementById('flag-display-quiz');
+    const optionsContainer = document.getElementById('options-container');
+    const answerKey = isYear ? 'years' : 'name';
+    
+    currentQuiz.correctAnswer = targetData;
 
+    quizPromptEl.dataset.translateKey = isYear ? 'quizPromptYear' : 'quizPromptFlag';
+    quizPromptEl.textContent = translations[settings.language][quizPromptEl.dataset.translateKey];
+    
+    flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag" class="flag-img mx-auto" loading="lazy" />`;
+    
+    let options = [currentQuiz.correctAnswer];
+    
+    // Tentukan kolam pengecoh berdasarkan mode
+    const globalPool = isYear ? historicalFlags : officialCountries;
+    const distractorPool = globalPool
+        .filter(item => item.name !== currentQuiz.correctAnswer.name)
+        .sort(() => 0.5 - Math.random());
+
+    while (options.length < settings.difficulty && distractorPool.length > 0) {
+        options.push(distractorPool.shift());
+    }
+
+    options = options.filter(opt => opt && opt[answerKey]);
+
+    options.sort(() => 0.5 - Math.random()).forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option[answerKey] || "????";
+        button.className = 'option-btn btn w-full btn-secondary py-3 px-4';
+        button.onclick = () => checkAnswer(option);
+        optionsContainer.appendChild(button);
+    });
+}
+
+        function endQuiz() {
+        clearInterval(currentQuiz.timerId);
+        
+        // 1. CEK LEVEL LAMA SEBELUM SKOR DITAMBAHKAN
+        const oldTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+        const oldLevel = calculateLevel(oldTotalXP);
+        
+        // 2. TAMBAH SKOR KE DATABASE & LOKAL
+        addToTotalScore(currentQuiz.score);
+        
+        // 3. CEK LEVEL BARU
+        const newTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+        const newLevel = calculateLevel(newTotalXP);
+        
+        // Update UI Score
+        document.getElementById('final-score').textContent = currentQuiz.score;
+        const resultsMessageEl = document.getElementById('results-message');
+        
+        // Logika Pesan
+        let msgText = "";
+        if ((currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') && currentQuiz.lives <= 0) {
+            const key = currentQuiz.mode === 'combo' ? 'comboResultMessage' : 'survivalResultMessage';
+            msgText = translations[settings.language][key]
+                .replace('{questions}', currentQuiz.questionNumber - 1)
+                .replace('{score}', currentQuiz.score);
+        } else {
+            msgText = translations[settings.language].resultsMessage.replace('{score}', currentQuiz.score);
+        }
+        resultsMessageEl.textContent = msgText;
+
+        const resultData = {
+            score: currentQuiz.score,
+            msg: msgText,
+            lastMode: currentQuiz.lastMode,       
+            lastSubMode: currentQuiz.lastSubMode  
+        };
+        localStorage.setItem('lastQuizResult', JSON.stringify(resultData));
+
+        document.getElementById('play-again-btn').onclick = () => startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode);
+        
+        // Pindah ke layar hasil
+        showScreen('results-screen');
+        
+        // 4. LOGIKA MODAL LEVEL UP (Muncul JIKA Level Naik & Dapat Skor)
+        if (newLevel > oldLevel && currentQuiz.score > 0) {
+            // Beri sedikit jeda agar pemain melihat hasil skornya dulu baru kaget disuguhi modal
+            setTimeout(() => {
+                const levelModal = document.getElementById('level-up-modal');
+                document.getElementById('new-level-display').textContent = `Lv. ${newLevel}`;
+                if (levelModal) levelModal.classList.add('active');
+                
+                // Opsional: Kalau kamu punya sfx Level Up, bisa di-play di sini!
+            }, 600); // Muncul 0.6 detik setelah layar hasil terbuka
+        }
+    }
 
     function showLibrary(category, subCategory = null) {
     // 0. SIMPAN state library
@@ -2132,19 +2050,18 @@ function initApp() {
         // Relative & overflow-hidden wajib agar badge Proposed/Recon rapi di pojok
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
         card.dataset.name = item.name.toLowerCase();
-        
-        card.innerHTML = `
-            ${badgeHTML}
-            <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
-                <img 
-                    src="${item.flag}" 
-                    alt="${item.name} flag" 
-                    class="flag-img w-full h-full object-cover opacity-0 transition-opacity duration-300" 
-                    loading="lazy" 
-                    decoding="async"
-                    onload="this.classList.remove('opacity-0')"
-                />
-            </div>
+               
+// Tambahkan onerror dan hapus opacity-0 agar lebih pasti
+card.innerHTML = `
+    ${badgeHTML}
+    <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
+        <img src="${item.flag}" 
+             alt="${item.name} flag" 
+             class="flag-img w-full h-full object-cover transition-opacity duration-300" 
+             loading="lazy" 
+             onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Link+Mati'; this.style.opacity=1;"
+             onload="this.style.opacity=1" />
+    </div>
             <div class="flex-grow flex flex-col justify-center py-1 w-full">
                  <div class="flex flex-col w-full px-1">
                     <p class="font-semibold text-[13px] leading-tight break-words line-clamp-2">
@@ -2193,15 +2110,42 @@ function initApp() {
         const correctButton = Array.from(document.getElementById('options-container').children).find(b => b.textContent == correctId); 
         const flagImg = document.querySelector("#flag-display-quiz img");
 
-            if (selectedId === correctId) { 
-        // --- JAWABAN BENAR ---        
-        sfxCorrect.play(); 
-        
-        currentQuiz.score += 10; // <--- UBAH DARI currentQuiz.score++ MENJADI += 10
-        document.getElementById('score').textContent = currentQuiz.score; 
-        if(selectedButton) selectedButton.classList.add('correct'); 
-        if(flagImg) flagImg.classList.add('correct-flag');
-          
+                            if (selectedId === correctId) { 
+            // --- JAWABAN BENAR ---        
+            sfxCorrect.play(); 
+            
+            // Menentukan XP berdasarkan mode
+            let xpReward = 10; // Default
+            switch (currentQuiz.mode) {
+                case 'classic':                     
+                case 'continent': 
+                    xpReward = 5; 
+                    break;
+                case 'capitalGuess': 
+                    xpReward = 10; 
+                    break;
+                case 'yearGuess':                    
+                case 'timeAttack': 
+                    xpReward = 25; 
+                    break;
+                case 'survival': 
+                    xpReward = 35; 
+                    break;
+                case 'combo': 
+                    xpReward = 50; 
+                    break;
+            }
+            
+            currentQuiz.score += xpReward; 
+            document.getElementById('score').textContent = currentQuiz.score; 
+            
+            if(selectedButton) {
+                selectedButton.classList.add('correct'); 
+                // PANGGIL ANIMASI XP DI SINI!
+                showFloatingXP(xpReward, selectedButton);
+            }
+            if(flagImg) flagImg.classList.add('correct-flag');
+                   
     } else { 
         // --- JAWABAN SALAH ---
         if ("vibrate" in navigator) navigator.vibrate(100); // Haptic peringatan
@@ -2505,7 +2449,25 @@ async function getFlagDetail(itemName, flagUrl) {
 
     }
 
-    
+        function showFloatingXP(amount, targetElement) {
+        const xpPopup = document.createElement('div');
+        xpPopup.className = 'xp-floating-text';
+        xpPopup.textContent = `+${amount} XP`;
+        
+        // Ambil posisi tombol yang ditekan agar XP muncul tepat di atasnya
+        const rect = targetElement.getBoundingClientRect();
+        
+        // Set posisi popup di tengah atas tombol
+        xpPopup.style.left = `${rect.left + (rect.width / 2)}px`;
+        xpPopup.style.top = `${rect.top}px`;
+        
+        document.body.appendChild(xpPopup);
+        
+        // Hapus elemen dari DOM setelah animasi selesai (1 detik)
+        setTimeout(() => {
+            xpPopup.remove();
+        }, 1000);
+    }   
 
     // Register Service Worker untuk Caching
 

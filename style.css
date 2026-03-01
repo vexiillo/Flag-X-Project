@@ -213,6 +213,7 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 9999px;
     border: 1px solid var(--card-border-color);
+    color: var(--text-color) !important;
 }
 
 .text-subtle { color: var(--subtle-text-color); }
@@ -232,6 +233,44 @@ body {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* Container utama tetap 2 kolom */
+#options-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Tetap 2 menyamping */
+    gap: 12px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Tombol Opsi yang bisa nambah tinggi kalau teks panjang */
+#options-container button {
+    width: 100%;
+    min-height: 70px; /* Tinggi minimal supaya rapi */
+    height: auto !important; /* KUNCI: Biar tinggi ngikutin teks */
+    padding: 10px 8px;
+    
+    /* Agar teks turun ke bawah kalau panjang */
+    white-space: normal !important; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    /* Layout teks di dalam tombol */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    font-size: 0.9rem; /* Sedikit dikecilkan agar aman di mobile */
+}
+
+/* Khusus untuk teks yang benar-benar panjang (seperti Sri Jayawardenepura Kotte) */
+@media (max-width: 480px) {
+    #options-container button {
+        font-size: 0.8rem; /* Lebih kecil sedikit di HP kecil */
+        padding: 8px 4px;
+    }
 }
 
 /* Quiz Answer Buttons */
@@ -661,4 +700,74 @@ body::before {
     background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
     color: #ffffff;
     border-bottom-left-radius: 8px;
+}
+
+/* --- FLOATING XP ANIMATION --- */
+.xp-floating-text {
+    position: fixed;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--success-color);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    pointer-events: none; /* Supaya tidak menghalangi klik */
+    z-index: 1000;
+    animation: floatUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.dark .xp-floating-text {
+    filter: drop-shadow(0 0 8px var(--success-color));
+}
+
+@keyframes floatUp {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -60px) scale(1); opacity: 0; }
+}
+
+/* Menyamakan warna LEVEL UP dengan gradien tombol AWESOME! */
+#level-up-text {
+    background-image: linear-gradient(90deg, var(--primary-color) 0%, #EC41B1 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+/* ============================================================
+   SCROLL TO TOP BUTTON
+   ============================================================ */
+#scroll-to-top-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%; /* Membuatnya bulat */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    z-index: 999; /* Memastikan selalu berada di atas elemen lain */
+    
+    /* State awal: Tersembunyi di bawah */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.4);
+}
+
+/* State saat muncul */
+#scroll-to-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Sedikit penyesuaian di layar HP agar tidak menabrak pinggiran */
+@media (max-width: 480px) {
+    #scroll-to-top-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 3rem;
+        height: 3rem;
+    }
 }
