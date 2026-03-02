@@ -407,12 +407,12 @@ body {
 
 /* Pengaturan Posisi */
 #settings-panel { 
-    top: 80px; 
+    top: 95px; 
     right: 20px; 
 }
 
 #profile-panel { 
-    top: 80px; 
+    top: 95px; 
     left: 20px; 
 } 
 
@@ -488,6 +488,12 @@ body {
         transform: translate(-50%, -50%);
     }
 }
+
+@media (min-width: 1024px) {
+    #settings-panel, 
+    #profile-panel { 
+        top: 100px; /* Gap lebih lega untuk layar besar */
+    }  
 
 /* Utility tambahan agar konten utama (Quiz/Library) tetap di tengah */
 /* Update agar konten mulai dari atas, tapi tetap tengah secara horizontal */
