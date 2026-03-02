@@ -337,20 +337,15 @@ function loadTheme() {
     // Fungsi untuk menutup semua panel
 
     function closeAllPanels() {
-
     const sPanel = document.getElementById('settings-panel');
-
     const pPanel = document.getElementById('profile-panel');
-
-    const dPanel = document.getElementById('disclaimer-panel'); // Tambahkan baris ini
-
+    const dPanel = document.getElementById('disclaimer-panel');
+    
     if (sPanel) sPanel.classList.remove('active');
-
     if (pPanel) pPanel.classList.remove('active');
-
-    if (dPanel) dPanel.classList.remove('active'); // Tambahkan baris ini
-
+    if (dPanel) dPanel.classList.remove('active');   
 }
+
 
      // --- EVENT LISTENERS (YANG SUDAH DIPERBAIKI) ---
 
@@ -381,8 +376,6 @@ if (profileBtn) {
     });
 
 }
-
-
 
     // 2. Logika Tombol Settings
 
@@ -433,8 +426,6 @@ if (infoBtn) {
 }
 
 // --------------------------
-
-
 
            // 3. Logika Tombol Leaderboard (VERSI BARU)
 
@@ -836,8 +827,6 @@ const handleLogin = async (e) => {
     }
 
 };
-
-
 
     // 2. Handle Logout
 
@@ -1510,8 +1499,6 @@ document.addEventListener('click', (e) => {
 
 }); // HANYA SATU PENUTUP DI SINI
 
-
-
     document.querySelectorAll('input[name="language"]').forEach(r => r.addEventListener('change', (e) => setLanguage(e.target.value)));
 
     document.querySelectorAll('input[name="difficulty"]').forEach(r => r.addEventListener('change', (e) => {
@@ -2086,14 +2073,17 @@ card.innerHTML = `
                 </div>
             </div>
             <div class="flex flex-col gap-1 mt-2 w-full">
-                <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md" 
-                        onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
-                    📖 <span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
-                </button>
-                <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md" 
-                        onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
-                    ✨ <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
-                </button>
+            <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md flex items-center justify-center" 
+        onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
+    <i class="fa-solid fa-book-open mr-1"></i> 
+    <span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
+</button>
+
+<button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md flex items-center justify-center" 
+        onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
+    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 
+    <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
+</button>
             </div>`;
         
         fragment.appendChild(card); });
@@ -2258,7 +2248,6 @@ card.innerHTML = `
                        : "Fun Fact";
 
 
-
      if (modalTitle) {
 
         // HAPUS emoji '✨' di sini, karena kita sudah pakai ikon besar di HTML.
@@ -2268,7 +2257,6 @@ card.innerHTML = `
         modalTitle.textContent = `${titleLabel}: ${itemName}`;
 
     }
-
 
 
     try {
@@ -2425,6 +2413,85 @@ async function getFlagDetail(itemName, flagUrl) {
         document.getElementById('detail-language').textContent = data.language || 'N/A';
         document.getElementById('detail-vexillology').textContent = data.vexillology || 'No specific vexillology info provided.';
     }
+    
+    // --- PERBAIKAN FUNGSI INIT FOTD ---
+
+function initFlagOfTheDay() {
+    const allFlags = [
+        ...(typeof officialCountries !== 'undefined' ? officialCountries : []),
+        ...(typeof subdivisions !== 'undefined' ? subdivisions : []),
+        ...(typeof territories !== 'undefined' ? territories : []),
+        ...(typeof unofficial !== 'undefined' ? unofficial : []),
+        ...(typeof historicalFlags !== 'undefined' ? historicalFlags : []),
+        ...(typeof worldOrganizations !== 'undefined' ? worldOrganizations : [])
+    ];
+
+    if (allFlags.length === 0) {
+        console.error("FOTD: Data bendera tidak ditemukan!");
+        return;
+    }
+
+    const today = new Date();
+    const dateSeed = today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString();
+    
+    let hash = 0;
+    for (let i = 0; i < dateSeed.length; i++) {
+        hash = ((hash << 5) - hash) + dateSeed.charCodeAt(i);
+        hash |= 0;
+    }
+    
+    const index = Math.abs(hash) % allFlags.length;
+    const dailyFlag = allFlags[index];
+
+    const imgEl = document.getElementById('fotd-img');
+    const nameEl = document.getElementById('fotd-name');
+    const btnEl = document.getElementById('fotd-fun-fact-btn');
+    const containerEl = document.getElementById('fotd-container');
+
+    if (dailyFlag) {
+        // UPDATE TEKS (Agar tidak "Loading..." lagi)
+        if (nameEl) nameEl.textContent = dailyFlag.name;
+
+        // UPDATE GAMBAR
+        if (imgEl) {
+            imgEl.style.opacity = '0';
+            if (containerEl) containerEl.classList.add('animate-pulse');
+            
+            // PERBAIKAN: Gunakan .image jika .flag tidak muncul
+            // Coba dailyFlag.image atau dailyFlag.flag sesuai isi flagsData.js Anda
+            imgEl.src = dailyFlag.image || dailyFlag.flag; 
+            
+            imgEl.onload = () => {
+                imgEl.style.opacity = '1';
+                if (containerEl) containerEl.classList.remove('animate-pulse');
+            };
+
+            // Tambahkan handling jika gambar gagal muat
+            imgEl.onerror = () => {
+                console.error("Gagal memuat gambar bendera FOTD");
+                if (containerEl) containerEl.classList.remove('animate-pulse');
+            };
+        }
+
+        // UPDATE TOMBOL
+        if (btnEl) {
+            btnEl.onclick = (e) => {
+                e.preventDefault();
+                // Pastikan window.getFunFact sudah didaftarkan
+                if (typeof window.getFunFact === 'function') {
+                    window.getFunFact(dailyFlag.name);
+                } else {
+                    console.error("Fungsi getFunFact tidak ditemukan di window.");
+                }
+            };
+        }
+    }
+}
+
+// WAJIB: Panggil fungsi ini agar jalan saat halaman dibuka!
+document.addEventListener('DOMContentLoaded', () => {
+    initFlagOfTheDay();
+});
 
         // --- UTILITY FUNCTIONS (PINDAHKAN KE SINI) ---
 

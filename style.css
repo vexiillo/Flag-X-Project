@@ -1,10 +1,10 @@
 :root {
-  /* --- Dark Mode (Jeton-Inspired Violet/Magenta) --- */
-  /* Latar belakang lebih gelap dan keunguan, seperti Jeton */
+  /* --- Dark Mode --- */
+  /* Latar belakang lebih gelap dan keunguan */
   --bg-color-dark: #100C1F;
   --bg-color-light: #19152C;
   
-  /* Warna primer "Jeton Violet" yang khas */
+  /* Warna primer yang khas */
   --primary-color: #7B47F5;
   --primary-color-rgb: 123, 71, 245;
   --primary-hover-color: #8F64F8;
@@ -59,7 +59,7 @@ html, body {
 
 body {
   font-family: 'Poppins', sans-serif;
-  /* Pola radial yang terinspirasi Jeton, fokus pada violet dan pink/magenta */
+  /* Pola radial yang berfokus pada violet dan pink/magenta */
   background-image: 
     radial-gradient(at 15% 15%, hsla(258, 88%, 60%, 0.15) 0px, transparent 50%),
     radial-gradient(at 80% 20%, hsla(320, 78%, 55%, 0.1) 0px, transparent 50%),
@@ -79,7 +79,7 @@ body {
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
     border: 1px solid var(--card-border-color);
-    /* Menambah 'glow' yang konsisten seperti Jeton */
+    /* Menambah 'glow' yang konsisten */
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--primary-color-rgb), 0.1);
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;   
 }
@@ -99,9 +99,9 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Tombol Utama dengan Gradient ala Jeton --- */
+/* --- Tombol Utama dengan Gradient --- */
 .btn-primary { 
-    /* Menggunakan gradient seperti Jeton (Violet ke Magenta/Pink) */
+    /* Menggunakan gradient (Violet ke Magenta/Pink) */
     background-image: linear-gradient(90deg, var(--primary-color) 0%, #EC41B1 100%); 
     color: white;
     background-size: 200% 100%;
@@ -820,7 +820,7 @@ body:not(.nav-hidden) #scroll-to-top-btn {
     left: 0;
     right: 0;
     height: 70px;
-    background: var(--secondary-color); /* Warna Jeton Dark dengan transparansi */
+    background: var(--secondary-color); /* Warna Dark dengan transparansi */
     background-color: rgba(var(--secondary-color-rgb), 0.85); 
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -883,4 +883,72 @@ footer {
     padding: 20px 0;
     text-align: center;
     /* Footer akan duduk tepat di atas padding-bottom #app-container */
+}
+
+/* Container utama FOTD */
+#fotd-container {  
+    height: auto;    
+    max-height: 130px;
+    min-height: 110px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--card-border-color);
+    background-color: var(--card-bg-color);
+    color: var(--text-color) !important;
+}
+
+/* Memastikan teks tidak meluap jika nama negara terlalu panjang */
+#fotd-name {
+    display: block;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#fotd-img {
+	opacity: 1;
+	transition: opacity 0.4s ease-in-out;
+	}
+
+/* --- KHUSUS TOMBOL FUN FACT DI FOTD --- */
+#fotd-fun-fact-btn {  
+  background: linear-gradient(270deg, var(--primary-color), #d53f8c, var(--primary-hover-color));
+  background-size: 400% 400%;
+  animation: gradientShiftFOTD 15s ease infinite;
+  color: #fff;
+}
+
+/* Hover Effect */
+#fotd-fun-fact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(var(--primary-color-rgb), 0.6);  
+}
+
+/* Active Effect (Saat Ditekan) */
+#fotd-fun-fact-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Keyframes Khusus FOTD agar tidak bentrok */
+@keyframes gradientShiftFOTD {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Pastikan teks di dalam span tetap putih */
+#fotd-fun-fact-btn span {
+  color: #fff !important;
+}
+
+/* Penyesuaian untuk layar sangat kecil (iPhone SE, dll) */
+@media (max-height: 660px) {
+    #fotd-container {
+        height: 15vh;
+        padding: 10px 20px;
+    }
+    #fotd-img { max-height: 50px; }
+    .text-[9px] { font-size: 8px; }
+    #fotd-name { font-size: 12px; }
 }
