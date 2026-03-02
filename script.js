@@ -433,7 +433,7 @@ if (infoBtn) {
     if (scrollToTopBtn) {
         // Deteksi scroll: Munculkan tombol jika layar di-scroll lebih dari 300px
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
+            if (window.scrollY > 100) {
                 scrollToTopBtn.classList.add('show');
             } else {
                 scrollToTopBtn.classList.remove('show');
@@ -1749,36 +1749,24 @@ function initApp() {
     }
 }
 
-    function loadComboQuestion() {
-
+        function loadComboQuestion() {
         const questionTypes = ['flag', 'capital', 'year'];
-
         const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
 
-
-
         switch(randomType) {
-
             case 'capital':
-
-                generateCapitalQuestion([...capitalGuessData].sort(() => 0.5 - Math.random()));
-
+                // Tambahkan [0] untuk mengambil satu negara saja
+                generateCapitalQuestion([...capitalGuessData].sort(() => 0.5 - Math.random())[0]);
                 break;
-
             case 'year':
-
-                generateFlagQuestion([...historicalFlags].sort(() => 0.5 - Math.random()), true);
-
+                // Tambahkan [0] untuk mengambil satu bendera sejarah saja
+                generateFlagQuestion([...historicalFlags].sort(() => 0.5 - Math.random())[0], true);
                 break;
-
             default:
-
-                generateFlagQuestion([...masterFlagPool].sort(() => 0.5 - Math.random()));
-
+                // Tambahkan [0] untuk mengambil satu bendera acak saja
+                generateFlagQuestion([...masterFlagPool].sort(() => 0.5 - Math.random())[0]);
                 break;
-
         }
-
     }
 
     function generateCapitalQuestion(targetData) {
