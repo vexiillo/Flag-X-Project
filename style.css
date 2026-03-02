@@ -50,6 +50,13 @@ html.light {
   --error-color-rgb: 239, 68, 69;
 }
 
+/* 1. Pastikan html dan body mengambil tinggi penuh tanpa overflow */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   /* Pola radial yang terinspirasi Jeton, fokus pada violet dan pink/magenta */
@@ -63,6 +70,7 @@ body {
   background-attachment: fixed;
   transition: color 0.3s ease, background 0.5s ease;
   min-height: 100dvh;
+  padding-bottom: 80px; /* Sesuaikan dengan tinggi nav + jarak aman */
 }
 
 /* --- Core Component Styling --- */
@@ -490,7 +498,12 @@ main {
     flex-direction: column;
     align-items: center;
     flex-grow: 1;    
+    flex: 1 0 auto; /* Ini akan memaksa footer tetap di bawah meski konten sedikit */
     padding: 0 20px; /* Memberi sedikit jarak di pinggir agar tidak menempel sekali */
+}
+
+main > section:last-child {
+    margin-bottom: 0;
 }
 
 /* Ganti slideDownCenter kamu dengan ini */
@@ -736,8 +749,8 @@ body::before {
    ============================================================ */
 #scroll-to-top-btn {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 20px;
+    right: 20px;
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 50%; /* Membuatnya bulat */
@@ -762,6 +775,34 @@ body::before {
     transform: translateY(0) scale(1);
 }
 
+/* Efek Hover */
+#scroll-to-top-btn:hover {
+    background: var(--primary-hover-color);
+    transform: translateY(-5px) scale(1.05);
+}
+
+/* Hilangkan ruang tersebut jika nav sedang disembunyikan */
+body.nav-hidden {
+    padding-bottom: 0;
+}
+body.nav-hidden #app-container {
+    padding-bottom: 0; /* Footer akan langsung mentok ke bawah */
+}
+
+/* KETIKA NAVIGASI MUNCUL (Bukan di Home/Quiz) */
+/* Kita gunakan selector body:not(.nav-hidden) */
+body:not(.nav-hidden) #scroll-to-top-btn {
+    bottom: 90px; /* Naik ke atas navigasi (70px tinggi nav + 20px jarak) */
+}
+
+/* Responsif untuk Mobile agar tidak terlalu mepet pinggir */
+@media (max-width: 640px) {
+    body:not(.nav-hidden) #scroll-to-top-btn {
+        bottom: 85px; 
+        right: 15px;
+    }
+}
+
 /* Sedikit penyesuaian di layar HP agar tidak menabrak pinggiran */
 @media (max-width: 480px) {
     #scroll-to-top-btn {
@@ -770,4 +811,76 @@ body::before {
         width: 3rem;
         height: 3rem;
     }
+}
+
+/* --- Bottom Navigation Styling --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--secondary-color); /* Warna Jeton Dark dengan transparansi */
+    background-color: rgba(var(--secondary-color-rgb), 0.85); 
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--card-border-color);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom); /* Dukungan iPhone berponi */
+    transition: all 0.3s ease; /* Transisi smooth saat ganti tema */
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--subtle-text-color);
+    background: none;
+    border: none;
+    font-size: 0.7rem;
+    gap: 4px;
+    transition: all 0.3s ease;
+    flex: 1;
+    cursor: pointer;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+}
+
+/* State Aktif (Ikon Terang) */
+.nav-item.active {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    font-weight: bold;
+}
+
+.nav-item.active i {
+    filter: drop-shadow(0 0 8px rgba(var(--primary-color-rgb), 0.6));
+}
+
+/* SOLUSI FOOTER: Berikan padding agar konten/footer tidak tertutup nav bar */
+#app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Gunakan 100dvh untuk mobile agar akurat dengan bar browser */
+    min-height: 100dvh; 
+    position: relative;
+    
+    /* Ruang untuk navigasi bawah (70px tinggi nav + 10px jarak) */
+    padding-bottom: 80px; 
+    transition: padding-bottom 0.3s ease;
+    box-sizing: border-box;
+}
+
+footer {
+    flex-shrink: 0; /* Mencegah footer terkompresi */
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    /* Footer akan duduk tepat di atas padding-bottom #app-container */
 }

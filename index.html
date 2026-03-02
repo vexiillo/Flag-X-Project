@@ -456,6 +456,25 @@
         <i class="fa-solid fa-arrow-up"></i>
     </button>
     
+    <nav class="bottom-nav">
+    <button onclick="showScreen('home-screen')" class="nav-item active" id="nav-home">
+        <i class="fa-solid fa-house"></i>
+        <span data-translate-key="navHome">Home</span>
+    </button>
+    <button onclick="showScreen('quiz-modes-screen')" class="nav-item" id="nav-quiz">
+        <i class="fa-solid fa-play"></i>
+        <span data-translate-key="navPlay">Play</span>
+    </button>
+    <button onclick="showScreen('library-categories-screen')" class="nav-item" id="nav-library">
+        <i class="fa-solid fa-book-open"></i>
+        <span data-translate-key="navLibrary">Library</span>
+    </button>
+    <button onclick="showLeaderboard()" class="nav-item" id="nav-leaderboard">
+        <i class="fa-solid fa-trophy"></i>
+        <span data-translate-key="navLeaderboard">Rank</span>
+    </button>
+</nav>
+    
     <script type="module" src="script.js" defer></script>
 </body>
 </html>

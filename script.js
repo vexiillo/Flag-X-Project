@@ -84,26 +84,51 @@ sfxCorrect.volume = 1.0;
 
 // 2. TULIS FUNGSI showScreen DI LUAR / ATAS
 
+// Update fungsi showScreen yang sudah ada
 function showScreen(screenId) {
-
     const screens = document.querySelectorAll('.screen');
-
     screens.forEach(s => s.classList.remove('active'));
-
-    const target = document.getElementById(screenId);
-
-    if (target) {
-
-        target.classList.add('active');
-
-        window.scrollTo(0, 0);
-
-        // SIMPAN: Agar saat refresh/pindah mode desktop tidak balik ke menu utama
-
-        localStorage.setItem('lastActiveScreen', screenId);
-
-    }
     
+    const target = document.getElementById(screenId);
+    if (target) {
+        target.classList.add('active');
+        window.scrollTo(0, 0);
+        localStorage.setItem('lastActiveScreen', screenId);
+        
+         // --- LOGIKA SEMBUNYIKAN NAV ---
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            // Sembunyikan jika di Home atau saat sedang mengerjakan Kuis
+            if (screenId === 'home-screen' || screenId === 'quiz-screen') {
+                bottomNav.style.display = 'none';
+                document.body.classList.add('nav-hidden'); // Bantu CSS untuk tombol scroll
+            } else {
+                bottomNav.style.display = 'flex';
+                document.body.classList.remove('nav-hidden');
+            }
+        }
+       
+        // Panggil fungsi untuk update status ikon navigasi
+        updateNavActiveState(screenId);
+    }
+}
+
+// Fungsi tambahan untuk sinkronisasi ikon navigasi
+function updateNavActiveState(screenId) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+    if (screenId === 'home-screen') {
+        document.getElementById('nav-home')?.classList.add('active');
+    } else if (screenId === 'quiz-modes-screen') {
+        document.getElementById('nav-quiz')?.classList.add('active');
+    } 
+    // TAMBAHKAN INI: Supaya ikon library nyala saat di menu kategori maupun saat liat benderanya
+    else if (screenId === 'library-categories-screen' || screenId === 'library-screen') {
+        document.getElementById('nav-library')?.classList.add('active');
+    } 
+    else if (screenId === 'leaderboard-screen') {
+        document.getElementById('nav-leaderboard')?.classList.add('active');
+    }
 }
 
     // --- DATA PROCESSING ---
