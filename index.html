@@ -227,29 +227,14 @@
     <div id="home-screen" class="screen active w-full max-w-md text-center">
         <h1 class="text-5xl sm:text-6xl font-bold mb-2">Flag-X</h1>
         
-        <div class="flex items-center justify-center gap-2 mb-8">
+        <div class="flex items-center justify-center gap-2 mb-6">
             <p class="text-subtle text-lg" data-translate-key="homeSubtitle">Test Your Global Knowledge</p>
             <button id="info-btn" class="text-subtle hover:text-[var(--primary-color)] transition-colors focus:outline-none">
                 <i class="fa-solid fa-circle-info"></i>
             </button>
         </div>
 
-        <div class="space-y-4">
-            <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2">
-                <i class="fa-solid fa-play fa-fw"></i>
-                <span data-translate-key="homePlayQuiz">Play Quiz</span>
-            </button>
-            <button onclick="showScreen('library-categories-screen')" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
-                <i class="fa-solid fa-book fa-fw"></i>
-                <span data-translate-key="homeFlagLibrary">Flag Library</span>
-            </button>
-            <button id="open-leaderboard-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
-                <i class="fa-solid fa-trophy fa-fw text-yellow-400"></i>
-                <span data-translate-key="homeLeaderboard">Leaderboard</span>
-            </button>
-        </div>
-        
-        <div class="flex justify-center w-full my-2 px-4">
+<div class="flex justify-center w-full mb-8 px-4">
     <div id="fotd-container" class="relative flex items-center gap-4 px-6 py-4 bg-[var(--secondary-color)]/80 border border-white/20 rounded-[2rem] text-white w-full max-w-[400px] shadow-xl overflow-hidden">
         
         <div class="flex-1 flex justify-center items-center">
@@ -270,6 +255,21 @@
         </div>
     </div>
 </div>
+
+        <div class="space-y-4 px-4">
+            <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play fa-fw"></i>
+                <span data-translate-key="homePlayQuiz">Play Quiz</span>
+            </button>
+            <button onclick="showScreen('library-categories-screen')" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-book fa-fw"></i>
+                <span data-translate-key="homeFlagLibrary">Flag Library</span>
+            </button>
+            <button id="open-leaderboard-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trophy fa-fw text-yellow-400"></i>
+                <span data-translate-key="homeLeaderboard">Leaderboard</span>
+            </button>
+        </div>              
     </div>
 
             <div id="quiz-modes-screen" class="screen w-full max-w-lg text-center">
