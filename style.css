@@ -224,6 +224,19 @@ body {
     color: var(--text-color) !important;
 }
 
+/* Efek Hover untuk Total Score Container agar sama dengan Profile/Settings */
+#totalscore-container:hover {
+    background-color: var(--secondary-hover-color) !important; /* Warna abu-abu ungu khas tombol lain */
+    border-color: rgba(var(--primary-color-rgb), 0.4); /* Beri sedikit kilau ungu pada border saat dihover */
+    transition: all 0.3s ease;
+}
+
+/* Pastikan tidak ada pergerakan posisi (translate) saat di klik */
+#totalscore-container:active {
+    background-color: var(--secondary-color); /* Sedikit lebih gelap saat ditekan */
+    transform: none !important;
+}
+
 .text-subtle { color: var(--subtle-text-color); }
 
 /* Fun Fact Button (sudah bagus, hanya ganti warna) */
@@ -354,7 +367,7 @@ body {
 .modal {
     display: none;
     position: fixed;
-    z-index: 50;
+    z-index: 1050;
     left: 0;
     top: 0;
     width: 100%;
@@ -366,7 +379,18 @@ body {
 }
 .modal.active { display: flex; }
 .modal .card { animation: zoomIn 0.3s ease-out; }
-
+/* Tambahkan ini di bawah class modal untuk Custom Scrollbar */
+.modal-scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+.modal-scrollable-content::-webkit-scrollbar {
+    width: 4px;
+}
+.modal-scrollable-content::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
 @keyframes zoomIn {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -381,6 +405,7 @@ body {
 /* Properti Bersama (Sistem Kerja Panel) */
 #settings-panel, 
 #profile-panel, 
+#level-info-panel, 
 #disclaimer-panel { 
     display: none;
     position: fixed;
@@ -396,13 +421,9 @@ body {
 
 /* Ukuran Spesifik: Profile & Settings (Side Panels) */
 #settings-panel, 
-#profile-panel { 
+#profile-panel,
+#level-info-panel { 
     width: 320px; 
-}
-
-/* Ukuran Spesifik: Disclaimer (Center Modal) - Dibuat Lebih Lebar */
-#disclaimer-panel { 
-    width: 480px; /* Ukuran ditingkatkan dari 320px ke 480px */
 }
 
 /* Pengaturan Posisi */
@@ -411,7 +432,8 @@ body {
     right: 20px; 
 }
 
-#profile-panel { 
+#profile-panel,
+#level-info-panel { 
     top: 100px; 
     left: 20px; 
 } 
@@ -424,9 +446,23 @@ body {
 
 /* Aktivasi & Animasi */
 #settings-panel.active, 
-#profile-panel.active { 
+#profile-panel.active,
+#level-info-panel.active { 
     display: block; 
     animation: slideDown 0.3s ease-out;
+}
+
+/* Penyesuaian Konten di Dalam Panel Level Info */
+#level-info-panel h4 {
+    color: var(--text-color);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+#level-info-panel ul li {
+    border-bottom: 1px solid var(--card-border-color);
+    padding-bottom: 0.5rem;
+    color: var(--subtle-text-color);
 }
 
 #disclaimer-panel.active { 

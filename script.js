@@ -198,8 +198,8 @@ function updateNavActiveState(screenId) {
     const screens = document.querySelectorAll('.screen');
 
     const totalscoreValueEl = document.getElementById('totalscore-value');
-
-    const settingsPanel = document.getElementById('settings-panel');
+   
+const settingsPanel = document.getElementById('settings-panel');
 
     const endQuizModal = document.getElementById('end-quiz-modal');
 
@@ -337,15 +337,31 @@ function loadTheme() {
     // Fungsi untuk menutup semua panel
 
     function closeAllPanels() {
-    const sPanel = document.getElementById('settings-panel');
-    const pPanel = document.getElementById('profile-panel');
-    const dPanel = document.getElementById('disclaimer-panel');
-    
-    if (sPanel) sPanel.classList.remove('active');
-    if (pPanel) pPanel.classList.remove('active');
-    if (dPanel) dPanel.classList.remove('active');   
+    const panels = ['settings-panel', 'profile-panel', 'disclaimer-panel', 'level-info-panel'];
+    panels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
 }
 
+// --- LOGIKA UNTUK PANEL LEVEL INFO ---
+
+function openLevelInfo(e) {
+    if (e) e.stopPropagation(); 
+    
+    const levelPanel = document.getElementById('level-info-panel');
+    const isCurrentlyActive = levelPanel.classList.contains('active');
+    
+    closeAllPanels(); // Menutup panel lain
+    
+    // Jika sebelumnya tidak aktif, maka buka. Jika sudah aktif, biarkan tertutup oleh closeAllPanels
+    if (!isCurrentlyActive) {
+        levelPanel.classList.add('active');
+    }
+}
+
+// Pastikan didaftarkan agar bisa dipanggil dari HTML
+window.openLevelInfo = openLevelInfo;
 
      // --- EVENT LISTENERS (YANG SUDAH DIPERBAIKI) ---
 
@@ -353,56 +369,32 @@ function loadTheme() {
 
     // 1. Logika Tombol Profile
 
+// --- PERBAIKAN: Logika Tombol Profile ---
 if (profileBtn) {
-
     profileBtn.addEventListener('click', (e) => {
-
-        e.stopPropagation(); // Mencegah event "click outside" terpicu
-
-        
-
-        // Tutup settings dan disclaimer jika sedang terbuka
-
-        settingsPanel.classList.remove('active');
-
-        disclaimerPanel.classList.remove('active'); // <-- TAMBAHKAN BARIS INI
-
-        
-
-        // Toggle profile
-
-        profilePanel.classList.toggle('active');
-
+        e.stopPropagation();
+        const isActive = profilePanel.classList.contains('active');
+        closeAllPanels(); // Tutup semua dulu
+        if (!isActive) {
+            profilePanel.classList.add('active'); // Buka jika sebelumnya tutup
+        }
     });
-
 }
-
     // 2. Logika Tombol Settings
 
     const settingsBtn = document.getElementById('settings-btn');
 
+// --- PERBAIKAN: Logika Tombol Settings ---
 if (settingsBtn) {
-
     settingsBtn.addEventListener('click', (e) => {
-
         e.stopPropagation();
-
-        profilePanel.classList.remove('active');
-
-        // --- TAMBAHKAN INI ---
-
-        disclaimerPanel.classList.remove('active'); 
-
-        // ---------------------
-
-        settingsPanel.classList.toggle('active');
-
+        const isActive = settingsPanel.classList.contains('active');
+        closeAllPanels();
+        if (!isActive) {
+            settingsPanel.classList.add('active');
+        }
     });
-
 }
-
-
-
 // --- TAMBAHKAN BLOK INI ---
 
 if (infoBtn) {
@@ -1451,53 +1443,35 @@ if (auth) {
 
 
 
-        // Global Click (Close panels)
-
+        // --- SATU-SATUNYA GLOBAL CLICK LISTENER ---
 document.addEventListener('click', (e) => {
+    const levelPanel = document.getElementById('level-info-panel');
+    const totalScoreBtn = document.getElementById('totalscore-container');
 
-    // Logika Settings
-
-    if (settingsPanel && settingsPanel.classList.contains('active') && 
-
-        !settingsPanel.contains(e.target) && 
-
-        !e.target.closest('#settings-btn')) {
-
-        settingsPanel.classList.remove('active');
-
+    // 1. Logika Level Info Panel (Klik luar untuk tutup)
+    if (levelPanel && levelPanel.classList.contains('active')) {
+        // Jika yang diklik BUKAN isi panel DAN BUKAN tombol pemicunya
+        if (!levelPanel.contains(e.target) && !totalScoreBtn.contains(e.target)) {
+            levelPanel.classList.remove('active');
+        }
     }
 
-
-
-    // Logika Disclaimer
-
-    if (disclaimerPanel && disclaimerPanel.classList.contains('active') && 
-
-        !disclaimerPanel.contains(e.target) && 
-
-        !e.target.closest('#info-btn')) {
-
-        disclaimerPanel.classList.remove('active');
-
+    // 2. Logika Settings Panel
+    if (settingsPanel && settingsPanel.classList.contains('active')) {
+        if (!settingsPanel.contains(e.target) && !e.target.closest('#settings-btn')) {
+            settingsPanel.classList.remove('active');
+        }
     }
-
-
-
-    // Logika Profile - SEKARANG ADA DI DALAM EVENT LISTENER
-
-    if (profilePanel && profilePanel.classList.contains('active') && 
-
-        !profilePanel.contains(e.target) && 
-
-        !e.target.closest('#profile-btn') &&
-
-        !e.target.closest('#login-google-btn')) { 
-
-        profilePanel.classList.remove('active');
-
+  
+    // 4. Logika Profile Panel
+    if (profilePanel && profilePanel.classList.contains('active')) {
+        if (!profilePanel.contains(e.target) && 
+            !e.target.closest('#profile-btn') && 
+            !e.target.closest('#login-google-btn')) { 
+            profilePanel.classList.remove('active');
+        }
     }
-
-}); // HANYA SATU PENUTUP DI SINI
+});
 
     document.querySelectorAll('input[name="language"]').forEach(r => r.addEventListener('change', (e) => setLanguage(e.target.value)));
 
