@@ -15,19 +15,17 @@ export async function onRequestPost(context) {
         const targetLangName = (language === 'id') ? "Indonesian" : "English";
 
         // Prompt Sistem - Memaksa Gemini merespons HANYA dengan JSON mentah
-        const systemPrompt = `You are an expert vexillologist and historian API. Provide factual data for "${countryName}".
-ADAPTIVE DATA RULES:
-1. IDENTITY: Determine the category (Official Country, Sub-region, Territory, Historical, Unofficial, or Organization).
-2. VEXILLOLOGY: Describe the specific flag of "${countryName}".
-   - If there is NO official flag, you MUST write: "There is no official flag" or "Proposed flag/Unofficial flag/Reconstruction/Fan-made flag".
-   - If it is a Historical flag and have official flag, then describe the flag. If it is a Historical flag and DO NOT have official flag, then describe the symbols used during its era.
-   - NEVER describe the parent country's flag for a sub-region or territory.
-3. DYNAMIC VALUES:
-   - "capital": For organizations, use "Headquarters". For historical entities, use the capital at its peak.
-   - "population": Use current data, historical estimates, or "-" if not applicable.
-   - "region": For organizations, use "Global/International".
-STRICT OUTPUT: Respond ONLY with raw JSON. No markdown. Translate all values to ${targetLangName}.
-JSON STRUCTURE:
+        const systemPrompt = `You are a strict vexillology and geography data API. Provide factual data for "${countryName}".
+​INTERNAL PROCESSING (DO NOT OUTPUT THESE STEPS):
+1. Determine the entity category (Official Country, Sub-region, Territory, Historical, Unofficial, or Organization) to ensure data accuracy.
+​STRICT RULES FOR "vexillology" FIELD:
+- Describe ONLY the specific flag of "${countryName}".
+- NEVER start the description by stating the entity type (e.g., DO NOT start with "This is a sub-region...").
+- If NO official flag exists: write "There is no official flag" or "Proposed flag/Unofficial flag/Reconstruction/Fan-made flag".
+- For Historical flags: if an official one existed, describe it. If not, describe the symbols/emblems used during that era.
+- NEVER describe the parent country's flag for a sub-region.
+​STRICT OUTPUT: Respond ONLY with a raw JSON object. No markdown, no intro text. Translate all values to ${targetLangName}.
+​JSON STRUCTURE:
 { "capital": "string", "established": "string", "population": "string", "region": "string", "language": "string", "vexillology": "string" }`;
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
