@@ -1195,9 +1195,14 @@ if (auth) {
 
         // 2. JIKA SUDAH LOGIN, LOAD DATA FIREBASE (Kode Asli)
 
-        listContainer.innerHTML = '<div class="p-8 flex justify-center"><div class="loader"></div></div>';
-
-
+        listContainer.innerHTML = `
+    <div class="p-8 flex flex-col items-center justify-center gap-3">
+        <div class="loader"></div>
+        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+            Loading Leaderboard...
+        </p>
+    </div>
+`;
 
         try {
 
