@@ -92,7 +92,14 @@ function showScreen(screenId) {
     const target = document.getElementById(screenId);
     if (target) {
         target.classList.add('active');
-        window.scrollTo(0, 0);
+        // Memaksa browser kembali ke atas secara instan
+        // Gunakan requestAnimationFrame agar dijalankan tepat setelah render
+        requestAnimationFrame(() => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'instant' 
+            });
+        });
         localStorage.setItem('lastActiveScreen', screenId);
         
          // --- LOGIKA SEMBUNYIKAN NAV ---
