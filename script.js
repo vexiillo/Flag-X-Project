@@ -509,7 +509,7 @@ if (infoBtn) {
 
             lib_official_title: "Official Countries", lib_subdivisions_title: "Subdivisions", lib_territories_title: "Territories", 
 
-            lib_unofficial_title: "Unofficial", lib_historical_title: "Historical", lib_organizations_title: "Organizations", lib_continent_title: "Continent Flags",
+            lib_unofficial_title: "Unofficial", lib_historical_title: "Historical", lib_organizations_title: "World Organizations", lib_continent_title: "Continent Flags",
 
             subdivisionSelectionTitle: "Choose a Country", territorySelectionTitle: "Choose a Country", historicalSelectionTitle: "Choose a Country",
 
@@ -581,7 +581,7 @@ if (infoBtn) {
 
             lib_official_title: "Negara Resmi", lib_subdivisions_title: "Subdivisi", lib_territories_title: "Wilayah", 
 
-            lib_unofficial_title: "Tidak Resmi", lib_historical_title: "Bersejarah", lib_organizations_title: "Organisasi", lib_continent_title: "Bendera Benua",
+            lib_unofficial_title: "Tidak Resmi", lib_historical_title: "Bersejarah", lib_organizations_title: "Organisasi Dunia", lib_continent_title: "Bendera Benua",
 
             subdivisionSelectionTitle: "Pilih Negara", territorySelectionTitle: "Pilih Negara", historicalSelectionTitle: "Pilih Negara",
 
