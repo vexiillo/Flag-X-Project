@@ -613,14 +613,6 @@ if (infoBtn) {
 
     };
 
-// Fungsi untuk mengecek apakah cache berasal dari hari yang sama
-function isCacheValid(timestamp) {
-    if (!timestamp) return false;
-    const cacheDate = new Date(timestamp).toDateString();
-    const today = new Date().toDateString();
-    return cacheDate === today;
-}
-
     // --- CORE LOGIC ---
 
     function setLanguage(lang) {
@@ -2215,102 +2207,93 @@ card.innerHTML = `
         }
     }
     
-    // --- GEMINI API INTEGRATION (With 1-Day Caching) ---
+
+// --- GEMINI API INTEGRATION ---
 async function getFunFact(itemName) {
     if (!itemName) return;
-
+    
     const geminiModal = document.getElementById('gemini-modal');
     const geminiContentEl = document.getElementById('gemini-content');
     const modalTitle = document.getElementById('gemini-modal-title');
 
     geminiModal.classList.add('active');
-    document.body.classList.add('modal-open');
+    document.body.classList.add('modal-open'); 
     
     geminiContentEl.innerHTML = `
-        <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
-            <div class="loader"></div>
-            <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
-        </div>
+    <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
+        <div class="loader"></div>
+        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
+    </div>
     `;
 
     const currentLang = settings.language || 'en'; 
-    const cacheKey = `funfact_${currentLang}_${itemName}`;
-    
-    // 1. Cek Cache (Daily Variation)
-    const cachedEntry = localStorage.getItem(cacheKey);
-    if (cachedEntry) {
-        const parsedCache = JSON.parse(cachedEntry);
-        if (isCacheValid(parsedCache.timestamp)) {
-            // Jika masih hari yang sama, tampilkan dari cache
-            setTimeout(() => {
-                geminiContentEl.textContent = parsedCache.fact;
-            }, 400);
-            updateFunFactTitle(itemName, currentLang, modalTitle);
-            return;
-        }
+    const titleLabel = (translations[currentLang] && translations[currentLang].funFact) 
+                       ? translations[currentLang].funFact 
+                       : "Fun Fact";
+
+    if (modalTitle) {
+        modalTitle.textContent = `${titleLabel}: ${itemName}`;
     }
 
-    updateFunFactTitle(itemName, currentLang, modalTitle);
+    // --- 1. LOGIKA DAILY CACHE UNTUK FUN FACT ---
+    const cacheKey = `funfact_${currentLang}_${itemName}`;
+    const todayStr = new Date().toDateString(); // Contoh: "Tue Mar 03 2026"
+    
+    const cachedRaw = localStorage.getItem(cacheKey);
+    if (cachedRaw) {
+        try {
+            const cachedData = JSON.parse(cachedRaw);
+            // Cek apakah data di-cache pada hari yang sama
+            if (cachedData.date === todayStr) {
+                geminiContentEl.textContent = cachedData.fact;
+                return; // Langsung pakai data cache, batalkan fetch API
+            }
+        } catch (e) {
+            console.error("Cache parsing error:", e);
+        }
+    }
 
     try {
         const response = await fetch('/get-fun-facts', { 
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ countryName: itemName, language: currentLang })
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                countryName: itemName,
+                language: currentLang 
+            })
         });
 
         if (!response.ok) {
-            // Jika status 429 (Too Many Requests), lempar error khusus limit
-            if (response.status === 429) throw new Error('LIMIT_EXCEEDED');
             const errorData = await response.json();
-            throw new Error(errorData.error || 'SERVER_ERROR');
+            throw new Error(errorData.error || 'Server error');
         }
 
         const data = await response.json();
-        
-        // Simpan ke Cache dengan timestamp hari ini
-        localStorage.setItem(cacheKey, JSON.stringify({
-            fact: data.fact,
-            timestamp: new Date().getTime()
-        }));
-
         geminiContentEl.textContent = data.fact;
+
+        // --- 2. SIMPAN CACHE DENGAN TANGGAL HARI INI ---
+        localStorage.setItem(cacheKey, JSON.stringify({
+            date: todayStr,
+            fact: data.fact
+        }));
 
     } catch (error) {
         console.error("Fetch error:", error);
-        displayGeminiError(geminiContentEl, currentLang, error.message);
+        const errorText = (translations[currentLang] && translations[currentLang].geminiError)       
+                         ? translations[currentLang].geminiError 
+                         : (currentLang === 'id' ? "Gagal memuat fakta. Silakan coba lagi." : "Connection error. Please try again.");
+
+        geminiContentEl.innerHTML = '';
+        const errorPara = document.createElement('p');
+        errorPara.className = 'text-center py-4 text-sm font-medium';
+        errorPara.textContent = errorText;
+        geminiContentEl.appendChild(errorPara);
     }
 }
 
-// Helper untuk update judul Fun Fact
-function updateFunFactTitle(itemName, lang, titleEl) {
-    const titleLabel = (translations[lang] && translations[lang].funFact) ? translations[lang].funFact : "Fun Fact";
-    if (titleEl) titleEl.textContent = `${titleLabel}: ${itemName}`;
-}
-
-// Helper untuk menampilkan pesan error yang "jujur"
-function displayGeminiError(container, lang, errorType) {
-    let errorText;
-    
-    if (errorType === 'LIMIT_EXCEEDED') {
-        errorText = (lang === 'id') 
-            ? "Maaf, batas harian kami sudah habis. Silakan coba lagi besok!" 
-            : "Sorry, our daily limit has been reached. Please try again tomorrow!";
-    } else {
-        errorText = (translations[lang] && translations[lang].geminiError)       
-            ? translations[lang].geminiError 
-            : (lang === 'id' ? "Maaf, gagal memuat fakta menarik saat ini." : "Sorry, failed to generate fun facts.");
-    }
-
-    container.innerHTML = '';
-    const errorPara = document.createElement('p');
-    errorPara.className = 'text-center py-4 text-sm font-medium opacity-80';
-    errorPara.textContent = errorText;
-    container.appendChild(errorPara);
-}
-
-
-// --- AI FLAG DETAIL LOGIC (With 1-Day Caching) ---
+// --- AI FLAG DETAIL LOGIC (With Daily Caching) ---
 async function getFlagDetail(itemName, flagUrl) {
     if (!itemName) return;
 
@@ -2320,6 +2303,7 @@ async function getFlagDetail(itemName, flagUrl) {
     const loaderEl = document.getElementById('detail-loader');
     const dataContainer = document.getElementById('detail-data');
 
+    // 1. Reset & Persiapan Awal
     const oldError = modal.querySelector('.error-message');
     if (oldError) oldError.remove();
 
@@ -2332,10 +2316,13 @@ async function getFlagDetail(itemName, flagUrl) {
 
     const currentLang = settings.language || 'en';
     const cacheKey = `flag_detail_${currentLang}_${itemName}`;
+    const todayStr = new Date().toDateString(); // Tanggal hari ini
 
+    // Fungsi Helper untuk Menampilkan Data ke UI
     const renderData = (data) => {
         loaderEl.classList.add('hidden');
         dataContainer.classList.remove('hidden');
+        
         document.getElementById('detail-capital').textContent = data.capital || '-';
         document.getElementById('detail-established').textContent = data.established || '-';
         document.getElementById('detail-population').textContent = data.population || '-';
@@ -2344,17 +2331,34 @@ async function getFlagDetail(itemName, flagUrl) {
         document.getElementById('detail-vexillology').textContent = data.vexillology || 'No info.';
     };
 
-    // 1. Cek Cache (Daily Variation)
-    const cachedEntry = localStorage.getItem(cacheKey);
-    if (cachedEntry) {
-        const parsedCache = JSON.parse(cachedEntry);
-        if (isCacheValid(parsedCache.timestamp)) {
-            setTimeout(() => renderData(parsedCache.data), 300);
-            return;
+    // 2. Cek Cache Harian di LocalStorage
+    const cachedRaw = localStorage.getItem(cacheKey);
+    if (cachedRaw) {
+        try {
+            const cachedData = JSON.parse(cachedRaw);
+            
+            // Cek jika cache menggunakan format baru (memiliki .date) dan di-cache hari ini
+            if (cachedData.date === todayStr) {
+                setTimeout(() => renderData(cachedData.data), 300);
+                return;
+            } 
+            // LOGIKA BACKWARD COMPATIBILITY:
+            // Cek jika cache menggunakan format lama (tanpa .date, sisa dari jam/hari sebelumnya)
+            else if (!cachedData.date && typeof cachedData === 'object' && cachedData.capital) {
+                setTimeout(() => renderData(cachedData), 300);
+                // Ubah format lamanya menjadi format cache harian secara otomatis
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    date: todayStr,
+                    data: cachedData
+                }));
+                return;
+            }
+        } catch (e) {
+            console.error("Cache parsing error:", e);
         }
     }
 
-    // 2. Fetch Baru jika sudah ganti hari atau belum ada cache
+    // 3. Panggil API jika tidak ada cache hari ini
     try {
         const response = await fetch('/get-flag-details', { 
             method: 'POST',
@@ -2362,38 +2366,30 @@ async function getFlagDetail(itemName, flagUrl) {
             body: JSON.stringify({ countryName: itemName, language: currentLang })
         });
 
-        if (!response.ok) {
-            if (response.status === 429) throw new Error('LIMIT_EXCEEDED');
-            throw new Error('API Error');
-        }
+        if (!response.ok) throw new Error('API Error');
 
         const result = await response.json();
         
-        // Simpan data dengan timestamp
+        // Simpan ke cache harian dengan format baru
         localStorage.setItem(cacheKey, JSON.stringify({
-            data: result,
-            timestamp: new Date().getTime()
+            date: todayStr,
+            data: result
         }));
         
         renderData(result);
 
-    } catch (error) {
+        } catch (error) {
         console.error("Fetch detail error:", error);
         loaderEl.classList.add('hidden');
         
+        // Menggunakan geminiError dari translation, dengan fallback gagal memuat detail
+        const errorText = (translations[currentLang] && translations[currentLang].geminiError)       
+                         ? translations[currentLang].geminiError 
+                         : (currentLang === 'id' ? "Gagal memuat detail. Silakan coba lagi." : "Failed to load details. Please try again.");
+
         const errorMsg = document.createElement('p');
-        errorMsg.className = 'error-message text-center py-4 text-sm font-medium opacity-80';
-        
-        if (error.message === 'LIMIT_EXCEEDED') {
-            errorMsg.textContent = (currentLang === 'id') 
-                ? 'Maaf, limit harian detail negara sudah habis. Coba lagi besok!' 
-                : 'Sorry, our daily limit for details is reached. Try again tomorrow!';
-        } else {
-            errorMsg.textContent = (currentLang === 'id')
-                ? 'Gagal memuat detail. Silakan coba lagi nanti.'
-                : 'Sorry, failed to generate details. Please try again later.';
-        }
-        
+        errorMsg.className = 'error-message text-center py-4 text-sm font-medium';
+        errorMsg.textContent = errorText;
         dataContainer.parentNode.insertBefore(errorMsg, dataContainer);
     }    
 }
