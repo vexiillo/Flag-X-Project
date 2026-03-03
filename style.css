@@ -752,12 +752,6 @@ body::before {
     color: white;
 }
 
-/* Label untuk Bendera yang benar-benar tidak asli/fan-made */
-.badge-unofficial {
-    background: linear-gradient(135deg, #4b5563, #1f2937); /* Abu-abu gelap/Charcoal */
-    color: white;
-}
-
 /* Warna khusus untuk Historical (Coklat Emas Tua / Sepia) */
 .badge-historical {
     background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
