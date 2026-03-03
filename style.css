@@ -376,6 +376,20 @@ body {
     justify-content: center;
     align-items: center;
     animation: fadeIn 0.3s ease;
+/* --- TAMBAHAN UNTUK GAP BOTTOM NAV --- */
+    /* Memberi jarak bawah 90px (nav 70px + gap 20px), dan jarak aman di sisi lain */
+    padding: 20px 20px 90px 20px; 
+    box-sizing: border-box;
+    
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* --- TAMBAHKAN CLASS BARU INI DI BAWAHNYA --- */
+/* Mengunci scroll pada body saat modal terbuka */
+body.modal-open {
+    overflow: hidden !important;
 }
 .modal.active { display: flex; }
 .modal .card { animation: zoomIn 0.3s ease-out; }

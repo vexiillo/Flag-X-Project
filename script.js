@@ -1485,21 +1485,42 @@ document.addEventListener('click', (e) => {
 
 
 
-    document.getElementById('end-quiz-btn').addEventListener('click', () => endQuizModal.classList.add('active'));
-
-    document.getElementById('cancel-end-quiz-btn').addEventListener('click', () => endQuizModal.classList.remove('active'));
-
-    document.getElementById('confirm-end-quiz-btn').addEventListener('click', () => { endQuizModal.classList.remove('active'); endQuiz(); });
-
-    document.getElementById('close-gemini-modal-btn').addEventListener('click', () => geminiModal.classList.remove('active'));
-   
-    document.getElementById('close-detail-modal-btn').addEventListener('click', () => {
-    document.getElementById('detail-modal').classList.remove('active');
+    // 1. Tombol End Quiz
+document.getElementById('end-quiz-btn').addEventListener('click', () => {
+    endQuizModal.classList.add('active');
+    document.body.classList.add('modal-open');
 });
 
+// 2. Tombol Cancel End Quiz
+document.getElementById('cancel-end-quiz-btn').addEventListener('click', () => {
+    endQuizModal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+});
+
+// 3. Tombol Confirm End Quiz (Sudah benar sebelumnya, tapi dirapikan)
+document.getElementById('confirm-end-quiz-btn').addEventListener('click', () => { 
+    endQuizModal.classList.remove('active'); 
+    document.body.classList.remove('modal-open'); 
+    endQuiz(); 
+});
+
+// 4. Tombol Close Gemini Modal
+document.getElementById('close-gemini-modal-btn').addEventListener('click', () => {
+    geminiModal.classList.remove('active'); 
+    document.body.classList.remove('modal-open');
+});
+   
+// 5. Tombol Close Detail Modal (Sudah Benar)
+document.getElementById('close-detail-modal-btn').addEventListener('click', () => {
+    document.getElementById('detail-modal').classList.remove('active');
+    document.body.classList.remove('modal-open');
+});
+
+// 6. Tombol Close Level Up (Sudah Benar)
 document.getElementById('close-level-up-btn').addEventListener('click', () => {
-        document.getElementById('level-up-modal').classList.remove('active');
-    });
+    document.getElementById('level-up-modal').classList.remove('active');
+    document.body.classList.remove('modal-open');
+});
 
     document.getElementById('library-search-input').addEventListener('input', filterLibrary);
 
@@ -1875,6 +1896,7 @@ function generateFlagQuestion(targetData, isYear = false) {
                 const levelModal = document.getElementById('level-up-modal');
                 document.getElementById('new-level-display').textContent = `Lv. ${newLevel}`;
                 if (levelModal) levelModal.classList.add('active');
+                document.body.classList.add('modal-open'); // Tambahkan ini!
                 
                 // Opsional: Kalau kamu punya sfx Level Up, bisa di-play di sini!
             }, 600); // Muncul 0.6 detik setelah layar hasil terbuka
@@ -2199,7 +2221,8 @@ card.innerHTML = `
 
 
     geminiModal.classList.add('active');
-
+    document.body.classList.add('modal-open'); // Tambahkan ini!
+    
     geminiContentEl.innerHTML = `
     <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
         <div class="loader"></div>
@@ -2320,6 +2343,7 @@ async function getFlagDetail(itemName, flagUrl) {
     loaderEl.classList.remove('hidden');
     dataContainer.classList.add('hidden');
     modal.classList.add('active');
+    document.body.classList.add('modal-open'); // Tambahkan ini!
 
     const currentLang = settings.language || 'en';
     const cacheKey = `flag_detail_${currentLang}_${itemName}`;
