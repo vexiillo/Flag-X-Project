@@ -57,17 +57,36 @@ html, body {
     padding: 0;
 }
 
+/* 1. Tambahkan lapisan gradient di elemen HTML agar benar-benar statis */
+html::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2; /* Di bawah globe (yang z-indexnya -1) */
+    pointer-events: none;
+    
+    /* Pindahkan gradient Anda ke sini */
+    background-image: 
+      radial-gradient(at 15% 15%, hsla(258, 88%, 60%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 20%, hsla(320, 78%, 55%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 80%, hsla(258, 88%, 60%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 90% 90%, hsla(320, 78%, 55%, 0.15) 0px, transparent 50%),
+      linear-gradient(135deg, var(--bg-color-dark), var(--bg-color-light));
+    background-size: cover;
+}
+
 body {
-  font-family: 'Poppins', sans-serif;
-  color: var(--text-color);
-  /* Berikan warna latar solid agar jika ada delay, yang muncul warna gelap, bukan putih */
-  background-color: var(--bg-color-dark); 
-  min-height: 100dvh;
-  padding-bottom: 80px;
+  font-family: 'Poppins', sans-serif;  
+  color: var(--text-color);  
   transition: color 0.3s ease;
+  min-height: 100dvh;
+  padding-bottom: 80px; /* Sesuaikan dengan tinggi nav + jarak aman */
+  background-color: var(--bg-color-dark); /* Warna dasar fallback */
   margin: 0;
   position: relative;
-  /* HAPUS background-image dan background-attachment dari sini */
 }
 
 /* --- Core Component Styling --- */
@@ -610,42 +629,31 @@ main > section:last-child {
     transition: color 0.3s ease;
 }
 
-/* LAPISAN 1: Untuk Gradient Latar Belakang (Ganti/Tambah ini) */
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(at 15% 15%, hsla(258, 88%, 60%, 0.15) 0px, transparent 50%),
-        radial-gradient(at 80% 20%, hsla(320, 78%, 55%, 0.1) 0px, transparent 50%),
-        radial-gradient(at 50% 80%, hsla(258, 88%, 60%, 0.1) 0px, transparent 50%),
-        radial-gradient(at 90% 90%, hsla(320, 78%, 55%, 0.15) 0px, transparent 50%),
-        linear-gradient(135deg, var(--bg-color-dark), var(--bg-color-light));
-    z-index: -2; /* Pastikan paling belakang */
-    pointer-events: none;
-    transform: translateZ(0); /* Memaksa GPU membantu rendering */
-}
-
-/* LAPISAN 2: Tetap gunakan body::before kamu untuk globe-bg */
 body::before {
     content: "";
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    
+    /* Ukuran responsif: di mobile tidak memenuhi layar, di desktop tidak raksasa */
     width: 85vw; 
     max-width: 550px;
     height: 85vw;
     max-height: 550px;
+
+    /* Memanggil file gambar asli kamu */
     background-image: url('globe-bg.png');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.18;      
-    z-index: -1; /* Di atas gradient, tapi di bawah konten */
+    
+    /* Atur kejelasan di sini */
+    opacity: 0.18;      /* Sudah cukup terlihat tapi tidak menabrak teks */
+    filter: blur(0px);  /* Tanpa blur agar detail bendera tajam */
+    
+    /* Layering agar berada di belakang konten */
+    z-index: -1;
     pointer-events: none;
 }
 
