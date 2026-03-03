@@ -88,6 +88,17 @@
         <i class="fa-solid fa-circle-info text-xs"></i>
         <span>Leveling System</span>
     </div>
+    
+    <div class="mb-5 bg-[var(--secondary-color)] rounded-full h-4 overflow-hidden border border-white/10 relative">
+        <div id="level-progress-bar" class="h-full bg-gradient-to-r from-[var(--primary-color)] to-[#EC41B1] transition-all duration-500" style="width: 0%"></div>
+    </div>
+    <div class="flex justify-between text-[10px] font-bold mb-4 px-1">
+        <span id="level-progress-text" class="text-[var(--subtle-text-color)]">0 / 500 XP</span>
+        <span id="level-percentage" class="text-[var(--primary-color)]">0%</span>
+    </div>
+
+    <ul class="text-[10px] text-left space-y-2 font-medium text-[var(--subtle-text-color)]">
+        </ul>
 
     <ul class="text-[10px] text-left space-y-2 font-medium text-[var(--subtle-text-color)]">
         <li class="flex justify-between border-b border-[var(--card-border-color)] pb-1.5">

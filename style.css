@@ -479,6 +479,12 @@ body.modal-open {
     color: var(--subtle-text-color);
 }
 
+/* style.css */
+#level-progress-bar {
+    box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
+    border-radius: inherit;
+}
+
 #disclaimer-panel.active { 
     display: block; 
     animation: fadeInCenter 0.3s ease-out;

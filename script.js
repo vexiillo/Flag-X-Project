@@ -691,19 +691,58 @@ renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByC
 
     }
 
+// script.js
+
+// Fungsi baru untuk menghitung detail progres level
 function updateLevelUI(xp) {
-    const level = calculateLevel(xp); // Menggunakan fungsi terpusat
-    const levelBadge = document.querySelector('.absolute.-bottom-4'); // Mengambil div badge level dari header HTML
-    if (levelBadge) {
-        levelBadge.textContent = level === 50 ? 'MAX Lv.' : `Lv. ${level}`;
-        
-        // Opsional: Ganti warna kalau max level!
-        if (level === 50) {
-            levelBadge.classList.add('bg-yellow-500'); 
-            levelBadge.classList.remove('bg-[var(--primary-color)]');
-        }
+    let level = 1;
+    let currentXPInLevel = 0;
+    let nextLevelXPThreshold = 500;
+
+    // Logika disesuaikan dengan threshold yang ada di calculateLevel() kamu
+    if (xp < 5000) {
+        level = Math.floor(xp / 500) + 1;
+        currentXPInLevel = xp % 500;
+        nextLevelXPThreshold = 500;
+    } else if (xp < 20000) {
+        level = 10 + Math.floor((xp - 5000) / 1000);
+        currentXPInLevel = (xp - 5000) % 1000;
+        nextLevelXPThreshold = 1000;
+    } else if (xp < 57500) {
+        level = 25 + Math.floor((xp - 20000) / 2500);
+        currentXPInLevel = (xp - 20000) % 2500;
+        nextLevelXPThreshold = 2500;
+    } else if (xp < 102500) {
+        level = 40 + Math.floor((xp - 57500) / 5000);
+        currentXPInLevel = (xp - 57500) % 5000;
+        nextLevelXPThreshold = 5000;
+    } else {
+        level = 50;
+        currentXPInLevel = 1; // Max
+        nextLevelXPThreshold = 1;
     }
+
+    const percentage = level >= 50 ? 100 : (currentXPInLevel / nextLevelXPThreshold) * 100;
+
+    // Update elemen DOM
+    const progressBar = document.getElementById('level-progress-bar');
+    const progressText = document.getElementById('level-progress-text');
+    const percentageText = document.getElementById('level-percentage');
+
+    if (progressBar) progressBar.style.width = `${percentage}%`;
+    if (progressText) {
+        progressText.textContent = level >= 50 
+            ? "MAX LEVEL reached!" 
+            : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
+    }
+    if (percentageText) percentageText.textContent = `${Math.floor(percentage)}%`;
 }
+
+// Pastikan fungsi ini dipanggil setiap kali skor XP berubah
+// Misalnya, panggil di dalam listener onAuthStateChanged setelah mengambil data dari Firestore:
+/* const userXP = docSnap.data().totalScore || 0;
+   updateLevelUI(userXP); 
+*/
 
     function loadTotalScore() {
     const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
@@ -1062,6 +1101,9 @@ if (auth) {
                     const userData = userDoc.data();
 
                     if (userData.username) nameToDisplay = userData.username;
+                    
+                    const userXP = docSnap.data().totalScore || 0;
+   updateLevelUI(userXP); 
 
                 }
 
