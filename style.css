@@ -1002,3 +1002,46 @@ footer {
     .text-[9px] { font-size: 8px; }
     #fotd-name { font-size: 12px; }
 }
+
+/* Notifikasi Toast Custom */
+.toast-msg {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #7B47F5; /* Sesuaikan dengan --primary-color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.toast-msg.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Animasi Getar jika input kosong */
+.shake-input {
+    animation: shake 0.4s ease-in-out;
+    border: 2px solid #ff4d4d !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+
+/* Loading State untuk Tombol */
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}

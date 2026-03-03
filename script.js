@@ -1442,51 +1442,79 @@ if (auth) {
 
 
 
-    // Username Editing
+    // --- Fungsi Helper untuk Toast (Diletakkan di luar listener) ---
+function showToast(message) {
+    let toast = document.querySelector('.toast-msg');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        document.body.appendChild(toast);
+    }
+    toast.innerText = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+}
 
-    let originalUsername = '';
+// --- Username Editing ---
+let originalUsername = '';
 
-    usernameInput.addEventListener('focus', () => {
+usernameInput.addEventListener('focus', () => {
+    originalUsername = usernameInput.value;
+    usernameActions.classList.remove('hidden');
+    usernameActions.classList.add('flex');
+});
 
-        originalUsername = usernameInput.value;
+cancelUsernameBtn.addEventListener('click', () => {
+    usernameInput.value = originalUsername;
+    usernameInput.classList.remove('shake-input'); // Bersihkan error jika ada
+    usernameActions.classList.add('hidden');
+    usernameActions.classList.remove('flex');
+});
 
-        usernameActions.classList.remove('hidden');
+saveUsernameBtn.addEventListener('click', async () => {
+    const newName = usernameInput.value.trim();
 
-        usernameActions.classList.add('flex');
+    // 1. VALIDASI: Jika nama kosong
+    if (!newName) {
+        usernameInput.classList.add('shake-input');
+        showToast("Name cannot be blank!️");
+        
+        // Hapus class animasi getar agar bisa dipicu lagi nanti
+        setTimeout(() => {
+            usernameInput.classList.remove('shake-input');
+        }, 400);
+        return; 
+    }
 
-    });
+    if (auth.currentUser) {
+        try {
+            // Memberikan efek "Saving..." pada tombol agar terasa smooth
+            const originalBtnText = saveUsernameBtn.innerText;
+            saveUsernameBtn.innerText = "Saving...";
+            saveUsernameBtn.classList.add('btn-loading');
 
-    cancelUsernameBtn.addEventListener('click', () => {
+            await setDoc(doc(db, "users", auth.currentUser.uid), { username: newName }, { merge: true });
 
-        usernameInput.value = originalUsername;
+            // 2. SUCCESS FEEDBACK
+            showToast("Name saved!");
+            
+            // Kembalikan UI
+            usernameActions.classList.add('hidden');
+            usernameActions.classList.remove('flex');
+            saveUsernameBtn.innerText = originalBtnText;
+            saveUsernameBtn.classList.remove('btn-loading');
 
-        usernameActions.classList.add('hidden');
-
-        usernameActions.classList.remove('flex');
-
-    });
-
-    saveUsernameBtn.addEventListener('click', async () => {
-
-        const newName = usernameInput.value.trim();
-
-        if (newName && auth.currentUser) {
-
-            try {
-
-                await setDoc(doc(db, "users", auth.currentUser.uid), { username: newName }, { merge: true });
-
-                usernameActions.classList.add('hidden');
-
-                usernameActions.classList.remove('flex');
-
-            } catch (e) { alert("Failed to save name."); }
-
+        } catch (e) { 
+            console.error(e);
+            showToast("Error saving name. Try again.");
+            saveUsernameBtn.innerText = "Save";
+            saveUsernameBtn.classList.remove('btn-loading');
         }
-
-    });
-
-
+    }
+});
 
         // --- SATU-SATUNYA GLOBAL CLICK LISTENER ---
 document.addEventListener('click', (e) => {
