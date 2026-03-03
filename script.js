@@ -1102,7 +1102,7 @@ if (auth) {
 
                     if (userData.username) nameToDisplay = userData.username;
                     
-                    const userXP = docSnap.data().totalScore || 0;
+                    const userXP = userData.totalScore || 0;
    updateLevelUI(userXP); 
 
                 }
