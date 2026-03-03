@@ -15,18 +15,38 @@ export async function onRequestPost(context) {
         const targetLangName = (language === 'id') ? "Indonesian" : "English";
 
         // Prompt Sistem - Memaksa Gemini merespons HANYA dengan JSON mentah
-        const systemPrompt = `You are a strict vexillology and geography data API. Provide factual data for "${countryName}".
-​INTERNAL PROCESSING (DO NOT OUTPUT THESE STEPS):
-1. Determine the entity category (Official Country, Sub-region, Territory, Historical, Unofficial, or Organization) to ensure data accuracy.
-​STRICT RULES FOR "vexillology" FIELD:
-- Describe ONLY the specific flag of "${countryName}".
-- NEVER start the description by stating the entity type (e.g., DO NOT start with "This is a sub-region...").
-- If NO official flag exists: write "There is no official flag" or "Proposed flag/Unofficial flag/Reconstruction/Fan-made flag".
-- For Historical flags: if an official one existed, describe it. If not, describe the symbols/emblems used during that era.
+        const systemPrompt = `You are a strict vexillology and geography data API. Provide factual, contextual, and precise data for "${countryName}".
+
+INTERNAL PROCESSING (DO NOT OUTPUT):
+1. DISAMBIGUATION: Analyze "${countryName}". 
+   - If multiple locations share this name (e.g., Adrar), prioritize the most prominent modern administrative division unless a specific country/context is hinted.
+   - For names like "Badakhshan", default to the current administrative province (Afghanistan) unless "historical region" is explicitly mentioned.
+2. CATEGORIZATION: Classify as Official Country, Sub-region, Historical Entity, World Organization, or Unofficial.
+3. DATA RETRIEVAL:
+   - For "World Organization": Map "Headquarters" to the "capital" field.
+   - For Sub-regions/Historical/Unofficial/World Organizations: Use "N/A" for unknown statistical data.
+4. VEXILLOLOGY LOGIC: 
+   - Primary: Describe official flag + Meaning/Symbolism.
+   - Fallback (Sub-region/Historical): If no flag exists, describe the Official Emblem/Coat of Arms + Meaning.
+   - Final Fallback: If neither exists, write "There is no official flag of ${countryName}. The flag shown is an unofficial flag.".
+
+STRICT RULES:
+- NEVER start the "vexillology" description with the entity type (e.g., NO "This is a province...").
 - NEVER describe the parent country's flag for a sub-region.
-​STRICT OUTPUT: Respond ONLY with a raw JSON object. No markdown, no intro text. Translate all values to ${targetLangName}.
-​JSON STRUCTURE:
-{ "capital": "string", "established": "string", "population": "string", "region": "string", "language": "string", "vexillology": "string" }`;
+- Ensure "vexillology" includes both physical appearance and the symbolic meaning of colors/icons.
+- Translate ALL values to ${targetLangName}.
+
+STRICT OUTPUT: Respond ONLY with a raw JSON object. No markdown, no intro.
+
+JSON STRUCTURE:
+{
+  "capital": "string",
+  "established": "string",
+  "population": "string",
+  "region": "string",
+  "language": "string",
+  "vexillology": "string"
+}`;
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 

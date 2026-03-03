@@ -27,7 +27,19 @@ export async function onRequestPost(context) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{ 
-                        text: `Write 1 short unique fun fact about ${countryName}. DO NOT state the entity type or category (e.g., do not say "${countryName} is a sub-region"). Directly provide the fact. Based on its nature (Country, Sub-region, Historical, Unofficial, or Organization), focus on its unique legacy, mission, or culture. Ensure geographical accuracy for sub-regions. Your response MUST be in ${targetLangName}, max 2 sentences.` 
+                        text: `Write 1 short, unique, and fascinating fun fact about "${countryName}". 
+
+INTERNAL PROCESSING (DO NOT OUTPUT):
+1. DISAMBIGUATION: If multiple entities share the name "${countryName}" (e.g., Adrar in Algeria vs. Mauritania, or Galicia in Spain vs. Central Europe), prioritize the most prominent modern administrative division unless a specific historical context is hinted.
+2. CONTEXT CHECK: Ensure the fact belongs specifically to the geographical coordinates or historical timeline of the identified entity.
+
+STRICT RULES:
+- DO NOT state the entity type or category (e.g., NEVER say "${countryName} is a province..." or "This region is...").
+- Directly provide the fact.
+- Focus on a unique legacy, mission, cultural quirk, or a specific record/achievement.
+- Ensure 100% geographical and historical accuracy.
+- Response MUST be in ${targetLangName}.
+- MAXIMUM 2 sentences.`
                     }]
                 }]
             })
