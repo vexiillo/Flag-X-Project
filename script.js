@@ -93,11 +93,17 @@ function showScreen(screenId) {
     if (target) {
         target.classList.add('active');
         window.scrollTo(0, 0)
-         // 2. Trik "Repaint" untuk memaksa browser mobile menghitung ulang area putih
-    // Kita ubah sedikit tinggi elemen lalu kembalikan secara instan
-    document.documentElement.style.overflow = 'hidden';
-    document.body.offsetHeight; // Memicu reflow
-    document.documentElement.style.overflow = '';
+         // 3. Trik "Kick" Viewport:
+        // Kita paksa browser melakukan render ulang dengan mengubah padding body sedikit
+        document.body.style.paddingBottom = '81px'; 
+        
+        requestAnimationFrame(() => {
+            // Setelah frame berikutnya, kembalikan ke normal
+            document.body.style.paddingBottom = '80px';
+            
+            // Opsional: Jika masih bandel, paksa sinkronisasi scroll
+            window.dispatchEvent(new Event('resize'));
+            });
         localStorage.setItem('lastActiveScreen', screenId);
         
          // --- LOGIKA SEMBUNYIKAN NAV ---
