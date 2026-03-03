@@ -1451,6 +1451,9 @@ function showToast(message) {
         document.body.appendChild(toast);
     }
     toast.innerText = message;
+    // Paksa browser me-reset state agar animasi ulang bisa jalan jika diklik cepat
+    toast.classList.remove('show');
+    void toast.offsetWidth; 
     toast.classList.add('show');
     
     setTimeout(() => {
@@ -1509,7 +1512,7 @@ saveUsernameBtn.addEventListener('click', async () => {
 
         } catch (e) { 
             console.error(e);
-            showToast("Error saving name. Try again.");
+            showToast("Failed to save. Try again.");
             saveUsernameBtn.innerText = "Save";
             saveUsernameBtn.classList.remove('btn-loading');
         }
