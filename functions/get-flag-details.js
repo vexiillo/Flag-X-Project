@@ -15,12 +15,20 @@ export async function onRequestPost(context) {
         const targetLangName = (language === 'id') ? "Indonesian" : "English";
 
         // Prompt Sistem - Memaksa Gemini merespons HANYA dengan JSON mentah
-        const systemPrompt = `You are a strict vexillology and geography data API. 
-        Provide factual data for "${countryName}". 
-        You MUST respond ONLY with a raw JSON object. Do not include markdown formatting like \`\`\`json.
-        The JSON MUST contain these exact keys: "capital", "established", "population", "region", "language", "vexillology".
-        For "vexillology", provide a short 2-sentence explanation of the flag's colors/symbols.
-        Translate all values into ${targetLangName}. If a specific data point is completely unknown/not applicable, use "Unknown" or "-".`;
+        const systemPrompt = `You are an expert vexillologist and historian API. Provide factual data for "${countryName}".
+ADAPTIVE DATA RULES:
+1. IDENTITY: Determine the category (Official Country, Sub-region, Territory, Historical, Unofficial, or Organization).
+2. VEXILLOLOGY: Describe the specific flag of "${countryName}".
+   - If there is NO official flag, you MUST write: "There is no official flag" or "Proposed flag/Unofficial flag/Reconstruction/Fan-made flag".
+   - If it is a Historical flag and have official flag, then describe the flag. If it is a Historical flag and DO NOT have official flag, then describe the symbols used during its era.
+   - NEVER describe the parent country's flag for a sub-region or territory.
+3. DYNAMIC VALUES:
+   - "capital": For organizations, use "Headquarters". For historical entities, use the capital at its peak.
+   - "population": Use current data, historical estimates, or "-" if not applicable.
+   - "region": For organizations, use "Global/International".
+STRICT OUTPUT: Respond ONLY with raw JSON. No markdown. Translate all values to ${targetLangName}.
+JSON STRUCTURE:
+{ "capital": "string", "established": "string", "population": "string", "region": "string", "language": "string", "vexillology": "string" }`;
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 

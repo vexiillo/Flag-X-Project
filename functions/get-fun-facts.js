@@ -1,3 +1,5 @@
+// functions/get-fun-fact.js
+
 export async function onRequestPost(context) {
     try {
         // 1. Ambil data dari request body (Format Cloudflare)
@@ -25,7 +27,7 @@ export async function onRequestPost(context) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{ 
-                        text: `Write 1 short unique fun fact about the flag or the country itself of ${countryName}. Your response MUST be in ${targetLangName}. Maximum 2 sentences.` 
+                        text: `Identify the entity type of "${countryName}" (is it an Official Country, Sub-region, Historical Entity, Unofficial State, or World Organization). Then, write 1 short unique fun fact about it. If it is a historical entity, focus on its legacy. If it is an organization, focus on its mission or symbol. If it is a sub-region, ensure you don't confuse it with other places of the same name. Response MUST be in ${targetLangName}, max 2 sentences.` 
                     }]
                 }]
             })
