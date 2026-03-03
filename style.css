@@ -94,7 +94,7 @@ body {
   
   /* Mencegah scroll memantul yang sering memicu area hantu */
     overscroll-behavior-y: none; 
-    min-height: 100.1vh; /* Paksa sedikit lebih tinggi dari layar */
+    min-height: 100.1dvh; /* Paksa sedikit lebih tinggi dari layar */
 }
 
 /* --- Core Component Styling --- */
