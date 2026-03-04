@@ -1923,19 +1923,21 @@ function generateFlagQuestion(targetData, isYear = false) {
     });
 }
 
-        function endQuiz() {
-        clearInterval(currentQuiz.timerId);
-        
-        // 1. CEK LEVEL LAMA SEBELUM SKOR DITAMBAHKAN
-        const oldTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-        const oldLevel = calculateLevel(oldTotalXP);
-        
-        // 2. TAMBAH SKOR KE DATABASE & LOKAL
-        addToTotalScore(currentQuiz.score);
-        
-        // 3. CEK LEVEL BARU
-        const newTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-        const newLevel = calculateLevel(newTotalXP);
+        // 1. Tambahkan kata 'async' di depan function
+async function endQuiz() {
+    clearInterval(currentQuiz.timerId);
+    
+    // 2. Cek Level LAMA
+    const oldTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const oldLevel = calculateLevel(oldTotalXP);
+    
+    // 3. TAMBAHKAN 'await' di sini! 
+    // Ini penting agar kode di bawahnya tidak jalan sebelum skor sukses masuk.
+    await addToTotalScore(currentQuiz.score);
+    
+    // 4. Cek Level BARU (Sekarang XP pasti sudah ter-update)
+    const newTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const newLevel = calculateLevel(newTotalXP);
         
         // Update UI Score
         document.getElementById('final-score').textContent = currentQuiz.score;
@@ -1966,19 +1968,22 @@ function generateFlagQuestion(targetData, isYear = false) {
         // Pindah ke layar hasil
         showScreen('results-screen');
         
-        // 4. LOGIKA MODAL LEVEL UP (Muncul JIKA Level Naik & Dapat Skor)
-        if (newLevel > oldLevel && currentQuiz.score > 0) {
-            // Beri sedikit jeda agar pemain melihat hasil skornya dulu baru kaget disuguhi modal
-            setTimeout(() => {
-                const levelModal = document.getElementById('level-up-modal');
-                document.getElementById('new-level-display').textContent = `Lv. ${newLevel}`;
-                if (levelModal) levelModal.classList.add('active');
-                document.body.classList.add('modal-open'); // Tambahkan ini!
-                
-                // Opsional: Kalau kamu punya sfx Level Up, bisa di-play di sini!
-            }, 600); // Muncul 0.6 detik setelah layar hasil terbuka
-        }
+         // 5. LOGIKA MODAL LEVEL UP
+    if (newLevel > oldLevel && currentQuiz.score > 0) {
+        setTimeout(() => {
+            const levelModal = document.getElementById('level-up-modal');
+            const display = document.getElementById('new-level-display');
+            
+            if (display) display.textContent = `Lv. ${newLevel}`;
+            
+            if (levelModal) {
+                // Gunakan 'active' sesuai CSS-mu
+                levelModal.classList.add('active'); 
+                document.body.classList.add('modal-open');
+            }
+        }, 600);
     }
+}
 
     function showLibrary(category, subCategory = null) {
     // 0. SIMPAN state library
