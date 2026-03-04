@@ -349,7 +349,7 @@ body {
 .flag-img {
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, opacity 0.3s ease-in-out;
 }
 #quiz-screen .flag-img {
   max-height: clamp(8rem, 15vh, 12rem);
@@ -404,10 +404,6 @@ body {
     /* Memberi jarak bawah 90px (nav 70px + gap 20px), dan jarak aman di sisi lain */
     padding: 20px 20px 90px 20px; 
     box-sizing: border-box;
-    
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.3s ease;
 }
 
 /* --- TAMBAHKAN CLASS BARU INI DI BAWAHNYA --- */
@@ -598,11 +594,6 @@ main > section:last-child {
     to { transform: scale(1); opacity: 1; }
 }
 
-@keyframes slideDown {
-    from { transform: translateY(-10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
 /* Loader */
 .loader {
     width: 48px;
@@ -738,9 +729,6 @@ body::before {
 .flag-img.opacity-0 {
     opacity: 0;
 }
-.flag-img {
-    transition: opacity 0.3s ease-in-out;
-}
 
 /* --- STATUS BADGES SYSTEM --- */
 .status-badge {
@@ -851,7 +839,7 @@ body::before {
 
 /* Efek Hover */
 #scroll-to-top-btn:hover {
-    background: var(--primary-hover-color);
+    /* Hapus 'background' agar efek gradasi .btn-primary tidak tertimpa */
     transform: translateY(-5px) scale(1.05);
 }
 
@@ -975,9 +963,10 @@ footer {
     display: block;
     width: 100%;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;      /* Mengizinkan teks turun ke bawah */
+    word-wrap: break-word;    /* Memutus kata jika terlalu panjang */
+    line-height: 1.2;         /* Mengatur jarak antar baris agar rapi */
+    overflow: visible;        /* Memastikan teks terlihat semua */
 }
 
 #fotd-img {
@@ -1058,11 +1047,11 @@ footer {
 
 /* Animasi Getar jika input kosong */
 .shake-input {
-    animation: shake 0.4s ease-in-out;
+    animation: shake-input-error 0.4s ease-in-out;
     border: 2px solid #ff4d4d !important;
 }
 
-@keyframes shake {
+@keyframes shake-input-error {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     50% { transform: translateX(5px); }

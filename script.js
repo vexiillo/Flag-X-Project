@@ -824,19 +824,21 @@ function updateLevelUI(xp) {
 
     const percentage = level >= 50 ? 100 : (currentXPInLevel / nextLevelXPThreshold) * 100;
 
-    // Update elemen DOM
+    // Update elemen DOM        
     const progressBar = document.getElementById('level-progress-bar');
     const progressText = document.getElementById('level-progress-text');
     const percentageText = document.getElementById('level-percentage');
+    const levelBadge = document.getElementById('level-badge'); // <-- 1. Tambahkan baris ini
 
     if (progressBar) progressBar.style.width = `${percentage}%`;
-        if (progressText) {
+    if (progressText) {
         progressText.textContent = level >= 50 
             ? translations[settings.language].maxLevelReached 
             : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
     }
     if (percentageText) percentageText.textContent = `${Math.floor(percentage)}%`;
-}
+    if (levelBadge) levelBadge.textContent = `Lv. ${level}`; // <-- 2. Tambahkan baris ini
+    }
 
 // Pastikan fungsi ini dipanggil setiap kali skor XP berubah
 // Misalnya, panggil di dalam listener onAuthStateChanged setelah mengambil data dari Firestore:
@@ -1243,7 +1245,14 @@ if (auth) {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer) return;
 
-    listContainer.innerHTML = '<div class="p-4 text-center">Loading...</div>';
+listContainer.innerHTML = `
+    <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
+        <div class="loader"></div>
+        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+            Loading Leaderboard...
+        </p>
+    </div>
+`;   
 
     try {
         // Cek jika belum login

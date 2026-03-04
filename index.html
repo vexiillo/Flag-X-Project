@@ -78,9 +78,9 @@
         <span id="totalscore-value">68</span>
     </span>
     
-    <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[var(--primary-color)] px-4 py-0.5 rounded-lg text-sm font-bold text-white shadow-lg border border-white/20 min-w-[80px] text-center">
-        Lv. 1
-    </div>
+    <div id="level-badge" class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[var(--primary-color)] px-4 py-0.5 rounded-lg text-sm font-bold text-white shadow-lg border border-white/20 min-w-[80px] text-center">
+    Lv. 1
+</div>
 </div>
 
 <div id="level-info-panel" class="card p-6 rounded-xl hidden"> 
@@ -243,16 +243,16 @@
         </div>
 
 <div class="flex justify-center w-full mb-8 px-4">
-    <div id="fotd-container" class="relative flex items-center gap-4 px-6 py-4 bg-[var(--secondary-color)]/80 border border-white/20 rounded-[2rem] text-white w-full max-w-[400px] shadow-xl overflow-hidden">
+    <div id="fotd-container" class="relative flex items-center gap-4 px-6 py-4 bg-[var(--secondary-color)]/80 border border-white/20 rounded-[2rem] text-white w-full max-w-[400px] shadow-xl">
         
         <div class="flex-1 flex justify-center items-center">
-            <img id="fotd-img" src="" alt="Flag" class="max-h-[60px] md:max-h-[75px] w-auto rounded shadow-sm object-contain transition-opacity duration-500">
+            <img id="fotd-img" src="" alt="Flag" class="max-h-[80px] md:max-h-[100px] w-auto rounded shadow-sm object-contain transition-opacity duration-500">
         </div>
 
-        <div class="flex-1 flex flex-col items-center justify-center text-center gap-1 overflow-hidden">
+        <div class="flex-1 flex flex-col items-center justify-center text-center gap-1">
             <span class="text-[12px] font-black tracking-[0.15em] text-[var(--primary-color)] uppercase w-full">Flag of the Day</span>
             
-            <h2 id="fotd-name" class="text-sm font-bold leading-tight truncate w-full mb-1 px-1">
+            <h2 id="fotd-name" class="text-sm font-bold leading-tight w-full mb-1 px-1">
                 Loading...
             </h2>
             
