@@ -45,7 +45,7 @@
     }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>    
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,7 +86,7 @@
 <div id="level-info-panel" class="card p-6 rounded-xl hidden"> 
     <div class="text-[var(--primary-color)] text-sm mb-3 flex items-center gap-2 font-bold">
         <i class="fa-solid fa-circle-info text-xs"></i>
-        <span>Leveling System</span>
+        <span data-translate-key="levelingSystem">Leveling System</span>
     </div>
     
     <div class="mb-5 bg-[var(--secondary-color)] rounded-full h-4 overflow-hidden border border-white/10 relative">
@@ -118,7 +118,7 @@
             <span class="text-[var(--text-color)] font-semibold">5,000 XP / Lv</span>
         </li>
         
-        <li class="text-center text-[var(--primary-color)] pt-1 font-bold text-[11px] uppercase tracking-wider">
+        <li class="text-center text-[var(--primary-color)] pt-1 font-bold text-[11px] uppercase tracking-wider" data-translate-key="maxLevelInfo">
             Max Level: 50
         </li>
     </ul>
@@ -145,10 +145,11 @@
         <div class="w-20 h-20 rounded-full bg-[var(--secondary-color)] flex items-center justify-center text-3xl border-2 border-[var(--card-border-color)]">
             <i class="fa-solid fa-user-slash text-subtle"></i>
         </div>
-        <p class="text-sm text-subtle text-center">Login to save your score to Leaderboard!</p>
+        <p class="text-sm text-subtle text-center" data-translate-key="loginPrompt">Login to save your XP to the global leaderboard!</p>
         <button id="login-google-btn" class="btn btn-primary w-full py-2 flex items-center justify-center gap-2 text-white">
-            <i class="fa-brands fa-google"></i> Login with Google
-        </button>
+    <i class="fa-brands fa-google"></i> 
+    <span data-translate-key="loginBtn">Login with Google</span>
+</button>
     </div>
 
     <div id="auth-logged-in" class="hidden flex flex-col items-center">
@@ -159,7 +160,7 @@
     <div class="relative w-full mb-2 group">
     <input type="text" id="username-input" 
            class="w-full bg-[var(--input-bg-color)] border border-[var(--card-border-color)] rounded p-2 pl-10 pr-10 text-center font-bold focus:outline-none focus:border-[var(--primary-color)] transition-all"
-           placeholder="Your Name">
+           data-translate-key="yourName" placeholder="Display Name" maxlength="15">
     
     <div class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle pointer-events-none group-focus-within:text-[var(--primary-color)]">
         <i class="fa-solid fa-pencil text-xs"></i>
@@ -167,8 +168,8 @@
 </div>
 
     <div id="username-actions" class="flex gap-2 mb-4 hidden w-full">
-        <button id="cancel-username-btn" class="btn bg-red-600 text-white text-xs py-1 flex-1 rounded hover:bg-red-700">Cancel</button>
-        <button id="save-username-btn" class="btn bg-green-600 text-white text-xs py-1 flex-1 rounded hover:bg-green-700">Save</button>
+        <button id="cancel-username-btn" class="btn bg-red-600 text-white text-xs py-1 flex-1 rounded hover:bg-red-700" data-translate-key="cancelBtn">Cancel</button>
+        <button id="save-username-btn" class="btn bg-green-600 text-white text-xs py-1 flex-1 rounded hover:bg-green-700" data-translate-key="saveBtn">Save</button>
     </div>
 
     <button id="logout-btn" class="btn bg-red-500 text-white rounded w-full py-2 transition-all flex items-center justify-center gap-2 hover:bg-red-600">
@@ -203,7 +204,7 @@
                     <a href="#" class="text-subtle hover:text-[var(--text-color)] transition-colors"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
-            <p class="text-center text-xs text-subtle mt-4">v.2.5 (Beta Version)</p>
+            <p class="text-center text-xs text-subtle mt-4" data-translate-key="versionInfo">v.2.5 (Beta Version)</p>
         </div>
         
         <div id="disclaimer-panel" class="card rounded-lg p-4">
@@ -224,7 +225,7 @@
     <div class="border-t border-[var(--card-border-color)] my-4"></div>
 
     <div class="mt-4">
-        <button id="close-disclaimer-btn" class="btn btn-secondary w-full py-2 text-sm" data-translate-key="closeButton" onclick="document.getElementById('disclaimer-panel').classList.remove('active')">
+        <button id="close-disclaimer-btn" class="btn btn-secondary w-full py-2 text-sm" data-translate-key="closeBtn" onclick="document.getElementById('disclaimer-panel').classList.remove('active')">
             Close
         </button>
     </div>
@@ -444,7 +445,7 @@
     <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
 </div>
 
-<button id="close-gemini-modal-btn" class="btn btn-secondary w-full py-2 px-8 transition-all relative z-10" data-translate-key="closeButton">
+<button id="close-gemini-modal-btn" class="btn btn-secondary w-full py-2 px-8 transition-all relative z-10" data-translate-key="closeBtn">
     CLOSE
 </button>
     </div>
@@ -470,38 +471,38 @@
             <div id="detail-data" class="hidden text-left space-y-4 text-sm w-full pb-2 pt-2">
                 <div class="grid grid-cols-2 gap-3 border-b border-[var(--card-border-color)] pb-4">
                     <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
-                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Capital</span>
+                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1" data-translate-key="capitalInfo">Capital</span>
                         <span id="detail-capital" class="font-semibold"></span>
                     </div>
                     <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
-                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Established</span>
+                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1" data-translate-key="establishedInfo">Established</span>
                         <span id="detail-established" class="font-semibold"></span>
                     </div>
                     <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
-                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Population</span>
+                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1" data-translate-key="populationInfo">Population</span>
                         <span id="detail-population" class="font-semibold"></span>
                     </div>
                     <div class="bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
-                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Region</span>
+                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1" data-translate-key="regionInfo">Region</span>
                         <span id="detail-region" class="font-semibold"></span>
                     </div>
                     <div class="col-span-2 bg-[var(--card-bg-color)] p-2 rounded border border-[var(--card-border-color)]">
-                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1">Primary Language</span>
+                        <span class="text-subtle text-[10px] uppercase font-bold tracking-wider block mb-1" data-translate-key="languageInfo">Primary Language</span>
                         <span id="detail-language" class="font-semibold"></span>
                     </div>
                 </div>
                 
                 <div class="bg-[var(--card-bg-color)] p-3 rounded-lg border border-[var(--card-border-color)]">
-                    <h4 class="font-bold text-[var(--primary-color)] mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-flag"></i> Vexillology Corner
-                    </h4>
-                    <p id="detail-vexillology" class="text-sm leading-relaxed text-[var(--text-color)]"></p>
-                </div>
+    <h4 class="font-bold text-[var(--primary-color)] mb-2 flex items-center gap-2" data-translate-key="vexillologyInfo">
+        <i class="fa-solid fa-flag"></i> Vexillology Corner
+    </h4>
+    <p id="detail-vexillology" class="text-sm leading-relaxed text-[var(--text-color)]"></p>
+</div>
             </div>
         </div>
         
         <div class="flex-shrink-0 relative z-10 mt-2 pt-4 border-t border-[var(--card-border-color)]">
-            <button id="close-detail-modal-btn" class="btn btn-secondary w-full py-2 px-8 transition-all relative z-10" data-translate-key="closeButton">
+            <button id="close-detail-modal-btn" class="btn btn-secondary w-full py-2 px-8 transition-all relative z-10" data-translate-key="closeBtn">
                 CLOSE
             </button>
         </div>
@@ -516,15 +517,15 @@
                 <i class="fa-solid fa-angles-up text-6xl text-yellow-400 glow-icon-effect" style="filter: drop-shadow(0 0 15px #FFD700);"></i>
             </div>
 
-            <h3 id="level-up-text" class="text-4xl font-black mb-1 text-transparent bg-clip-text relative z-10" style="-webkit-text-stroke: 1px rgba(255,255,255,0.1);">
+            <h3 id="level-up-text" class="text-4xl font-black mb-1 text-transparent bg-clip-text relative z-10" style="-webkit-text-stroke: 1px rgba(255,255,255,0.1);" data-translate-key="levelUpInfo">
     LEVEL UP!
 </h3>
             
-            <p class="text-subtle mb-6 relative z-10 font-medium">
+            <p class="text-subtle mb-6 relative z-10 font-medium" data-translate-key="reachedInfo">
                 You've reached <span id="new-level-display" class="font-bold text-[var(--primary-color)] text-2xl ml-1">Lv. ?</span>
             </p>
 
-            <button id="close-level-up-btn" class="btn btn-primary py-3 px-8 w-full transition-all relative z-10 text-lg font-bold shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.5)]">
+            <button id="close-level-up-btn" class="btn btn-primary py-3 px-8 w-full transition-all relative z-10 text-lg font-bold shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.5)]" data-translate-key="awesomeBtn">
                 AWESOME!
             </button>
         </div>
@@ -555,10 +556,4 @@
     
     <script type="module" src="script.js" defer></script>
 </body>
-
 </html>
-
-
-
-
-

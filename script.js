@@ -502,7 +502,7 @@ if (infoBtn) {
 
             comboResultMessage: "You survived the Combo Challenge for {questions} questions and gained {score} XP!",
 
-            viewDetailBtn: "View Detail", funFact: "Fun Fact", closeButton: "Close", geminiError: "Sorry, our daily limit has been reached. Please try again tomorrow!", searchPlaceholder: "Search for a flag...",
+            viewDetailBtn: "View Detail", funFact: "Fun Fact", closeBtn: "Close", geminiError: "Sorry, our daily limit has been reached. Please try again tomorrow!", searchPlaceholder: "Search for a flag...",
 
             mode_classic_title: "Classic Mode", mode_classic_desc: "Guess 20 official country flags. No time limit.",
 
@@ -527,8 +527,37 @@ if (infoBtn) {
             playQuizBtn: "Play Quiz", viewBtn: "View",
 
             // NEW TRANSLATIONS
+            awesomeBtn: "AWESOME!",
+            
+            reachedInfo: "You've reached",
+            
+            levelUpInfo: "LEVEL UP!",
+            
+            vexillologyInfo: "Vexillology Corner",
+            
+            languageInfo: "Primary Language",
+            
+            regionInfo: "Region",
+            
+            populationInfo: "Population",
+            
+            establishedInfo: "Established",
+            
+            capitalInfo: "Capital",
+            
+            versionInfo: "v.2.5 (Beta Version)",
+            
+            saveBtn: "Save",
+            
+            cancelBtn: "Cancel",
+            
+            yourName: "Display Name",
+            
+            maxLevelInfo: "Max Level: 50",
+            
+            levelingSystem: "Leveling System",
 
-            loginPrompt: "Login to save your score to the global leaderboard!",
+            loginPrompt: "Login to save your XP to the global leaderboard!",
 
             loginBtn: "Login with Google",
 
@@ -546,8 +575,24 @@ if (infoBtn) {
 
             disclaimerTitle: "Flag Accuracy Note",
 
-    disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encounter—even the most unrecognizable ones—the broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!"
+    disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encounter—even the most unrecognizable ones—the broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
 
+// Tambahkan di dalam objek 'en', di bawah teks yang sudah ada:
+toastNameBlank: "Name cannot be blank!️",
+toastNameSaved: "Name saved!",
+toastSaveFailed: "Failed to save. Try again.",
+btnSaving: "Saving...",
+maxLevelReached: "MAX LEVEL reached!",
+leaderboardLockedTitle: "Leaderboard Locked",
+leaderboardLockedDesc: "Login to view global rankings and compete with others!",
+leaderboardLoginBtn: "Login to Unlock",
+leaderboardError: "Error loading leaderboard. Check internet connection and try again.",
+libNoFlags: "No flags available.",
+searchNoFlags: "No flags found",
+searchTryDifferent: "Try a different keyword.",
+detailNoInfo: "No specific vexillology info provided.",
+toastLoginSuccess: "Login successful!",
+toastLoginFailed: "Login failed: "
         },
 
         id: {
@@ -574,7 +619,7 @@ if (infoBtn) {
 
             comboResultMessage: "Anda bertahan di Tantangan Kombo selama {questions} pertanyaan dan mendapat {score} XP!",
 
-            viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeButton: "Tutup", geminiError: "Maaf, batas harian kami sudah habis. Silakan coba lagi besok!", searchPlaceholder: "Cari bendera...",
+            viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeBtn: "Tutup", geminiError: "Maaf, batas harian kami sudah habis. Silakan coba lagi besok!", searchPlaceholder: "Cari bendera...",
 
             mode_classic_title: "Mode Klasik", mode_classic_desc: "Tebak 20 bendera negara resmi. Tanpa batas waktu.",
 
@@ -599,6 +644,35 @@ if (infoBtn) {
             playQuizBtn: "Main Kuis", viewBtn: "Lihat",
 
             // NEW TRANSLATIONS
+            awesomeBtn: "LUAR BIASA!",
+            
+            reachedInfo: "Anda telah mencapai",
+            
+            levelUpInfo: "NAIK LEVEL!",
+            
+            vexillologyInfo: "Sudut Vexillologi",
+            
+            languageInfo: "Bahasa Utama",
+            
+            regionInfo: "Wilayah",
+            
+            populationInfo: "Populasi",
+            
+            establishedInfo: "Didirikan",
+            
+            capitalInfo: "Ibukota",
+            
+            versionInfo: "v.2.5 (Versi Beta)",
+            
+            saveBtn: "Simpan",
+            
+            cancelBtn: "Batal",
+            
+            yourName: "Nama Tampilan",
+            
+            maxLevelInfo: "Level Maks: 50",
+            
+            levelingSystem: "Sistem Level",
 
             loginPrompt: "Masuk untuk simpan XP ke papan peringkat global!",
 
@@ -618,10 +692,25 @@ if (infoBtn) {
 
             disclaimerTitle: "Catatan Akurasi Bendera",
 
-    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang kamu temui—bahkan yang paling sulit dikenali sekalipun—semakin luas pengetahuan yang kamu dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!"
+    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang kamu temui—bahkan yang paling sulit dikenali sekalipun—semakin luas pengetahuan yang kamu dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
 
+// Tambahkan di dalam objek 'id', di bawah teks yang sudah ada:
+toastNameBlank: "Nama tidak boleh kosong!️",
+toastNameSaved: "Nama disimpan!",
+toastSaveFailed: "Gagal menyimpan. Coba lagi.",
+btnSaving: "Menyimpan...",
+maxLevelReached: "LEVEL MAKS tercapai!",
+leaderboardLockedTitle: "Papan Peringkat Terkunci",
+leaderboardLockedDesc: "Masuk untuk melihat peringkat global dan bersaing dengan yang lain!",
+leaderboardLoginBtn: "Masuk untuk Membuka",
+leaderboardError: "Gagal memuat papan peringkat. Periksa internet dan coba lagi.",
+libNoFlags: "Tidak ada bendera tersedia.",
+searchNoFlags: "Bendera tidak ditemukan",
+searchTryDifferent: "Coba kata kunci lain.",
+detailNoInfo: "Tidak ada info vexillologi spesifik.",
+toastLoginSuccess: "Berhasil masuk!",
+toastLoginFailed: "Gagal masuk: "
         },
-
     };
 
     // --- CORE LOGIC ---
@@ -741,9 +830,9 @@ function updateLevelUI(xp) {
     const percentageText = document.getElementById('level-percentage');
 
     if (progressBar) progressBar.style.width = `${percentage}%`;
-    if (progressText) {
+        if (progressText) {
         progressText.textContent = level >= 50 
-            ? "MAX LEVEL reached!" 
+            ? translations[settings.language].maxLevelReached 
             : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
     }
     if (percentageText) percentageText.textContent = `${Math.floor(percentage)}%`;
@@ -800,76 +889,42 @@ function updateLevelUI(xp) {
 
     // --- AUTH & DATABASE FUNCTIONS ---
 
-    
-
-    // Ganti seluruh fungsi handleLogin dengan ini:
-
+// 1. HandleLogin
 const handleLogin = async (e) => {
-
     if (e) {
-
         e.preventDefault();
-
         e.stopPropagation();
-
     }
 
-
-
-    if (!auth) return alert("Firebase not configured!");
-
-
+    // Perubahan di sini: Mengganti pesan teknis dengan pesan Login Failed dari terjemahan
+    if (!auth) {
+        showToast(translations[settings.language].toastLoginFailed);
+        return;
+    }
 
     try {
-
-        console.log("Mencoba membuka popup Google...");
-
         await signInWithPopup(auth, googleProvider);
-
         
-
-        console.log("Login berhasil!");
-
+        // Memanggil toast sukses
+        showToast(translations[settings.language].toastLoginSuccess);
         
-
-        // SOLUSI MASALAH 1: Tutup panel setelah login sukses
-
         const profilePanel = document.getElementById('profile-panel');
-
         if (profilePanel) profilePanel.classList.remove('active');
-
         
-
     } catch (error) {
-
         console.error("Login Error:", error);
-
         
-
-        // Tutup panel juga jika error/cancel agar tidak menutupi layar
-
         const profilePanel = document.getElementById('profile-panel');
-
         if (profilePanel) profilePanel.classList.remove('active');
 
-
-
-        if (error.code === 'auth/popup-closed-by-user') {
-
-            console.log("Popup ditutup oleh user");
-
-        } else {
-
-            alert("Gagal Login: " + error.message);
-
+        if (error.code !== 'auth/popup-closed-by-user') {
+            // Menggabungkan pesan gagal dengan pesan error teknis di belakangnya
+            showToast(translations[settings.language].toastLoginFailed + ": " + error.message);
         }
-
     }
-
 };
 
-    // 2. Handle Logout
-
+    // 2. Handle Logout    
     // --- Update Fungsi Logout (Versi Anti-Bug) ---
 const handleLogout = async () => {
     try {
@@ -1185,153 +1240,87 @@ if (auth) {
     // 5. Load Leaderboard
 
         const loadLeaderboard = async () => {
+    const listContainer = document.getElementById('leaderboard-list');
+    if (!listContainer) return;
 
-        const listContainer = document.getElementById('leaderboard-list');
+    listContainer.innerHTML = '<div class="p-4 text-center">Loading...</div>';
 
-        
-
-        // 1. CEK STATUS LOGIN DULU
-
+    try {
+        // Cek jika belum login
         if (!auth || !auth.currentUser) {
-
-            // Tampilan jika BELUM Login (Terkunci)
-
             listContainer.innerHTML = `
-
                 <div class="flex flex-col items-center justify-center py-10 px-4 text-center h-full">
-
                     <div class="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center text-3xl mb-4 border border-[var(--card-border-color)]">
-
                         <i class="fa-solid fa-lock text-[var(--subtle-text-color)]"></i>
-
                     </div>
-
-                    <h3 class="text-xl font-bold mb-2">Leaderboard Locked</h3>
-
+                    <h3 class="text-xl font-bold mb-2">${translations[settings.language].leaderboardLockedTitle}</h3>
                     <p class="text-subtle mb-6 text-sm max-w-xs mx-auto">
-
-                        Login to view global rankings and compete with others!
-
+                        ${translations[settings.language].leaderboardLockedDesc}
                     </p>
-
                     <button id="leaderboard-login-btn" class="btn btn-primary px-6 py-2 shadow-lg hover:scale-105 transition-transform">
-
-                        <i class="fa-brands fa-google mr-2"></i> Login to Unlock
-
+                        <i class="fa-brands fa-google mr-2"></i> ${translations[settings.language].leaderboardLoginBtn}
                     </button>
-
                 </div>
-
             `;
 
-            
-
-            // Aktifkan tombol login di dalam tampilan terkunci ini
-
-            document.getElementById('leaderboard-login-btn')
-
-  .addEventListener('click', () => {
-
-    signInWithPopup(auth, googleProvider)
-
-      .catch(err => console.error("Login Error:", err));
-
-  });
-
-            return; // BERHENTI DI SINI, jangan load data firebase
-
-        }
-
-
-
-        // 2. JIKA SUDAH LOGIN, LOAD DATA FIREBASE (Kode Asli)
-
-        listContainer.innerHTML = `
-    <div class="p-8 flex flex-col items-center justify-center gap-3">
-        <div class="loader"></div>
-        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-            Loading Leaderboard...
-        </p>
-    </div>
-`;
-
-        try {
-
-            const q = query(collection(db, "users"), orderBy("totalScore", "desc"), limit(50));
-
-            const querySnapshot = await getDocs(q);
-
-            
-
-            let html = '';
-
-            let rank = 1;
-
-
-
-            if (querySnapshot.empty) {
-
-                listContainer.innerHTML = '<div class="p-4 text-subtle text-center">No players yet. Be the first!</div>';
-
-                return;
-
+            const loginBtn = document.getElementById('leaderboard-login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    handleLogin();
+                });
             }
-
-
-
-            querySnapshot.forEach((doc) => {
-
-                const data = doc.data();
-
-                const isMe = auth.currentUser && auth.currentUser.uid === doc.id;
-
-                 // Tambahkan baris ini untuk menghitung level pemain
-                const userLevel = calculateLevel(data.totalScore || 0);
-
-                let rankDisplay = rank;
-
-                let rankColor = "text-subtle";
-
-                if(rank === 1) { rankDisplay = '<i class="fa-solid fa-trophy text-yellow-400"></i>'; rankColor="text-yellow-400"; }
-
-                else if(rank === 2) { rankDisplay = '<i class="fa-solid fa-trophy text-gray-400"></i>'; rankColor="text-gray-400"; }
-
-                else if(rank === 3) { rankDisplay = '<i class="fa-solid fa-trophy text-amber-700"></i>'; rankColor="text-amber-700"; }
-
-
-
-                const rowClass = `grid grid-cols-12 gap-2 p-3 items-center border-b border-[var(--card-border-color)] text-sm hover:bg-[var(--card-bg-color)] transition ${isMe ? 'bg-[rgba(var(--primary-color-rgb),0.2)] border-[var(--primary-color)]' : ''}`;
-
-                
-
-                html += `
-                <div class="${rowClass}">
-                    <div class="col-span-2 font-bold text-center ${rankColor}">${rankDisplay}</div>
-                    <div class="col-span-7 flex items-center gap-3 pl-2 overflow-hidden">
-                        <img src="${data.photoURL || 'https://ui-avatars.com/api/?name='+data.username}" class="w-8 h-8 rounded-full border border-[var(--card-border-color)] object-cover" loading="lazy">
-                        <span class="truncate font-semibold flex items-center gap-2 ${isMe ? 'text-[var(--primary-color)]' : ''}">
-                            ${data.username || 'Anonymous'}
-                            <span class="text-[9px] bg-[var(--primary-color)] text-white px-1.5 py-0.5 rounded shadow-sm">Lv.${userLevel}</span>
-                        </span>
-                    </div>
-                    <div class="col-span-3 text-right font-mono font-bold pr-2">${data.totalScore}</div>
-                </div>`;
-                rank++;
-            });
-
-            listContainer.innerHTML = html;
-
-        } catch (error) {
-
-            console.error("Leaderboard Error:", error);
-
-            listContainer.innerHTML = '<div class="p-4 text-[var(--error-color)] text-center">Error loading leaderboard. Check internet connection.</div>';
-
+            return;
         }
 
-    };
+        // Ambil data dari Firestore
+        const q = query(collection(db, "users"), orderBy("totalScore", "desc"), limit(50));
+        const querySnapshot = await getDocs(q);
 
-    
+        if (querySnapshot.empty) {
+            listContainer.innerHTML = ''; // Pesan "No players" dihapus sesuai permintaan
+            return;
+        }
+
+        let html = '';
+        let rank = 1;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const isMe = auth.currentUser && auth.currentUser.uid === doc.id;
+            const userLevel = calculateLevel(data.totalScore || 0);
+            
+            // Username acak jika tidak ada nama
+            const displayName = data.username || 'User' + Math.floor(1000 + Math.random() * 9000);
+
+            let rankColor = "text-[var(--subtle-text-color)]";
+            if (rank === 1) rankColor = "text-yellow-400";
+            else if (rank === 2) rankColor = "text-gray-300";
+            else if (rank === 3) rankColor = "text-amber-600";
+
+            const rowClass = `grid grid-cols-12 gap-2 p-3 items-center border-b border-[var(--card-border-color)] text-sm hover:bg-[var(--card-bg-color)] transition ${isMe ? 'bg-[rgba(var(--primary-color-rgb),0.2)] border-[var(--primary-color)]' : ''}`;
+            
+            html += `
+            <div class="${rowClass}">
+                <div class="col-span-2 font-bold text-center ${rankColor}">${rank}</div>
+                <div class="col-span-7 flex items-center gap-3 pl-2 overflow-hidden">
+                    <img src="${data.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-8 h-8 rounded-full border border-[var(--card-border-color)] object-cover">
+                    <span class="truncate font-semibold flex items-center gap-2 ${isMe ? 'text-[var(--primary-color)]' : ''}">
+                        ${displayName}
+                        <span class="text-[9px] bg-[var(--primary-color)] text-white px-1.5 py-0.5 rounded">Lv.${userLevel}</span>
+                    </span>
+                </div>
+                <div class="col-span-3 text-right font-mono font-bold pr-2">${data.totalScore}</div>
+            </div>`;
+            rank++;
+        });
+
+        listContainer.innerHTML = html;
+
+    } catch (error) {
+        console.error("Leaderboard Error:", error);
+        listContainer.innerHTML = `<div class="p-4 text-[var(--error-color)] text-center">${translations[settings.language].leaderboardError}</div>`;
+    }
+};
 
     function renderQuizModes() {
 
@@ -1491,40 +1480,32 @@ cancelUsernameBtn.addEventListener('click', () => {
 saveUsernameBtn.addEventListener('click', async () => {
     const newName = usernameInput.value.trim();
 
-    // 1. VALIDASI: Jika nama kosong
     if (!newName) {
         usernameInput.classList.add('shake-input');
-        showToast("Name cannot be blank!️");
-        
-        // Hapus class animasi getar agar bisa dipicu lagi nanti
-        setTimeout(() => {
-            usernameInput.classList.remove('shake-input');
-        }, 400);
+        showToast(translations[settings.language].toastNameBlank);
+        setTimeout(() => { usernameInput.classList.remove('shake-input'); }, 400);
         return; 
     }
-
+        
     if (auth.currentUser) {
         try {
-            // Memberikan efek "Saving..." pada tombol agar terasa smooth
             const originalBtnText = saveUsernameBtn.innerText;
-            saveUsernameBtn.innerText = "Saving...";
+            saveUsernameBtn.innerText = translations[settings.language].btnSaving;
             saveUsernameBtn.classList.add('btn-loading');
 
             await setDoc(doc(db, "users", auth.currentUser.uid), { username: newName }, { merge: true });
 
-            // 2. SUCCESS FEEDBACK
-            showToast("Name saved!");
+            showToast(translations[settings.language].toastNameSaved);
             
-            // Kembalikan UI
             usernameActions.classList.add('hidden');
             usernameActions.classList.remove('flex');
-            saveUsernameBtn.innerText = originalBtnText;
+            saveUsernameBtn.innerText = originalBtnText; // Kembali ke teks asli (Save/Simpan)
             saveUsernameBtn.classList.remove('btn-loading');
 
         } catch (e) { 
             console.error(e);
-            showToast("Failed to save. Try again.");
-            saveUsernameBtn.innerText = "Save";
+            showToast(translations[settings.language].toastSaveFailed);
+            saveUsernameBtn.innerText = translations[settings.language].saveBtn; // Fallback text
             saveUsernameBtn.classList.remove('btn-loading');
         }
     }
@@ -2069,8 +2050,8 @@ function generateFlagQuestion(targetData, isYear = false) {
     grid.innerHTML = '';
     grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full";
     
-    if (!data || data.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-subtle">No flags available.</p>`;
+        if (!data || data.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-subtle">${translations[settings.language].libNoFlags}</p>`;
         showScreen('library-display-screen');
         return;
     }
@@ -2276,10 +2257,10 @@ card.innerHTML = `
                 emptyState = document.createElement('div');
                 emptyState.id = 'library-empty-state';
                 emptyState.className = 'col-span-full py-16 text-center text-subtle flex flex-col items-center w-full';
-                emptyState.innerHTML = `
+                                emptyState.innerHTML = `
                     <i class="fa-solid fa-magnifying-glass text-5xl mb-4 opacity-30"></i>
-                    <p class="text-lg font-bold">No flags found</p>
-                    <p class="text-sm">Try a different keyword.</p>
+                    <p class="text-lg font-bold">${translations[settings.language].searchNoFlags}</p>
+                    <p class="text-sm">${translations[settings.language].searchTryDifferent}</p>
                 `;
                 grid.appendChild(emptyState);
             } else {
@@ -2412,7 +2393,7 @@ async function getFlagDetail(itemName, flagUrl) {
         document.getElementById('detail-population').textContent = data.population || '-';
         document.getElementById('detail-region').textContent = data.region || '-';
         document.getElementById('detail-language').textContent = data.language || '-';
-        document.getElementById('detail-vexillology').textContent = data.vexillology || 'No info.';
+        document.getElementById('detail-vexillology').textContent = data.vexillology || translations[settings.language].detailNoInfo;
     };
 
     // 2. Cek Cache Harian di LocalStorage
@@ -2488,7 +2469,7 @@ async function getFlagDetail(itemName, flagUrl) {
         document.getElementById('detail-population').textContent = data.population || 'N/A';
         document.getElementById('detail-region').textContent = data.region || 'N/A';
         document.getElementById('detail-language').textContent = data.language || 'N/A';
-        document.getElementById('detail-vexillology').textContent = data.vexillology || 'No specific vexillology info provided.';
+        document.getElementById('detail-vexillology').textContent = data.vexillology || translations[settings.language].detailNoInfo;
     }
     
     // --- PERBAIKAN FUNGSI INIT FOTD ---
@@ -2504,7 +2485,7 @@ function initFlagOfTheDay() {
     ];
 
     if (allFlags.length === 0) {
-        console.error("FOTD: Data bendera tidak ditemukan!");
+        console.error("FOTD: Flag data not found!");
         return;
     }
 
@@ -2545,7 +2526,7 @@ function initFlagOfTheDay() {
 
             // Tambahkan handling jika gambar gagal muat
             imgEl.onerror = () => {
-                console.error("Gagal memuat gambar bendera FOTD");
+                console.error("Failed to load FOTD flag image");
                 if (containerEl) containerEl.classList.remove('animate-pulse');
             };
         }
@@ -2558,7 +2539,7 @@ function initFlagOfTheDay() {
                 if (typeof window.getFunFact === 'function') {
                     window.getFunFact(dailyFlag.name);
                 } else {
-                    console.error("Fungsi getFunFact tidak ditemukan di window.");
+                    console.error("getFunFact function not found in window.");
                 }
             };
         }
@@ -2666,6 +2647,9 @@ if ('serviceWorker' in navigator) {
     window.handleLogin = handleLogin;
 
     window.handleLogout = handleLogout;
+    
+    // Tambahkan ini di bagian paling bawah script.js agar bisa dites di console
+window.showToast = showToast;
 
     // Jalankan initApp HANYA SEKALI di sini
 
