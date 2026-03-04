@@ -22,8 +22,9 @@ jobs:
         run: npm install -D tailwindcss
 
       - name: Build CSS
-        # Ini bagian yang men-scan JS kamu dan membuat file output
-        run: npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify
+        run: |
+          mkdir -p dist
+          npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify
 
       - name: Commit and Push CSS
         run: |
