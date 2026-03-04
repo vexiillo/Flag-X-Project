@@ -1,0 +1,35 @@
+name: Build Tailwind CSS
+
+on:
+  push:
+    branches:
+      - main  # Ganti jadi 'master' jika branch utama kamu namanya master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Tailwind CSS
+        run: npm install -D tailwindcss
+
+      - name: Build CSS
+        # Ini bagian yang men-scan JS kamu dan membuat file output
+        run: npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify
+
+      - name: Commit and Push CSS
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/output.css
+          git commit -m "Update compiled Tailwind CSS" || exit 0
+          git push
+          
