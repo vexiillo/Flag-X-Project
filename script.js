@@ -932,26 +932,25 @@ const handleLogin = async (e) => {
     }
 };
 
-// Fungsi untuk Ganti Akun (Switch Account) dengan Refresh
+// Fungsi untuk Ganti Akun (Switch Account) Anti-Nyangkut
 async function switchAccount() {
     try {
-        // 1. Keluarkan (Sign Out) akun yang sedang aktif
-        await signOut(auth);
-
-        // 2. Siapkan Google Provider dengan paksaan pilih akun
+        // 1. Siapkan Google Provider dengan paksaan pilih akun
+        // Catatan: KITA TIDAK LAGI memanggil signOut() di sini.
+        // Tujuannya agar jika user membatalkan (cancel), akun lamanya tetap aman.
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({
             prompt: 'select_account' 
         });
 
-        // 3. Tampilkan popup login untuk pilih akun baru
+        // 2. Tampilkan popup login untuk pilih akun baru
+        // Firebase otomatis akan menimpa (overwrite) sesi lama jika login ini berhasil
         await signInWithPopup(auth, provider);
 
-        // 4. Tampilkan toast notifikasi sukses (berdasarkan bahasa aktif)
+        // 3. Jika berhasil sampai baris ini, berarti user BENAR-BENAR sukses ganti akun
         showToast(translations[settings.language].toastSwitchSuccess);
 
-        // 5. Refresh halaman web!
-        // Beri jeda 800ms agar toast notifikasi sukses sempat terbaca sebelum refresh
+        // 4. Refresh halaman web agar foto profil, xp, dan level akun baru termuat dengan sempurna
         setTimeout(() => {
             window.location.reload();
         }, 800); 
@@ -959,7 +958,9 @@ async function switchAccount() {
     } catch (error) {
         console.error("Gagal mengganti akun: ", error);
         
-        // Jangan tampilkan error jika pengguna sekadar batal/close popup Google
+        // Jika error-nya karena user nge-klik 'X' (cancel/tutup popup), 
+        // kita tidak perlu melakukan apa-apa. User akan tetap berada di akun lamanya,
+        // UI tidak akan berubah menjadi mode logout, dan skor/level tetap aman.
         if (error.code !== 'auth/popup-closed-by-user') {
             showToast(translations[settings.language].toastSwitchFailed + error.message);
         }
