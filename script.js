@@ -926,6 +926,42 @@ const handleLogin = async (e) => {
     }
 };
 
+// Fungsi untuk Ganti Akun (Switch Account)
+async function switchAccount() {
+    const auth = getAuth();
+    try {
+        // 1. Keluarkan (Sign Out) akun yang sedang aktif
+        await signOut(auth);
+        console.log("Akun lama berhasil dikeluarkan.");
+
+        // 2. Siapkan Google Provider dengan paksaan pilih akun
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: 'select_account' // Ini kuncinya!
+        });
+
+        // 3. Tampilkan popup login
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        console.log("Berhasil ganti akun ke: ", user.displayName);
+
+        // 4. (Opsional) Tampilkan notifikasi
+        // Asumsi kamu punya fungsi showToast() berdasarkan style.css-mu
+        if(typeof showToast === 'function') {
+            showToast("Berhasil ganti akun ke " + user.displayName);
+        }
+
+        // 5. Muat ulang layar utama atau data user (Sesuaikan dengan fungsi load datamu)
+        showScreen('home-screen'); 
+
+    } catch (error) {
+        console.error("Gagal mengganti akun: ", error);
+        if(typeof showToast === 'function') {
+            showToast("Gagal mengganti akun. Silakan coba lagi.");
+        }
+    }
+}
+
     // 2. Handle Logout    
     // --- Update Fungsi Logout (Versi Anti-Bug) ---
 const handleLogout = async () => {
@@ -2659,6 +2695,8 @@ if ('serviceWorker' in navigator) {
     window.toggleTheme = toggleTheme;
 
     window.handleLogin = handleLogin;
+    
+    window.switchAccount = switchAccount;
 
     window.handleLogout = handleLogout;
     
