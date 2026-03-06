@@ -592,7 +592,10 @@ searchNoFlags: "No flags found",
 searchTryDifferent: "Try a different keyword.",
 detailNoInfo: "No specific vexillology info provided.",
 toastLoginSuccess: "Login successful!",
-toastLoginFailed: "Login failed: "
+toastLoginFailed: "Login failed: ",
+switchAccount: "Switch Account",
+toastSwitchSuccess: "Successfully switched account!",
+toastSwitchFailed: "Failed to switch account: "
         },
 
         id: {
@@ -710,6 +713,9 @@ searchTryDifferent: "Coba kata kunci lain.",
 detailNoInfo: "Tidak ada info vexillologi spesifik.",
 toastLoginSuccess: "Berhasil masuk!",
 toastLoginFailed: "Gagal masuk: "
+switchAccount: "Ganti Akun",
+toastSwitchSuccess: "Berhasil mengganti akun!",
+toastSwitchFailed: "Gagal mengganti akun: "
         },
     };
 
@@ -926,38 +932,36 @@ const handleLogin = async (e) => {
     }
 };
 
-// Fungsi untuk Ganti Akun (Switch Account)
+// Fungsi untuk Ganti Akun (Switch Account) dengan Refresh
 async function switchAccount() {
-    const auth = getAuth();
     try {
         // 1. Keluarkan (Sign Out) akun yang sedang aktif
         await signOut(auth);
-        console.log("Akun lama berhasil dikeluarkan.");
 
         // 2. Siapkan Google Provider dengan paksaan pilih akun
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({
-            prompt: 'select_account' // Ini kuncinya!
+            prompt: 'select_account' 
         });
 
-        // 3. Tampilkan popup login
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        console.log("Berhasil ganti akun ke: ", user.displayName);
+        // 3. Tampilkan popup login untuk pilih akun baru
+        await signInWithPopup(auth, provider);
 
-        // 4. (Opsional) Tampilkan notifikasi
-        // Asumsi kamu punya fungsi showToast() berdasarkan style.css-mu
-        if(typeof showToast === 'function') {
-            showToast("Berhasil ganti akun ke " + user.displayName);
-        }
+        // 4. Tampilkan toast notifikasi sukses (berdasarkan bahasa aktif)
+        showToast(translations[settings.language].toastSwitchSuccess);
 
-        // 5. Muat ulang layar utama atau data user (Sesuaikan dengan fungsi load datamu)
-        showScreen('home-screen'); 
+        // 5. Refresh halaman web!
+        // Beri jeda 800ms agar toast notifikasi sukses sempat terbaca sebelum refresh
+        setTimeout(() => {
+            window.location.reload();
+        }, 800); 
 
     } catch (error) {
         console.error("Gagal mengganti akun: ", error);
-        if(typeof showToast === 'function') {
-            showToast("Gagal mengganti akun. Silakan coba lagi.");
+        
+        // Jangan tampilkan error jika pengguna sekadar batal/close popup Google
+        if (error.code !== 'auth/popup-closed-by-user') {
+            showToast(translations[settings.language].toastSwitchFailed + error.message);
         }
     }
 }
