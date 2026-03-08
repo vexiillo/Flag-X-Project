@@ -583,10 +583,8 @@ toastNameSaved: "Name saved!",
 toastSaveFailed: "Failed to save. Try again.",
 btnSaving: "Saving...",
 maxLevelReached: "MAX LEVEL reached!",
-leaderboardLockedTitle: "Leaderboard Locked",
-leaderboardLockedDesc: "Login to view global rankings and compete with others!",
-leaderboardLoginBtn: "Login to Unlock",
-leaderboardError: "Error loading leaderboard. Check internet connection and try again.",
+leaderboardError: "Error loading leaderboard.",
+leaderboardErrorSub: "Check your internet connection and try again in a moment.",
 libNoFlags: "No flags available.",
 searchNoFlags: "No flags found.",
 searchTryDifferent: "Try a different keyword.",
@@ -595,7 +593,13 @@ toastLoginSuccess: "Login successful!",
 toastLoginFailed: "Login failed: ",
 switchAccount: "Switch Account",
 toastSwitchSuccess: "Successfully switched account!",
-toastSwitchFailed: "Failed to switch account: "
+toastSwitchFailed: "Failed to switch account: ",
+leaderboardGuestCTA: "Login to enter global rankings and compete with others!",
+retryBtn: "Try Again",
+navHome: "Home",
+navPlay: "Play",
+navLibrary: "Library",
+navLeaderboard: "Rank"
         },
 
         id: {
@@ -695,7 +699,7 @@ toastSwitchFailed: "Failed to switch account: "
 
             disclaimerTitle: "Catatan Akurasi Bendera",
 
-    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang kamu temui—bahkan yang paling sulit dikenali sekalipun—semakin luas pengetahuan yang kamu dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
+    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temui—bahkan yang paling sulit dikenali sekalipun—semakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
 
 // Tambahkan di dalam objek 'id', di bawah teks yang sudah ada:
 toastNameBlank: "Nama tidak boleh kosong!️",
@@ -703,10 +707,8 @@ toastNameSaved: "Nama disimpan!",
 toastSaveFailed: "Gagal menyimpan. Coba lagi.",
 btnSaving: "Menyimpan...",
 maxLevelReached: "LEVEL MAKS tercapai!",
-leaderboardLockedTitle: "Papan Peringkat Terkunci",
-leaderboardLockedDesc: "Masuk untuk melihat peringkat global dan bersaing dengan yang lain!",
-leaderboardLoginBtn: "Masuk untuk Membuka",
-leaderboardError: "Gagal memuat papan peringkat. Periksa internet dan coba lagi.",
+leaderboardError: "Gagal memuat papan peringkat.",
+leaderboardErrorSub: "Periksa koneksi internet Anda dan coba beberapa saat lagi.",
 libNoFlags: "Tidak ada bendera tersedia.",
 searchNoFlags: "Bendera tidak ditemukan",
 searchTryDifferent: "Coba kata kunci lain.",
@@ -715,7 +717,13 @@ toastLoginSuccess: "Berhasil masuk!",
 toastLoginFailed: "Gagal masuk: ",
 switchAccount: "Ganti Akun",
 toastSwitchSuccess: "Berhasil mengganti akun!",
-toastSwitchFailed: "Gagal mengganti akun: "
+toastSwitchFailed: "Gagal mengganti akun: ",
+leaderboardGuestCTA: "Login untuk masuk ke peringkat global dan bersaing dengan yang lain!",
+retryBtn: "Coba Lagi",
+navHome: "Beranda",
+navPlay: "Main",
+navLibrary: "Pustaka",
+navLeaderboard: "Peringkat"
         },
     };
 
@@ -1286,54 +1294,44 @@ if (auth) {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer) return;
 
-listContainer.innerHTML = `
-    <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
-        <div class="loader"></div>
-        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-            Loading Leaderboard...
-        </p>
-    </div>
-`;   
+    listContainer.innerHTML = `
+        <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
+            <div class="loader"></div>
+            <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+                Loading Leaderboard...
+            </p>
+        </div>
+    `;   
 
     try {
-        // Cek jika belum login
+        let html = '';
+
+        // 1. Jika belum login, siapkan Banner CTA untuk digabungkan di atas tabel
         if (!auth || !auth.currentUser) {
-            listContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-10 px-4 text-center h-full">
-                    <div class="w-16 h-16 rounded-full bg-[var(--secondary-color)] flex items-center justify-center text-3xl mb-4 border border-[var(--card-border-color)]">
-                        <i class="fa-solid fa-lock text-[var(--subtle-text-color)]"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">${translations[settings.language].leaderboardLockedTitle}</h3>
-                    <p class="text-subtle mb-6 text-sm max-w-xs mx-auto">
-                        ${translations[settings.language].leaderboardLockedDesc}
+            html += `
+                <div class="bg-[var(--secondary-color)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)]">
+                    <p class="text-sm font-semibold text-[var(--text-color)]" data-translate-key="leaderboardGuestCTA">
+                        ${translations[settings.language].leaderboardGuestCTA}
                     </p>
-                    <button id="leaderboard-login-btn" class="btn btn-primary px-6 py-2 shadow-lg hover:scale-105 transition-transform">
-                        <i class="fa-brands fa-google mr-2"></i> ${translations[settings.language].leaderboardLoginBtn}
+                    <button id="leaderboard-login-btn" class="btn btn-primary px-6 py-2 shadow-md flex items-center gap-2">
+                        <i class="fa-brands fa-google"></i> <span data-translate-key="loginBtn">${translations[settings.language].loginBtn}</span>
                     </button>
                 </div>
             `;
-
-            const loginBtn = document.getElementById('leaderboard-login-btn');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', () => {
-                    handleLogin();
-                });
-            }
-            return;
         }
 
-        // Ambil data dari Firestore
+        // 2. Ambil data dari Firestore (Berlaku untuk Guest maupun User yang sudah Login)
         const q = query(collection(db, "users"), orderBy("totalScore", "desc"), limit(50));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            listContainer.innerHTML = ''; // Pesan "No players" dihapus sesuai permintaan
+            listContainer.innerHTML = html + ''; // Tetap tampilkan CTA jika tidak ada data
             return;
         }
 
-        let html = '';
         let rank = 1;
 
+        // 3. Loop dan render setiap baris pemain
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             const isMe = auth.currentUser && auth.currentUser.uid === doc.id;
@@ -1364,11 +1362,51 @@ listContainer.innerHTML = `
             rank++;
         });
 
+        // Tampilkan hasil akhir ke dalam container
         listContainer.innerHTML = html;
 
-    } catch (error) {
+        // 4. Pasang Event Listener ke tombol CTA jika tombolnya ter-render
+        if (!auth || !auth.currentUser) {
+            const loginBtn = document.getElementById('leaderboard-login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    handleLogin();
+                });
+            }
+        }
+
+        } catch (error) {
         console.error("Leaderboard Error:", error);
-        listContainer.innerHTML = `<div class="p-4 text-[var(--error-color)] text-center">${translations[settings.language].leaderboardError}</div>`;
+        
+        listContainer.innerHTML = `
+            <div class="p-10 text-center flex flex-col items-center gap-4 animate-fadeIn">
+                <div class="w-16 h-16 bg-[rgba(var(--error-color-rgb),0.1)] rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-[var(--error-color)]"></i>
+                </div>
+                
+                <div>
+                    <p class="text-[var(--error-color)] font-bold text-lg" data-translate-key="leaderboardError">
+                        ${translations[settings.language].leaderboardError}
+                    </p>
+                    <p class="text-[var(--subtle-text-color)] text-sm mt-1" data-translate-key="leaderboardErrorSub">
+    ${translations[settings.language].leaderboardErrorSub}
+</p>
+                </div>
+
+                <button id="retry-leaderboard-btn" class="btn btn-secondary px-6 py-2 flex items-center gap-2 border border-[var(--card-border-color)] hover:bg-[var(--secondary-hover-color)] transition-all active:scale-95">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                    <span data-translate-key="retryBtn">${translations[settings.language].retryBtn}</span>
+                </button>
+            </div>
+        `;
+
+        // Pasang fungsi klik untuk mencoba memuat ulang
+        const retryBtn = document.getElementById('retry-leaderboard-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                loadLeaderboard(); // Memanggil dirinya sendiri
+            });
+        }
     }
 };
 
