@@ -1064,3 +1064,16 @@ footer {
     pointer-events: none;
     position: relative;
 }
+
+/* ============================================================
+   STREAK ANIMATION
+   ============================================================ */
+@keyframes fire-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.4)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.8)); }
+}
+
+.streak-active {
+    color: #f97316 !important; /* Warna Orange Tailwind */
+    animation: fire-pulse 2s infinite ease-in-out;
+}

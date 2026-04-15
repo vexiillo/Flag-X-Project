@@ -31,28 +31,22 @@ import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, g
 
     // --- FIREBASE CONFIGURATION ---
 
-    // ⚠️ GANTI INI DENGAN CONFIG DARI FIREBASE CONSOLE ANDA
+    //  GANTI INI DENGAN CONFIG DARI FIREBASE CONSOLE ANDA
 
  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 const firebaseConfig = {
-
-  apiKey: "AIzaSyA-f-B0RH9CJDsfxytIIdyBWwAxNJ4vDik",
-
+  // Kita ambil dari fitur 'Secrets' di Replit supaya tidak terlihat orang lain
+  apiKey: process.env.FIREBASE_API_KEY, 
+  
   authDomain: "flag-x-3439d.firebaseapp.com",
-
   projectId: "flag-x-3439d",
-
   storageBucket: "flag-x-3439d.firebasestorage.app",
-
   messagingSenderId: "576734845240",
-
   appId: "1:576734845240:web:620dfc7ee7f9e7ad0149cd",
-
   measurementId: "G-1VKSLQQCPN"
-
 };
 
     // --- INITIALIZE FIREBASE ---
@@ -490,7 +484,7 @@ if (infoBtn) {
 
             endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your XP will be finalized.",
 
-            endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X © 2025. All Rights Reserved.",
+            endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X  2025. All Rights Reserved.",
 
             settingsLanguage: "Language", settingsDifficulty: "Difficulty", difficultyEasy: "Easy", difficultyNormal: "Normal", difficultyHard: "Hard", settingsContact: "Contact",
 
@@ -575,10 +569,10 @@ if (infoBtn) {
 
             disclaimerTitle: "Flag Accuracy Note",
 
-    disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encounter—even the most unrecognizable ones—the broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
+    disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encountereven the most unrecognizable onesthe broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
 
 // Tambahkan di dalam objek 'en', di bawah teks yang sudah ada:
-toastNameBlank: "Name cannot be blank!️",
+toastNameBlank: "Name cannot be blank!",
 toastNameSaved: "Name saved!",
 toastSaveFailed: "Failed to save. Try again.",
 btnSaving: "Saving...",
@@ -614,7 +608,7 @@ navLeaderboard: "Rank"
 
             endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? XP Anda akan difinalisasi.",
 
-            endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X © 2025. Hak Cipta Dilindungi.",
+            endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X  2025. Hak Cipta Dilindungi.",
 
             settingsLanguage: "Bahasa", settingsDifficulty: "Tingkat Kesulitan", difficultyEasy: "Mudah", difficultyNormal: "Normal", difficultyHard: "Sulit", settingsContact: "Kontak",
 
@@ -699,10 +693,10 @@ navLeaderboard: "Rank"
 
             disclaimerTitle: "Catatan Akurasi Bendera",
 
-    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temui—bahkan yang paling sulit dikenali sekalipun—semakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
+    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temuibahkan yang paling sulit dikenali sekalipunsemakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
 
 // Tambahkan di dalam objek 'id', di bawah teks yang sudah ada:
-toastNameBlank: "Nama tidak boleh kosong!️",
+toastNameBlank: "Nama tidak boleh kosong!",
 toastNameSaved: "Nama disimpan!",
 toastSaveFailed: "Gagal menyimpan. Coba lagi.",
 btnSaving: "Menyimpan...",
@@ -863,45 +857,30 @@ function updateLevelUI(xp) {
     function loadTotalScore() {
     const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     totalscoreValueEl.textContent = xp;
-    updateLevelUI(xp); // Tambahkan baris ini
+    updateLevelUI(xp);       
 }
 
-    // UPDATED: addToTotalScore with Firestore Sync
-
     async function addToTotalScore(scoreFromQuiz) {
-
-        // 1. Update LocalStorage       
+    // 1. Update LocalStorage (XP)      
     const currentTotal = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     const newTotal = currentTotal + scoreFromQuiz;
     localStorage.setItem('flagx-totalscore', newTotal);
     totalscoreValueEl.textContent = newTotal;
-    updateLevelUI(newTotal); // Tambahkan baris ini
+    updateLevelUI(newTotal); 
 
-        // 2. Update Firestore if Logged In
-
-        if (auth && auth.currentUser) {
-
-            try {
-
-                const userRef = doc(db, "users", auth.currentUser.uid);
-
-                await setDoc(userRef, { 
-
-                    totalScore: newTotal,
-
-                    lastActive: new Date()
-
-                }, { merge: true });
-
-            } catch (e) {
-
-                console.error("Failed to sync score:", e);
-
-            }
-
+    // 2. Update Firestore if Logged In
+    if (auth && auth.currentUser) {
+        try {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await setDoc(userRef, { 
+                totalScore: newTotal,                           
+                lastActive: new Date()
+            }, { merge: true });
+        } catch (e) {
+            console.error("Failed to sync score:", e);
         }
-
     }
+}
 
     // --- AUTH & DATABASE FUNCTIONS ---
 
