@@ -39,8 +39,7 @@ import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, g
 
 const firebaseConfig = {
   // Kita ambil dari fitur 'Secrets' di Replit supaya tidak terlihat orang lain
-  apiKey: process.env.FIREBASE_API_KEY, 
-  
+  apiKey: AIzaSyA-f-B0RH9CJDsfxytIIdyBWwAxNJ4vDik, 
   authDomain: "flag-x-3439d.firebaseapp.com",
   projectId: "flag-x-3439d",
   storageBucket: "flag-x-3439d.firebasestorage.app",
