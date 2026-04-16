@@ -89,13 +89,7 @@
         <span data-translate-key="levelingSystem">Leveling System</span>
     </div>
     
-    <div class="mb-5 bg-[var(--secondary-color)] rounded-full h-4 overflow-hidden border border-white/10 relative">
-        <div id="level-progress-bar" class="h-full bg-gradient-to-r from-[var(--primary-color)] to-[#EC41B1] transition-all duration-500" style="width: 0%"></div>
-    </div>
-    <div class="flex justify-between text-[10px] font-bold mb-4 px-1">
-        <span id="level-progress-text" class="text-[var(--subtle-text-color)]">0 / 500 XP</span>
-        <span id="level-percentage" class="text-[var(--primary-color)]">0%</span>
-    </div>
+
 
     <ul class="text-[10px] text-left space-y-2 font-medium text-[var(--subtle-text-color)]">
         </ul>
@@ -247,7 +241,19 @@
             </button>
         </div>
 
-<div class="flex justify-center w-full mb-8 px-4">
+<!-- Daily Streak -->
+        <div id="streak-display" class="flex justify-center mb-5 px-4 hidden">
+    <div class="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_4px_15px_rgba(249,115,22,0.4)] border border-white/20 border-0 ring-0">
+        <i class="fa-solid fa-fire text-white text-lg animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"></i>
+        <div class="flex flex-col items-start">
+            <span class="text-sm font-black text-white leading-tight drop-shadow-md">
+                <span id="streak-count">0</span> <span data-translate-key="dayStreak">day streak</span>
+            </span>
+        </div>
+    </div>
+</div>
+
+        <div class="flex justify-center w-full mb-8 px-4">
     <div id="fotd-container" class="relative flex items-center gap-4 px-6 py-4 bg-[var(--secondary-color)]/80 border border-white/20 rounded-[2rem] text-white w-full max-w-[400px] shadow-xl">
         
         <div class="flex-1 flex justify-center items-center">
@@ -268,6 +274,17 @@
         </div>
     </div>
 </div>
+
+        <!-- Mini XP Progress Bar -->
+        <div id="home-xp-bar-wrap" class="w-full max-w-[400px] mx-auto px-4 mb-5">
+            <div class="mb-2 bg-[var(--secondary-color)] rounded-full h-4 overflow-hidden border border-white/10 relative">
+                <div id="level-progress-bar" class="h-full bg-gradient-to-r from-[var(--primary-color)] to-[#EC41B1] transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] font-bold px-1">
+                <span id="level-progress-text" class="text-[var(--subtle-text-color)]">0 / 500 XP</span>
+                <span id="level-percentage" class="text-[var(--primary-color)]">0%</span>
+            </div>
+        </div>
 
         <div class="space-y-4 px-4">
             <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2">
@@ -314,7 +331,7 @@
         </div>
 
         <div class="text-center">
-            <p id="quiz-prompt" class="text-xl mb-4 h-12 flex items-center justify-center"></p>
+            <p id="quiz-prompt" class="text-xl mb-6 h-12 flex items-center justify-center"></p>
             <div class="mb-6 mx-auto h-40 sm:h-52 w-full max-w-md">
                 <div id="flag-display-quiz" class="flex justify-center items-center h-full"></div>
             </div>
@@ -331,8 +348,24 @@
         <p class="text-5xl sm:text-6xl font-bold text-[var(--primary-color)] mb-6" id="final-score">0</p>
         <p class="text-subtle mb-6" id="results-message"></p>
         <div class="space-y-4">
-            <button id="play-again-btn" class="btn w-full btn-primary text-white py-3 px-4 text-lg" data-translate-key="resultsPlayAgain">Play Again</button>
-            <button onclick="showScreen('quiz-modes-screen')" class="btn w-full btn-secondary py-3 px-4 text-lg" data-translate-key="backToQuizModes">Back to Menu</button>
+            <button id="play-again-btn" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2" data-translate-key="resultsPlayAgain"><i class="fa-solid fa-play"></i>Play Again</button>
+            <button id="share-score-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span data-translate-key="shareScore">Share Score</span>
+            </button>
+            <button id="back-to-menu-btn" class="btn w-full btn-secondary py-3 px-4 text-lg" data-translate-key="backToQuizModes">Back to Menu</button>
+        </div>
+
+        <!-- Missed Flags Review -->
+        <div id="missed-flags-section" class="hidden text-left mt-4">
+            <button id="toggle-missed-btn" class="w-full flex items-center justify-center p-4 card rounded-lg mb-2 relative min-h-[56px]">
+    <div class="flex items-center gap-2">
+        <i class="fa-solid fa-flag text-[var(--error-color)]"></i>
+        <span id="missed-flags-label" class="font-bold text-sm leading-none" data-translate-key="missedFlagsTitle">Flags to Review</span>
+    </div>
+    <i id="missed-toggle-icon" class="fa-solid fa-chevron-down text-subtle text-xs transition-transform absolute right-4"></i>
+</button>
+            <div id="missed-flags-grid" class="hidden grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-72 overflow-y-auto custom-scrollbar rounded-lg p-1"></div>
         </div>
     </div>
 </div>
@@ -421,6 +454,36 @@
         <footer class="w-full max-w-6xl mx-auto mt-8 text-center text-subtle text-sm">
     <p data-translate-key="footer">&copy; 2025 Flag-X. All Rights Reserved.</p>
 </footer>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal">
+        <div class="card rounded-xl p-6 w-full max-w-sm m-4 text-center relative">
+            <div class="flex justify-center gap-2 mb-5">
+                <div class="onboard-dot w-2.5 h-2.5 rounded-full transition-all duration-300"></div>
+                <div class="onboard-dot w-2.5 h-2.5 rounded-full transition-all duration-300"></div>
+                <div class="onboard-dot w-2.5 h-2.5 rounded-full transition-all duration-300"></div>
+            </div>
+            <div class="onboard-slide">
+                <div class="text-5xl mb-4">&#127758;</div>
+                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingWelcomeTitle">Welcome to Flag-X!</h3>
+                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingWelcomeText">Test your knowledge of world flags from official countries, subdivisions, historical flags, and more.</p>
+            </div>
+            <div class="onboard-slide hidden">
+                <div class="text-5xl mb-4">&#11088;</div>
+                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingXpTitle">Earn XP &amp; Level Up</h3>
+                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingXpText">Answer correctly to earn XP. Progress through 50 levels and compete on the global leaderboard!</p>
+            </div>
+            <div class="onboard-slide hidden">
+                <div class="text-5xl mb-4">&#128293;</div>
+                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingStreakTitle">Build Your Streak</h3>
+                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingStreakText">Play every day to keep your streak alive, bookmark flags to study them, and share your best scores!</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="onboard-skip-btn" class="btn btn-secondary flex-1 py-2 text-sm" data-translate-key="skipBtn">Skip</button>
+                <button id="onboard-next-btn" class="btn btn-primary flex-1 py-2 text-sm text-white" data-translate-key="nextBtn">Next</button>
+            </div>
+        </div>
     </div>
 
     <div id="end-quiz-modal" class="modal">
@@ -561,6 +624,6 @@
     </button>
 </nav>
     
-    <script type="module" src="script.js" defer></script>
+    <script type="module" src="script2.js" defer></script>
 </body>
 </html>

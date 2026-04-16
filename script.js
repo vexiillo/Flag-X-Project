@@ -38,7 +38,6 @@ import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, g
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 const firebaseConfig = {
-  // Kita ambil dari fitur 'Secrets' di Replit supaya tidak terlihat orang lain
   apiKey: "AIzaSyA-f-B0RH9CJDsfxytIIdyBWwAxNJ4vDik", 
   authDomain: "flag-x-3439d.firebaseapp.com",
   projectId: "flag-x-3439d",
@@ -475,7 +474,7 @@ if (infoBtn) {
 
             totalScoreLabel: "XP", homeSubtitle: "Test Your Global Knowledge", homePlayQuiz: "Play Quiz", homeFlagLibrary: "Flag Library",
 
-            quizModesTitle: "Quiz Modes", backToMenu: "Back to Menu", continentClashTitle: "Choose a Continent", backToQuizModes: "Back to Quiz Modes",
+            quizModesTitle: "Quiz Modes", backToMenu: "Back to Menu", continentClashTitle: "Choose a Continent", backToQuizModes: "Back to Quiz Modes", backToBookmarks: "Back to Bookmark",
 
             quizScore: "XP", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Results:", resultsPlayAgain: "Play Again",
 
@@ -592,14 +591,35 @@ retryBtn: "Try Again",
 navHome: "Home",
 navPlay: "Play",
 navLibrary: "Library",
-navLeaderboard: "Rank"
+navLeaderboard: "Rank",
+dayStreak: "day streak",
+shareScore: "Share Score",
+scoredCopied: "Score copied to clipboard!",
+missedFlagsTitle: "Flags to Review",
+correctAnswer: "Correct:",
+bookmarkAdded: "Bookmarked! \u2B50",
+bookmarkRemoved: "Bookmark removed",
+noBookmarksMsg: "No bookmarks yet! Star flags in the library.",
+noBookmarksSub: "Explore the library and click the star icon on any flag to save it here for a quick study session!",
+notEnoughBookmarks: "Add at least 4 bookmarked flags to start a quiz.",
+lib_bookmarks_title: "My Bookmarks",
+startBookmarkQuiz: "Study Quiz",
+onboardingWelcomeTitle: "Welcome to Flag-X!",
+onboardingWelcomeText: "Test your knowledge of world flags from official countries, subdivisions, historical flags, and more.",
+onboardingXpTitle: "Earn XP & Level Up",
+onboardingXpText: "Answer correctly to earn XP. Progress through 50 levels and compete on the global leaderboard!",
+onboardingStreakTitle: "Build Your Streak",
+onboardingStreakText: "Play every day to keep your streak alive, bookmark flags to study, and share your best scores!",
+skipBtn: "Skip",
+nextBtn: "Next",
+letsGoBtn: "Let's Go!"
         },
 
         id: {
 
             totalScoreLabel: "XP", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
 
-            quizModesTitle: "Mode Kuis", backToMenu: "Kembali ke Menu", continentClashTitle: "Pilih Benua", backToQuizModes: "Kembali ke Mode Kuis",
+            quizModesTitle: "Mode Kuis", backToMenu: "Kembali ke Menu", continentClashTitle: "Pilih Benua", backToQuizModes: "Kembali ke Mode Kuis", backToBookmarks: "Kembali ke Bookmark",
 
             quizScore: "XP", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "Hasil XP:", resultsPlayAgain: "Main Lagi",
 
@@ -716,7 +736,28 @@ retryBtn: "Coba Lagi",
 navHome: "Beranda",
 navPlay: "Main",
 navLibrary: "Pustaka",
-navLeaderboard: "Peringkat"
+navLeaderboard: "Peringkat",
+dayStreak: "hari berturut",
+shareScore: "Bagikan Skor",
+scoredCopied: "Skor disalin!",
+missedFlagsTitle: "Bendera untuk Ditinjau",
+correctAnswer: "Benar:",
+bookmarkAdded: "Ditandai! \u2B50",
+bookmarkRemoved: "Tanda dihapus",
+noBookmarksMsg: "Belum ada bookmark! Tandai bendera di pustaka.",
+noBookmarksSub: "Jelajahi pustaka dan klik ikon bintang pada bendera mana pun untuk menyimpannya di sini agar dapat dipelajari dengan cepat!",
+notEnoughBookmarks: "Tambahkan minimal 4 bendera bookmark untuk memulai kuis.",
+lib_bookmarks_title: "Bookmark Saya",
+startBookmarkQuiz: "Kuis Belajar",
+onboardingWelcomeTitle: "Selamat Datang di Flag-X!",
+onboardingWelcomeText: "Uji pengetahuan Anda tentang bendera dunia dari negara resmi, subdivisi, bendera bersejarah, dan banyak lagi.",
+onboardingXpTitle: "Kumpulkan XP & Naik Level",
+onboardingXpText: "Jawab dengan benar untuk mendapatkan XP. Capai 50 level dan bersaing di papan peringkat global!",
+onboardingStreakTitle: "Bangun Streak Anda",
+onboardingStreakText: "Main setiap hari untuk menjaga streak, bookmark bendera untuk belajar, dan bagikan skor terbaikmu!",
+skipBtn: "Lewati",
+nextBtn: "Lanjut",
+letsGoBtn: "Ayo Mulai!"
         },
     };
 
@@ -844,7 +885,19 @@ function updateLevelUI(xp) {
             : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
     }
     if (percentageText) percentageText.textContent = `${Math.floor(percentage)}%`;
-    if (levelBadge) levelBadge.textContent = `Lv. ${level}`; // <-- 2. Tambahkan baris ini
+    if (levelBadge) levelBadge.textContent = `Lv. ${level}`;
+
+    // Update home screen mini XP bar
+    const homeFill = document.getElementById('home-xp-fill');
+    const homeLabel = document.getElementById('home-level-label');
+    const homeXpLabel = document.getElementById('home-xp-label');
+    if (homeFill) homeFill.style.width = `${percentage}%`;
+    if (homeLabel) homeLabel.textContent = `Lv. ${level}`;
+    if (homeXpLabel) {
+        homeXpLabel.textContent = level >= 50
+            ? (translations[settings.language] && translations[settings.language].maxLevelReached || 'MAX')
+            : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
+    }
     }
 
 // Pastikan fungsi ini dipanggil setiap kali skor XP berubah
@@ -855,8 +908,9 @@ function updateLevelUI(xp) {
 
     function loadTotalScore() {
     const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-    totalscoreValueEl.textContent = xp;
-    updateLevelUI(xp);       
+    if (totalscoreValueEl) if (totalscoreValueEl) totalscoreValueEl.textContent = xp;
+    updateLevelUI(xp);
+    updateHomeXPBar();
 }
 
     async function addToTotalScore(scoreFromQuiz) {
@@ -864,7 +918,8 @@ function updateLevelUI(xp) {
     const currentTotal = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     const newTotal = currentTotal + scoreFromQuiz;
     localStorage.setItem('flagx-totalscore', newTotal);
-    totalscoreValueEl.textContent = newTotal;
+    if (totalscoreValueEl) totalscoreValueEl.textContent = newTotal;
+    updateHomeXPBar();
     updateLevelUI(newTotal); 
 
     // 2. Update Firestore if Logged In
@@ -1009,7 +1064,8 @@ const handleLogout = async () => {
 
         localStorage.setItem('flagx-totalscore', finalScore);
 
-        totalscoreValueEl.textContent = finalScore;
+        if (totalscoreValueEl) totalscoreValueEl.textContent = finalScore;
+        updateHomeXPBar();
         
         updateLevelUI(finalScore); // Tambahkan baris ini
 
@@ -1481,6 +1537,9 @@ if (auth) {
         { id: 'organizations', icon: 'fa-handshake', action: () => showLibrary('organizations') },
         { id: 'unofficial', icon: 'fa-gavel', action: () => showLibrary('unofficial'), span: 'md:col-span-2' }
     ];
+    
+        categories.unshift({ id: 'bookmarks', icon: 'fa-star', action: () => showBookmarksLibrary(), span: '' });
+   
     categories.forEach(cat => {
         const card = document.createElement('div');
         card.className = `card p-4 rounded-lg text-left flex flex-col justify-between ${cat.span || ''}`;
@@ -1746,6 +1805,10 @@ function initApp() {
 
 
 
+        displayStreak();
+        updateHomeXPBar();
+        setTimeout(initOnboarding, 300);
+
         const cachedPic = localStorage.getItem('cachedProfilePic');
 
         if (cachedPic) {
@@ -1784,34 +1847,38 @@ function initApp() {
 
         }
 
-        // 2. Logika Result (Dipulihkan datanya)
-
+                // 2. Logika Result (Dipulihkan datanya)
         else if (lastScreen === 'results-screen') {
-
             const savedResult = localStorage.getItem('lastQuizResult');
-
             if (savedResult) {
-
                 const data = JSON.parse(savedResult);
-
                 // Pulihkan Tampilan
-
                 document.getElementById('final-score').textContent = data.score;
-
                 document.getElementById('results-message').textContent = data.msg;
-
                 // Pulihkan Fungsi Tombol "Play Again"
-
                 document.getElementById('play-again-btn').onclick = () => startQuiz(data.lastMode, data.lastSubMode);
+                
+                renderMissedFlags(data.missedFlags || []);      
 
+                // --- TAMBAHKAN JUGA DI SINI ---
+                const backToMenuBtn = document.getElementById('back-to-menu-btn');
+                if (backToMenuBtn) {
+                    // FIX: Gunakan 'data.lastMode', bukan 'currentQuiz.lastMode'
+                    if (data.lastMode === 'bookmarks') {
+                        backToMenuBtn.setAttribute('data-translate-key', 'backToBookmarks');
+                        backToMenuBtn.textContent = translations[settings.language].backToBookmarks;
+                        backToMenuBtn.onclick = () => showBookmarksLibrary();
+                    } else {
+                        backToMenuBtn.setAttribute('data-translate-key', 'backToQuizModes');
+                        backToMenuBtn.textContent = translations[settings.language].backToQuizModes;
+                        backToMenuBtn.onclick = () => showScreen('quiz-modes-screen');
+                    }
+                }
+        
                 showScreen('results-screen');
-
             } else {
-
                 showScreen('quiz-modes-screen');
-
             }
-
         }
 
         // 3. Logika Sedang Quiz (Reset ke Menu karena data soal hilang)
@@ -2016,11 +2083,37 @@ async function endQuiz() {
             score: currentQuiz.score,
             msg: msgText,
             lastMode: currentQuiz.lastMode,       
-            lastSubMode: currentQuiz.lastSubMode  
+            lastSubMode: currentQuiz.lastSubMode,
+            missedFlags: currentQuiz.missedFlags 
         };
         localStorage.setItem('lastQuizResult', JSON.stringify(resultData));
 
         document.getElementById('play-again-btn').onclick = () => startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode);
+
+        // Set up share button
+        const shareBtn = document.getElementById('share-score-btn');
+        if (shareBtn) shareBtn.onclick = shareScore;
+        
+                // --- TAMBAHKAN LOGIKA TOMBOL BACK DINAMIS DI SINI ---
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        if (backToMenuBtn) {
+            if (currentQuiz.lastMode === 'bookmarks') {
+                // HAPUS removeAttribute, GANTI dengan setAttribute
+                backToMenuBtn.setAttribute('data-translate-key', 'backToBookmarks');
+                backToMenuBtn.textContent = translations[settings.language].backToBookmarks;
+                backToMenuBtn.onclick = () => showBookmarksLibrary();
+            } else {
+                backToMenuBtn.setAttribute('data-translate-key', 'backToQuizModes');
+                backToMenuBtn.textContent = translations[settings.language].backToQuizModes;
+                backToMenuBtn.onclick = () => showScreen('quiz-modes-screen');
+            }
+        }
+
+        // Render missed flags section
+        renderMissedFlags(currentQuiz.missedFlags);
+
+        // Update daily streak
+        if (currentQuiz.score > 0) updateStreak();
         
         // Pindah ke layar hasil
         showScreen('results-screen');
@@ -2185,10 +2278,14 @@ async function endQuiz() {
         // Relative & overflow-hidden wajib agar badge Proposed/Recon rapi di pojok
         card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
         card.dataset.name = item.name.toLowerCase();
+        const bmarkSet = loadBookmarks();
+        const isStarred = bmarkSet.has(item.name);
                
-// Tambahkan onerror dan hapus opacity-0 agar lebih pasti
 card.innerHTML = `
     ${badgeHTML}
+    <button class="bookmark-btn absolute top-1 left-1 p-1 z-20 ${isStarred ? 'text-yellow-400' : 'text-gray-500 hover:text-yellow-300'}" onclick="event.stopPropagation(); toggleBookmarkUI(this, '${item.name.replace(/'/g, "\\'")}')">
+        <i class="fa-${isStarred ? 'solid' : 'regular'} fa-star text-sm"></i>
+    </button>    
     <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
         <img src="${item.flag}" 
              alt="${item.name} flag" 
@@ -2288,7 +2385,11 @@ card.innerHTML = `
         // --- JAWABAN SALAH ---
         if ("vibrate" in navigator) navigator.vibrate(100); // Haptic peringatan
         
-        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') currentQuiz.lives--; 
+        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') currentQuiz.lives--;
+        if (!currentQuiz.missedFlags) currentQuiz.missedFlags = [];
+        if (currentQuiz.correctAnswer && !currentQuiz.missedFlags.some(f => f.name === currentQuiz.correctAnswer.name)) {
+            currentQuiz.missedFlags.push(currentQuiz.correctAnswer);
+        }
         if(selectedButton) selectedButton.classList.add('incorrect'); 
         if(correctButton) correctButton.classList.add('correct'); 
         if(flagImg) flagImg.classList.add('incorrect-flag');
@@ -2696,7 +2797,303 @@ if ('serviceWorker' in navigator) {
 
     
 
-        // --- DAFTARKAN SEMUA KE WINDOW DI SINI (PALING BAWAH) ---
+    
+// ============================================
+// FEATURE: DAILY STREAK
+// ============================================
+function updateStreak() {
+    const today = new Date().toDateString();
+    const lastPlayed = localStorage.getItem('flagx-last-played');
+    let streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    if (lastPlayed === today) {
+        // Already played today, no change
+    } else {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (lastPlayed === yesterday.toDateString()) {
+            streak++;
+        } else if (!lastPlayed) {
+            streak = 1;
+        } else {
+            streak = 1;
+        }
+        localStorage.setItem('flagx-last-played', today);
+        localStorage.setItem('flagx-streak', streak);
+    }
+    displayStreak();
+}
+
+function displayStreak() {
+    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const el = document.getElementById('streak-display');
+    const countEl = document.getElementById('streak-count');
+    if (countEl) countEl.textContent = streak;
+    if (el) {
+        if (streak >= 1) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    }
+}
+
+function updateHomeXPBar() {
+    const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    let level = 1, currentXPInLevel = 0, nextLevelXPThreshold = 500;
+    if (xp < 5000) { level = Math.floor(xp / 500) + 1; currentXPInLevel = xp % 500; nextLevelXPThreshold = 500; }
+    else if (xp < 20000) { level = 10 + Math.floor((xp - 5000) / 1000); currentXPInLevel = (xp - 5000) % 1000; nextLevelXPThreshold = 1000; }
+    else if (xp < 57500) { level = 25 + Math.floor((xp - 20000) / 2500); currentXPInLevel = (xp - 20000) % 2500; nextLevelXPThreshold = 2500; }
+    else { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; }
+    const pct = Math.min(100, (currentXPInLevel / nextLevelXPThreshold) * 100);
+    const lvLabel = document.getElementById('home-level-label');
+    const xpLabel = document.getElementById('home-xp-label');
+    const fill = document.getElementById('home-xp-fill');
+    if (lvLabel) lvLabel.textContent = `Lv. ${level}`;
+    if (xpLabel) xpLabel.textContent = `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
+    if (fill) fill.style.width = `${pct}%`;
+}
+
+// ============================================
+// FEATURE: FLAG BOOKMARKS
+// ============================================
+function loadBookmarks() {
+    try { return new Set(JSON.parse(localStorage.getItem('flagx-bookmarks') || '[]')); }
+    catch(e) { return new Set(); }
+}
+
+function saveBookmarks(bookmarks) {
+    localStorage.setItem('flagx-bookmarks', JSON.stringify([...bookmarks]));
+}
+
+function toggleBookmark(flagName) {
+    const b = loadBookmarks();
+    if (b.has(flagName)) b.delete(flagName); else b.add(flagName);
+    saveBookmarks(b);
+    return b.has(flagName);
+}
+
+function toggleBookmarkUI(btn, flagName) {
+    const bookmarks = loadBookmarks();
+    let isStarred = false;
+
+    if (bookmarks.has(flagName)) {
+        bookmarks.delete(flagName);
+        btn.classList.remove('text-yellow-400');
+        btn.classList.add('text-gray-500');
+        btn.innerHTML = '<i class="fa-regular fa-star text-sm"></i>';
+        
+        // TAMBAHKAN INI UNTUK TOAST REMOVE
+        showToast(translations[settings.language].bookmarkRemoved || 'Bookmark removed');
+    } else {
+        bookmarks.add(flagName);
+        btn.classList.remove('text-gray-500');
+        btn.classList.add('text-yellow-400');
+        btn.innerHTML = '<i class="fa-solid fa-star text-sm"></i>';
+        
+        // TAMBAHKAN INI UNTUK TOAST ADD
+        showToast(translations[settings.language].bookmarkAdded || 'Bookmarked! ⭐');
+    }
+    
+    saveBookmarks(bookmarks);
+    
+    // PAKSA POSISI: Pastikan class 'left-1' tetap ada dan tidak berubah ke 'right-1'
+    btn.classList.remove('right-1');
+    btn.classList.add('left-1', 'absolute', 'top-1');
+}
+
+function showBookmarksLibrary() {
+    const b = loadBookmarks();
+    const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
+    const data = allFlags.filter(f => b.has(f.name));
+    
+    const titleEl = document.getElementById('library-title-display');
+    if (titleEl) {
+        // Tambahkan data-translate-key agar otomatis terganti saat switch bahasa
+        titleEl.dataset.translateKey = 'lib_bookmarks_title';
+        titleEl.textContent = translations[settings.language].lib_bookmarks_title || 'My Bookmarks';
+    }
+    
+    const backBtn = document.getElementById('back-from-library-btn');
+    if (backBtn) backBtn.onclick = () => { localStorage.removeItem('libraryState'); showScreen('library-categories-screen'); };
+    
+    const grid = document.getElementById('library-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 w-full';
+    
+    // PEMBARUAN: Jika kosong, tombol Quiz pindah ke bawah teks dengan jarak jauh (mb-12)
+    if (data.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'col-span-full text-center py-12 text-subtle flex flex-col items-center justify-center';
+        emptyState.innerHTML = `
+            <i class="fa-regular fa-star text-5xl mb-4 opacity-40"></i>
+            <p class="font-bold text-xl mb-1" data-translate-key="noBookmarksMsg">${translations[settings.language].noBookmarksMsg || "You haven't bookmarked any flags."}</p>
+            <p class="text-sm mb-12" data-translate-key="noBookmarksSub">${translations[settings.language].noBookmarksSub || "Explore the library and click the star icon on any flag to save it here for a quick study session!"}</p>
+            
+            <button onclick="startBookmarkQuiz()" class="btn btn-primary w-[80%] max-w-[300px] py-3 text-white font-bold flex items-center justify-center gap-2 mx-auto shadow-lg">
+                <i class="fa-solid fa-graduation-cap"></i> 
+                <span data-translate-key="startBookmarkQuiz">${translations[settings.language].startBookmarkQuiz || 'Study Quiz'}</span>
+            </button>
+        `;
+        grid.appendChild(emptyState);
+        showScreen('library-display-screen');
+        return;
+    }
+
+    // Jika ADA data, letakkan tombol Kuis di paling atas
+    const studyBtn = document.createElement('div');
+    studyBtn.className = 'col-span-full mb-2';
+    studyBtn.innerHTML = `<button onclick="startBookmarkQuiz()" class="btn btn-primary w-full py-3 text-white font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-graduation-cap"></i> <span data-translate-key="startBookmarkQuiz">${translations[settings.language].startBookmarkQuiz || 'Study Quiz'}</span></button>`;
+    grid.appendChild(studyBtn);
+
+    const fragment = document.createDocumentFragment();
+    data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
+        card.dataset.name = item.name.toLowerCase();
+        
+        card.innerHTML = `
+            <button class="bookmark-btn absolute top-1 left-1 p-1 z-20 text-yellow-400" onclick="event.stopPropagation(); toggleBookmarkUI(this, '${item.name.replace(/'/g, "\\'")}')">
+                <i class="fa-solid fa-star text-sm"></i>
+            </button>
+            <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
+                <img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';">
+            </div>
+            
+            <div class="flex-grow flex flex-col justify-center py-1 w-full">
+                 <div class="flex flex-col w-full px-1">
+                    <p class="font-semibold text-[13px] leading-tight break-words line-clamp-2">${item.name}</p>
+                 </div>
+            </div>
+
+            <div class="flex flex-col gap-1 mt-2 w-full">
+                <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md flex items-center justify-center" 
+                        onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
+                    <i class="fa-solid fa-book-open mr-1"></i> 
+                    <span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
+                </button>
+                <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 transition-transform shadow-md flex items-center justify-center" onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+                    <span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
+                </button>
+            </div>`;
+        fragment.appendChild(card);
+    });
+    grid.appendChild(fragment);
+    
+    const searchInput = document.getElementById('library-search-input');
+    if (searchInput) searchInput.value = '';
+    showScreen('library-display-screen');
+}
+
+function startBookmarkQuiz() {
+    const b = loadBookmarks();
+    if (b.size === 0) { showToast(translations[settings.language].noBookmarksMsg || 'No bookmarks yet!'); return; }
+    const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
+    const bookmarkedData = allFlags.filter(f => b.has(f.name));
+    if (bookmarkedData.length < 4) { showToast(translations[settings.language].notEnoughBookmarks || 'Add at least 4 bookmarks!'); return; }
+    currentQuiz = { ...currentQuiz, mode: 'classic', lastMode: 'bookmarks', lastSubMode: null, score: 0, questionNumber: 0, timeLeft: 0, lives: 999, missedFlags: [], dataset: [...bookmarkedData].sort(() => 0.5 - Math.random()), totalQuestions: Math.min(bookmarkedData.length, 20) };
+    const scoreEl = document.getElementById('score');
+    if (scoreEl) scoreEl.textContent = '0';
+    const timerEl = document.getElementById('timer');
+    if (timerEl) { timerEl.style.display = 'none'; timerEl.textContent = ''; }
+    showScreen('quiz-screen');
+    loadQuestion();
+}
+
+// ============================================
+// FEATURE: SHARE SCORE
+// ============================================
+function shareScore() {
+    const score = document.getElementById('final-score') ? document.getElementById('final-score').textContent : '0';
+    const totalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const lvl = calculateLevel(totalXP);
+    const shareText = `\uD83C\uDFC6 I scored ${score} XP (Level ${lvl}) on Flag-X!\nTest your knowledge of world flags! \uD83C\uDF0D\uD83D\uDEA9`;
+    if (navigator.share) {
+        navigator.share({ title: 'Flag-X Score', text: shareText, url: 'https://flag-x-project.pages.dev/' }).catch(() => copyScoreToClipboard(shareText + '\nhttps://flag-x-project.pages.dev/'));
+    } else {
+        copyScoreToClipboard(shareText);
+    }
+}
+
+function copyScoreToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(translations[settings.language].scoredCopied || 'Copied to clipboard!');
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        showToast(translations[settings.language].scoredCopied || 'Copied to clipboard!');
+    });
+}
+
+// ============================================
+// FEATURE: MISSED FLAGS REVIEW
+// ============================================
+function renderMissedFlags(missed) {
+    const section = document.getElementById('missed-flags-section');
+    const grid = document.getElementById('missed-flags-grid');
+    const toggleBtn = document.getElementById('toggle-missed-btn');
+    const toggleIcon = document.getElementById('missed-toggle-icon');
+    const label = document.getElementById('missed-flags-label');
+    if (!section || !grid) return;
+    if (!missed || missed.length === 0) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    if (label) label.textContent = `${translations[settings.language].missedFlagsTitle || 'Flags to Review'} (${missed.length})`;
+    grid.innerHTML = '';
+    missed.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
+        card.innerHTML = `
+            <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
+                <img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';">
+            </div>
+            <p class="font-semibold text-[12px] leading-tight break-words line-clamp-2 w-full px-1">${item.name}</p>`;
+        grid.appendChild(card);
+    });
+    let isOpen = false;
+    toggleBtn.onclick = () => {
+        isOpen = !isOpen;
+        grid.classList.toggle('hidden', !isOpen);
+        if (toggleIcon) toggleIcon.style.transform = isOpen ? 'rotate(180deg)' : '';
+    };
+}
+
+// ============================================
+// FEATURE: ONBOARDING
+// ============================================
+function initOnboarding() {
+    if (localStorage.getItem('flagx-onboarded')) return;
+    const modal = document.getElementById('onboarding-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+    let currentSlide = 0;
+    const slides = modal.querySelectorAll('.onboard-slide');
+    const dots = modal.querySelectorAll('.onboard-dot');
+    function showSlide(n) {
+        slides.forEach((s, i) => s.classList.toggle('hidden', i !== n));
+        dots.forEach((d, i) => { d.classList.toggle('active-dot', i === n); });
+        currentSlide = n;
+        const nextBtn = document.getElementById('onboard-next-btn');
+        if (nextBtn) nextBtn.textContent = n === slides.length - 1 ? (translations[settings.language].letsGoBtn || "Let's Go!") : (translations[settings.language].nextBtn || 'Next');
+    }
+    showSlide(0);
+    const nextBtn = document.getElementById('onboard-next-btn');
+    const skipBtn = document.getElementById('onboard-skip-btn');
+    if (nextBtn) nextBtn.onclick = () => {
+        if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+        else closeOnboarding();
+    };
+    if (skipBtn) skipBtn.onclick = closeOnboarding;
+}
+
+function closeOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) { modal.classList.remove('active'); document.body.classList.remove('modal-open'); }
+    localStorage.setItem('flagx-onboarded', '1');
+}
+
+    // --- DAFTARKAN SEMUA KE WINDOW DI SINI (PALING BAWAH) ---
 
     window.showScreen = showScreen;
 
@@ -2720,6 +3117,11 @@ if ('serviceWorker' in navigator) {
     window.switchAccount = switchAccount;
 
     window.handleLogout = handleLogout;
+    window.toggleBookmarkUI = toggleBookmarkUI;
+    window.startBookmarkQuiz = startBookmarkQuiz;
+    window.showBookmarksLibrary = showBookmarksLibrary;
+    window.shareScore = shareScore;
+    window.closeOnboarding = closeOnboarding;
     
     // Tambahkan ini di bagian paling bawah script.js agar bisa dites di console
 window.showToast = showToast;
