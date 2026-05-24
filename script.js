@@ -1784,18 +1784,21 @@ html += `<div class="${rowClass}">
     ${displayName}
 </span>
     </div>
-    <div class="col-span-3 flex justify-center items-center">
+    <!-- Kolom Streak: Ditambah min-w-0 agar patuh pada lebar grid -->
+    <div class="col-span-3 flex justify-center items-center min-w-0">
     ${streakVal > 0 
-        ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border border-white/20">
-                <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"></i>
-                <span class="text-white font-black text-xs leading-tight drop-shadow-md">${streakVal}</span>
+        ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-[0_2px_8px_rgba(249,115,22,0.4)] border border-white/20 max-w-full">
+                <!-- flex-shrink-0 agar api tetap pada ukuran aslinya & sejajar di tengah -->
+                <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
+                <!-- min-w-0 & break-all agar angka super panjang bisa turun ke bawah -->
+                <span class="text-white font-black text-xs leading-tight drop-shadow-md min-w-0 break-all text-center">${streakVal}</span>
            </div>`
-        : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border border-white/10">
-                <i class="fa-solid fa-fire text-gray-400 text-xs"></i>
-                <span class="text-gray-400 font-black text-xs">${streakVal}</span>
+        : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-xl border border-white/10 max-w-full">
+                <i class="fa-solid fa-fire text-gray-400 text-xs flex-shrink-0"></i>
+                <span class="text-gray-400 font-black text-xs leading-tight min-w-0 break-all text-center">${streakVal}</span>
            </div>`
     }
-</div> 
+    </div> 
     <div class="col-span-2 flex justify-center items-center">
     <div class="flex justify-center items-center px-2 py-1 bg-[rgba(var(--primary-color-rgb),0.2)] rounded-lg border border-[rgba(var(--primary-color-rgb),0.3)]">
         <span class="text-[var(--primary-color)]  font-black text-xs leading-none">Lv.${userLevel}</span>
