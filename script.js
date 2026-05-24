@@ -379,9 +379,11 @@ if (profileBtn) {
     profileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isActive = profilePanel.classList.contains('active');
-        closeAllPanels(); // Tutup semua dulu
+        closeAllPanels();
         if (!isActive) {
-            profilePanel.classList.add('active'); // Buka jika sebelumnya tutup
+            profilePanel.classList.add('active');
+            // Refresh stats setiap kali panel dibuka
+            if (auth && auth.currentUser) _refreshProfileStats();
         }
     });
 }
@@ -1436,110 +1438,61 @@ const profileIconDefault = document.getElementById('profile-icon-default');
 
 
 
-// 1. Fungsi untuk Update Tampilan (Sesuai yang kita bahas tadi)
-
 function updateProfileUI(user, customName = null) {
-
     const loggedOutView = document.getElementById('auth-logged-out');
-
-    const loggedInView = document.getElementById('auth-logged-in');
-
-    
-
-    // Elemen di Pojok (Header)
-
-    const userPhotoPojok = document.getElementById('user-photo'); 
-
-    const userIconDefault = document.getElementById('user-icon-default');
-
-
-
-    // Elemen di Profile Panel
-
-    const userPhotoPanel = document.getElementById('user-panel-img');
-
-    const usernameInput = document.getElementById('username-input'); // Input tempat edit nama
-
-    const profileNameDisplay = document.getElementById('profile-name'); // Teks display nama di panel
-
-
+    const loggedInView  = document.getElementById('auth-logged-in');
+    const userPhotoPojok   = document.getElementById('user-photo');
+    const userIconDefault  = document.getElementById('user-icon-default');
+    const userPhotoPanel   = document.getElementById('user-panel-img');
+    const usernameInput    = document.getElementById('username-input');
+    const profileNameDisplay = document.getElementById('profile-name');
 
     if (user) {
-
-        if(loggedOutView) loggedOutView.classList.add('hidden');
-
-        if(loggedInView) loggedInView.classList.remove('hidden');
-
-
-
-        // Gunakan customName jika ada, jika tidak ada baru pakai displayName Google
+        if (loggedOutView) loggedOutView.classList.add('hidden');
+        if (loggedInView)  loggedInView.classList.remove('hidden');
 
         const finalName = customName || user.displayName || 'User';
-
-
-
-        // Update semua elemen nama agar sinkron
-
-        if (usernameInput) usernameInput.value = finalName;
-
+        if (usernameInput)    usernameInput.value       = finalName;
         if (profileNameDisplay) profileNameDisplay.textContent = finalName;
 
-
-
-        const photoURL = user.photoURL;
-
-        if (photoURL) {
-
-            if (userPhotoPojok) {
-
-                userPhotoPojok.src = photoURL;
-
-                userPhotoPojok.classList.remove('hidden');
-
-            }
-
+        if (user.photoURL) {
+            if (userPhotoPojok) { userPhotoPojok.src = user.photoURL; userPhotoPojok.classList.remove('hidden'); }
             if (userIconDefault) userIconDefault.classList.add('hidden');
-
-            if (userPhotoPanel) userPhotoPanel.src = photoURL;
-
+            if (userPhotoPanel)  userPhotoPanel.src = user.photoURL;
         }
+
+        // Sync stats ke panel
+        _refreshProfileStats();
 
     } else {
-
-        // --- LOGIKA SAAT LOGOUT ---
-
-        if(loggedOutView) loggedOutView.classList.remove('hidden');
-
-        if(loggedInView) loggedInView.classList.add('hidden');
-
-        
-
-        if (userPhotoPojok) {
-
-            userPhotoPojok.classList.add('hidden');
-
-            userPhotoPojok.src = '';
-
-        }
-
+        if (loggedOutView) loggedOutView.classList.remove('hidden');
+        if (loggedInView)  loggedInView.classList.add('hidden');
+        if (userPhotoPojok) { userPhotoPojok.classList.add('hidden'); userPhotoPojok.src = ''; }
         if (userIconDefault) userIconDefault.classList.remove('hidden');
-
-        if (usernameInput) usernameInput.value = '';
-
+        if (usernameInput)   usernameInput.value = '';
         if (profileNameDisplay) profileNameDisplay.textContent = 'Guest';
-
     }
-
 }
 
+// Helper: refresh angka XP, Level, Streak di profile panel
+function _refreshProfileStats() {
+    const xp     = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const level  = calculateLevel(xp);
+    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
 
+    const badge   = document.getElementById('profile-level-badge');
+    const xpStat  = document.getElementById('profile-xp-stat');
+    const lvStat  = document.getElementById('profile-level-stat');
+    const strStat = document.getElementById('profile-streak-stat');
+
+    if (badge)   badge.textContent   = `Lv. ${level}`;
+    if (xpStat)  xpStat.textContent  = formatXP(xp);
+    if (lvStat)  lvStat.textContent  = level;
+    if (strStat) strStat.textContent = streak;
+}
+window._refreshProfileStats = _refreshProfileStats;
 
 // 2. Fungsi onAuthStateChanged (JANGAN DIBUANG, TAPI DIUPDATE)
-
-// Cari blok kode ini di script.js (sekitar baris 608) dan update isinya:
-
-
-
 if (auth) {
 
     onAuthStateChanged(auth, async (user) => {
@@ -3583,8 +3536,8 @@ function updateStreak() {
             setTimeout(() => showStreakMilestoneModal(streak), 1200);
         }
 
-        // Tampilkan Modal Minta Izin Notifikasi Jika Streak = 2 (dan belum pernah ditanya)
-        if (streak >= 2 && localStorage.getItem('flagx-notif-asked') !== 'true') {
+        // BARU — muncul saat pertama kali main (streak = 1, belum pernah ditanya)
+if (streak === 1 && localStorage.getItem('flagx-notif-asked') !== 'true') {
             setTimeout(() => requestNotificationPermission(), 2500); // Muncul sedikit lambat
         }
     }
