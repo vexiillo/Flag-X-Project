@@ -1778,8 +1778,8 @@ function renderLeaderboardRows(allData, tab) {
 
 html += `<div class="${rowClass}">
     <div class="col-span-1 font-bold text-center ${rankColor}">${rankDisplay}</div>
-    <div class="col-span-4 flex items-center gap-2 pl-1 min-w-0">
-        <img src="${data.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-7 h-7 rounded-full border border-[var(--card-border-color)] object-cover flex-shrink-0">
+    <div class="col-span-4 flex items-center gap-2 pl-1 min-w-0">        
+<img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-7 h-7 rounded-full border border-[var(--card-border-color)] object-cover flex-shrink-0">
         <span class="font-semibold leading-tight break-words min-w-0 text-left ${isMe ? 'text-[var(--primary-color)]' : ''}">
     ${displayName}
 </span>
@@ -1788,7 +1788,7 @@ html += `<div class="${rowClass}">
     ${streakVal > 0 
         ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border border-white/20">
                 <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"></i>
-                <span class="text-white font-black text-xs leading-none drop-shadow-md">${streakVal}</span>
+                <span class="text-white font-black text-xs leading-tight drop-shadow-md">${streakVal}</span>
            </div>`
         : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border border-white/10">
                 <i class="fa-solid fa-fire text-gray-400 text-xs"></i>
