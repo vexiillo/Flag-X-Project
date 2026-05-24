@@ -53,8 +53,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/jpeg" href="logo.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>    
 </head>
 
 <body class="antialiased">
@@ -70,12 +69,12 @@
          
         <div id="totalscore-container" 
      onclick="openLevelInfo(event)"
-     class="group relative flex items-center gap-2 px-6 py-2 bg-[var(--secondary-color)]/80 border border-white/20 rounded-full text-lg font-bold text-white w-fit flex-shrink-0 cursor-pointer">
+     class="group relative flex items-center gap-2 px-6 py-2 bg-[var(--secondary-color)]/80 border border border-[var(--card-border-color)] rounded-full text-lg font-bold text-white w-fit flex-shrink-0 cursor-pointer">
 
     <i class="fa-solid fa-star text-yellow-400"></i>
     <span>
         <span data-translate-key="totalScoreLabel">XP</span>: 
-        <span id="totalscore-value">68</span>
+        <span id="totalscore-value">0</span>
     </span>
     
     <div id="level-badge" class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[var(--primary-color)] px-4 py-0.5 rounded-lg text-sm font-bold text-white shadow-lg border border-white/20 min-w-[80px] text-center">
@@ -179,21 +178,71 @@
 </div>
 
         <div id="settings-panel" class="card rounded-lg p-4">
-            <div class="mb-4">
-                <h4 class="font-bold mb-2" data-translate-key="settingsLanguage">Language</h4>
-                <div class="flex gap-4">
-                    <label class="flex items-center"><input type="radio" name="language" value="en" class="mr-2 settings-input"> English</label>
-                    <label class="flex items-center"><input type="radio" name="language" value="id" class="mr-2 settings-input"> Bahasa Indonesia</label>
-                </div>
+           <div class="mb-4">
+    <h4 class="font-bold mb-3" data-translate-key="settingsLanguage">Language</h4>
+    <div class="flex gap-3">
+        <label class="custom-radio-label flex-1" onclick="document.querySelector('input[name=\'language\'][value=\'en\']').click()">
+            <input type="radio" name="language" value="en" class="sr-only">
+            <div class="custom-radio-card" id="lang-card-en">
+                <div class="custom-radio-dot" id="lang-dot-en"></div>
+                <span>English</span>
+            </div>
+        </label>
+        <label class="custom-radio-label flex-1" onclick="document.querySelector('input[name=\'language\'][value=\'id\']').click()">
+            <input type="radio" name="language" value="id" class="sr-only">
+            <div class="custom-radio-card" id="lang-card-id">
+                <div class="custom-radio-dot" id="lang-dot-id"></div>
+                <span>Indonesia</span>
+            </div>
+        </label>
+    </div>
+</div>
+<div class="mb-4">
+    <h4 class="font-bold mb-3" data-translate-key="settingsDifficulty">Difficulty</h4>
+    <div class="flex gap-2">
+        <label class="custom-radio-label flex-1" onclick="document.querySelector('input[name=\'difficulty\'][value=\'2\']').click()">
+            <input type="radio" name="difficulty" value="2" class="sr-only">
+            <div class="custom-radio-card" id="diff-card-2">
+                <div class="custom-radio-dot" id="diff-dot-2"></div>
+                <span data-translate-key="difficultyEasy">Easy</span>
+            </div>
+        </label>
+        <label class="custom-radio-label flex-1" onclick="document.querySelector('input[name=\'difficulty\'][value=\'4\']').click()">
+            <input type="radio" name="difficulty" value="4" class="sr-only">
+            <div class="custom-radio-card" id="diff-card-4">
+                <div class="custom-radio-dot" id="diff-dot-4"></div>
+                <span data-translate-key="difficultyNormal">Normal</span>
+            </div>
+        </label>
+        <label class="custom-radio-label flex-1" onclick="document.querySelector('input[name=\'difficulty\'][value=\'6\']').click()">
+            <input type="radio" name="difficulty" value="6" class="sr-only">
+            <div class="custom-radio-card" id="diff-card-6">
+                <div class="custom-radio-dot" id="diff-dot-6"></div>
+                <span data-translate-key="difficultyHard">Hard</span>
+            </div>
+        </label>
+    </div>
+</div>
+            <div id="type-name-setting" class="hidden mb-4">
+                <h4 class="font-bold mb-3" data-translate-key="settingsTypeName">Input Mode</h4>
+<label class="flex items-center gap-5 cursor-pointer" onclick="toggleTypeNameMode()">
+                    <div class="relative flex-shrink-0">
+                        <div id="type-name-toggle-track" class="w-10 h-6 rounded-full border border-[var(--card-border-color)] transition-colors duration-200 bg-[var(--secondary-color)]"></div>
+                        <div id="type-name-toggle-thumb" class="absolute top-1 left-1 w-4 h-4 rounded-full transition-all duration-200 bg-[var(--subtle-text-color)]"></div>
+                    </div>
+                    <span class="text-sm leading-none self-center" data-translate-key="typeNameLabel">Type the Answer</span>
+                </label>
             </div>
             <div class="mb-4">
-                <h4 class="font-bold mb-2" data-translate-key="settingsDifficulty">Difficulty</h4>
-                <div class="flex justify-between">
-                    <label class="flex items-center"><input type="radio" name="difficulty" value="2" class="mr-2 settings-input"> <span data-translate-key="difficultyEasy">Easy</span></label>
-                    <label class="flex items-center"><input type="radio" name="difficulty" value="4" class="mr-2 settings-input"> <span data-translate-key="difficultyNormal">Normal</span></label>
-                    <label class="flex items-center"><input type="radio" name="difficulty" value="6" class="mr-2 settings-input"> <span data-translate-key="difficultyHard">Hard</span></label>
-                </div>
-            </div>
+    <h4 class="font-bold mb-2" data-translate-key="settingsSound">Sound</h4>
+    <label class="flex items-center gap-3 cursor-pointer" onclick="toggleSound()">
+        <div class="relative flex-shrink-0">
+            <div id="sound-toggle-track" class="w-10 h-6 rounded-full border border-[var(--card-border-color)] transition-colors duration-200 bg-[var(--secondary-color)]"></div>
+            <div id="sound-toggle-thumb" class="absolute top-1 left-1 w-4 h-4 rounded-full transition-all duration-200 bg-[var(--subtle-text-color)]"></div>
+        </div>
+        <span class="text-sm leading-none self-center" data-translate-key="soundLabel">Sound Effects</span>
+    </label>
+</div>
             <div class="border-t border-[var(--card-border-color)] my-4"></div>
             <div>
                 <h4 class="font-bold mb-2" data-translate-key="settingsContact">Contact</h4>
@@ -261,7 +310,7 @@
         </div>
 
         <div class="flex-1 flex flex-col items-center justify-center text-center gap-1">
-            <span class="text-[12px] font-black tracking-[0.15em] text-[var(--primary-color)] uppercase w-full">Flag of the Day</span>
+            <span class="text-[12px] font-black tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa] uppercase w-full">Flag of the Day</span>
             
             <h2 id="fotd-name" class="text-sm font-bold leading-tight w-full mb-1 px-1">
                 Loading...
@@ -298,6 +347,10 @@
             <button id="open-leaderboard-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
                 <i class="fa-solid fa-trophy fa-fw text-yellow-400"></i>
                 <span data-translate-key="homeLeaderboard">Leaderboard</span>
+            </button>
+            <button onclick="showQuizHistory()" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left fa-fw text-[var(--primary-color)]"></i>
+                <span data-translate-key="homeHistory">Quiz History</span>
             </button>
         </div>              
     </div>
@@ -336,6 +389,11 @@
                 <div id="flag-display-quiz" class="flex justify-center items-center h-full"></div>
             </div>
             <div id="options-container" class="grid grid-cols-2 gap-4"></div>
+            <div id="type-name-input-container" class="hidden mt-4">
+                <input type="text" id="type-name-input" class="w-full rounded-lg py-3 px-4 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] bg-[var(--input-bg-color)] border border-[var(--card-border-color)]" data-translate-key="typeNamePlaceholder" placeholder="Type country name..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button id="type-name-submit" class="btn btn-primary w-full py-3 mt-2 text-white font-bold" data-translate-key="submitBtn">Submit</button>
+                <div id="type-name-feedback" class="mt-2 text-sm font-bold hidden"></div>
+            </div>
             <button id="end-quiz-btn" class="btn mt-6 w-full bg-[var(--error-color)] hover:bg-[var(--error-color)] text-white py-2 px-4" data-translate-key="quizEnd">End Quiz</button>
         </div>
     </div>
@@ -345,8 +403,29 @@
     <div class="card rounded-lg p-8">
         <h2 class="text-3xl font-bold mb-4" data-translate-key="resultsTitle">Quiz Over!</h2>
         <p class="text-lg mb-2" data-translate-key="resultsFinalScore">Final Score:</p>
-        <p class="text-5xl sm:text-6xl font-bold text-[var(--primary-color)] mb-6" id="final-score">0</p>
-        <p class="text-subtle mb-6" id="results-message"></p>
+        <p class="text-5xl sm:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]" id="final-score">0</p>
+        <p class="text-subtle mb-4" id="results-message"></p>
+
+        <!-- Results Breakdown -->       
+<div id="results-breakdown" class="grid grid-cols-2 gap-2 mb-4">
+    <div class="card p-2 rounded-lg text-center">
+        <div class="text-xl font-bold" style="color: var(--success-color);" id="res-correct">0</div>
+        <div class="text-xs text-subtle" data-translate-key="resCorrect">Correct</div>
+    </div>
+    <div class="card p-2 rounded-lg text-center">
+        <div class="text-xl font-bold" style="color: var(--error-color);" id="res-wrong">0</div>
+        <div class="text-xs text-subtle" data-translate-key="resWrong">Wrong</div>
+    </div>
+    <div class="card p-2 rounded-lg text-center">
+        <div class="text-xl font-bold" style="color: #f59e0b;" id="res-accuracy">0%</div>
+        <div class="text-xs text-subtle" data-translate-key="resAccuracy">Accuracy</div>
+    </div>
+    <div class="card p-2 rounded-lg text-center">
+        <div class="text-xl font-bold" style="color: #3b82f6;" id="res-avg-time">-</div>
+        <div class="text-xs text-subtle" data-translate-key="resAvgTime">Avg. Time</div>
+    </div>
+</div>
+      
         <div class="space-y-4">
             <button id="play-again-btn" class="btn w-full btn-primary text-white py-3 px-4 text-lg flex items-center justify-center gap-2" data-translate-key="resultsPlayAgain"><i class="fa-solid fa-play"></i>Play Again</button>
             <button id="share-score-btn" class="btn w-full btn-secondary py-3 px-4 text-lg flex items-center justify-center gap-2">
@@ -357,34 +436,47 @@
         </div>
 
         <!-- Missed Flags Review -->
-        <div id="missed-flags-section" class="hidden text-left mt-4">
-            <button id="toggle-missed-btn" class="w-full flex items-center justify-center p-4 card rounded-lg mb-2 relative min-h-[56px]">
-    <div class="flex items-center gap-2">
-        <i class="fa-solid fa-flag text-[var(--error-color)]"></i>
-        <span id="missed-flags-label" class="font-bold text-sm leading-none" data-translate-key="missedFlagsTitle">Flags to Review</span>
-    </div>
-    <i id="missed-toggle-icon" class="fa-solid fa-chevron-down text-subtle text-xs transition-transform absolute right-4"></i>
-</button>
-            <div id="missed-flags-grid" class="hidden grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-72 overflow-y-auto custom-scrollbar rounded-lg p-1"></div>
+        <div id="missed-flags-section" class="hidden text-left mt-4 w-full">
+    <button id="toggle-missed-btn" class="w-full flex items-center p-4 card rounded-lg mb-2 relative min-h-[56px] hover:bg-[var(--secondary-hover-color)] transition-colors">
+        <div class="absolute left-4">
+            <i class="fa-solid fa-flag text-[var(--error-color)]"></i>
         </div>
+        <div class="flex-grow text-center">
+            <span id="missed-flags-label" class="font-bold text-sm" data-translate-key="missedFlagsTitle">Flags to Review</span>
+        </div>
+        <div class="absolute right-4">
+            <i id="missed-toggle-icon" class="fa-solid fa-chevron-down text-subtle text-xs transition-transform duration-300"></i>
+        </div>
+    </button>
+    <div id="missed-flags-grid" class="hidden grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-72 overflow-y-auto custom-scrollbar rounded-lg p-1"></div>
+</div>
     </div>
 </div>
 
 <div id="leaderboard-screen" class="screen w-full max-w-2xl text-center">
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-4 text-left">
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-4 text-left">
         <h2 class="text-2xl sm:text-3xl font-bold flex items-center gap-3">
             <i class="fa-solid fa-trophy text-yellow-400"></i> 
             <span data-translate-key="leaderboardTitle">Top Players</span>
         </h2>
         <button onclick="showScreen('home-screen')" class="btn btn-secondary py-2 px-4" data-translate-key="backButton">Back</button>
     </div>
+
+    <!-- Leaderboard Tabs -->
+    <div class="flex gap-2 mb-4">
+        <button id="tab-alltime" onclick="filterLeaderboard('alltime')" class="btn btn-primary flex-1 py-2 text-sm font-bold" data-translate-key="tabAllTime">All Time</button>
+        <button id="tab-thisweek" onclick="filterLeaderboard('thisweek')" class="btn btn-secondary flex-1 py-2 text-sm font-bold" data-translate-key="tabThisWeek">This Week</button>
+    </div>
     
     <div class="card rounded-lg overflow-hidden border border-[var(--card-border-color)] mb-6">
-        <div class="grid grid-cols-12 gap-2 p-3 bg-[var(--secondary-color)] font-bold text-sm sm:text-base border-b border-[var(--card-border-color)]">
-            <div class="col-span-2">#</div>
-            <div class="col-span-7 text-left pl-2" data-translate-key="leaderboardUser">Player</div>
-            <div class="col-span-3 text-right pr-2" data-translate-key="leaderboardScore">Score</div>
-        </div>
+        <!-- Ganti baris ini di dalam grid header leaderboard -->
+<div class="grid grid-cols-12 gap-2 p-3 bg-[var(--secondary-color)] font-bold text-sm sm:text-base border-b border-[var(--card-border-color)]">
+    <div class="col-span-1">#</div>
+    <div class="col-span-4 text-left pl-2" data-translate-key="leaderboardUser">Player</div>
+    <div class="col-span-3 text-center font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500">Streak</div>
+    <div class="col-span-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">Lv.</div>
+    <div class="col-span-2 text-right pr-2" data-translate-key="leaderboardScore">XP</div>
+</div>
         <div id="leaderboard-list" class="max-h-[60vh] overflow-y-auto custom-scrollbar">
     <div class="p-8 flex flex-col items-center justify-center gap-3">
         <div class="loader"></div>
@@ -449,10 +541,41 @@
     </div>
     <div id="library-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
 </div>
+
+<!-- Letakkan ini di dalam <main>, persis sebelum tag </main> -->
+<div id="history-screen" class="screen w-full max-w-2xl text-center">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4 text-left">
+        <h2 class="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+            <i class="fa-solid fa-clock-rotate-left text-[var(--primary-color)]"></i>
+            <span data-translate-key="historyTitle">Quiz History</span>
+        </h2>
+        <button onclick="showScreen('home-screen')" class="btn btn-secondary py-2 px-4" data-translate-key="backButton">Back</button>
+    </div>
+ <div class="flex gap-2 mb-4 w-full">
+    <button id="history-filter-btn" onclick="openHistoryFilterModal('mode')"
+        class="flex-1 flex items-center justify-between gap-2 bg-[var(--input-bg-color)] border border-[var(--card-border-color)] text-[var(--text-color)] rounded-lg px-3 py-2 text-sm hover:border-[var(--primary-color)] transition-colors">
+        <span class="flex items-center gap-1.5 overflow-hidden">
+            <i class="fa-solid fa-filter text-[var(--subtle-text-color)] text-xs"></i>
+            <span id="history-filter-label" class="truncate" data-translate-key="filterAll">All Modes</span>
+        </span>
+        <i class="fa-solid fa-chevron-down text-[var(--subtle-text-color)] text-xs flex-shrink-0"></i>
+    </button>
+    
+    <button id="history-sort-btn" onclick="openHistoryFilterModal('sort')"
+        class="flex-1 flex items-center justify-between gap-2 bg-[var(--input-bg-color)] border border-[var(--card-border-color)] text-[var(--text-color)] rounded-lg px-3 py-2 text-sm hover:border-[var(--primary-color)] transition-colors">
+        <span class="flex items-center gap-1.5 overflow-hidden">
+            <i class="fa-solid fa-sort text-[var(--subtle-text-color)] text-xs"></i>
+            <span id="history-sort-label" class="truncate" data-translate-key="sortNewest">Newest</span>
+        </span>
+        <i class="fa-solid fa-chevron-down text-[var(--subtle-text-color)] text-xs flex-shrink-0"></i>
+    </button>
+</div>
+    <div id="history-list" class="space-y-3 pb-28 w-full px-2"></div>
+</div>
         </main>
               
         <footer class="w-full max-w-6xl mx-auto mt-8 text-center text-subtle text-sm">
-    <p data-translate-key="footer">© 2025 Flag-X. All Rights Reserved.</p>
+    <p data-translate-key="footer">&copy; 2025 Flag-X. All Rights Reserved.</p>
 </footer>
     </div>
 
@@ -464,21 +587,23 @@
                 <div class="onboard-dot w-2.5 h-2.5 rounded-full transition-all duration-300"></div>
                 <div class="onboard-dot w-2.5 h-2.5 rounded-full transition-all duration-300"></div>
             </div>
-            <div class="onboard-slide">
-                <div class="text-5xl mb-4">&#127758;</div>
-                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingWelcomeTitle">Welcome to Flag-X!</h3>
-                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingWelcomeText">Test your knowledge of world flags from official countries, subdivisions, historical flags, and more.</p>
-            </div>
-            <div class="onboard-slide hidden">
-                <div class="text-5xl mb-4">&#11088;</div>
-                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingXpTitle">Earn XP &amp; Level Up</h3>
-                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingXpText">Answer correctly to earn XP. Progress through 50 levels and compete on the global leaderboard!</p>
-            </div>
-            <div class="onboard-slide hidden">
-                <div class="text-5xl mb-4">&#128293;</div>
-                <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingStreakTitle">Build Your Streak</h3>
-                <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingStreakText">Play every day to keep your streak alive, bookmark flags to study them, and share your best scores!</p>
-            </div>
+            <div class="onboard-slides-container">
+    <div class="onboard-slide">
+        <div class="text-5xl mb-4">&#127758;</div>
+        <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingWelcomeTitle">Welcome to Flag-X!</h3>
+        <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingWelcomeText">Test your knowledge of world flags from official countries, subdivisions, historical flags, and more.</p>
+    </div>
+    <div class="onboard-slide">
+        <div class="text-5xl mb-4">&#11088;</div>
+        <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingXpTitle">Earn XP &amp; Level Up</h3>
+        <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingXpText">Answer correctly to earn XP. Progress through 50 levels and compete on the global leaderboard!</p>
+    </div>
+    <div class="onboard-slide">
+        <div class="text-5xl mb-4">&#128293;</div>
+        <h3 class="text-2xl font-bold mb-2 text-[var(--primary-color)]" data-translate-key="onboardingStreakTitle">Build Your Streak</h3>
+        <p class="text-subtle text-sm leading-relaxed" data-translate-key="onboardingStreakText">Play every day to keep your streak alive, bookmark flags to study them, and share your best scores!</p>
+    </div>
+</div>
             <div class="flex gap-3 mt-6">
                 <button id="onboard-skip-btn" class="btn btn-secondary flex-1 py-2 text-sm" data-translate-key="skipBtn">Skip</button>
                 <button id="onboard-next-btn" class="btn btn-primary flex-1 py-2 text-sm text-white" data-translate-key="nextBtn">Next</button>
@@ -578,6 +703,63 @@
     </div>
 </div>
 
+<div id="switch-difficulty-modal" class="modal">
+    <div class="card rounded-xl p-6 w-full max-w-sm m-4 text-center shadow-2xl">
+        <div class="w-12 h-12 bg-[rgba(var(--error-color-rgb),0.1)] text-[var(--error-color)] rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-sliders text-xl"></i>
+        </div>
+        <h3 class="text-lg font-bold mb-2" data-translate-key="switchDiffModalTitle">Ganti Tingkat Kesulitan?</h3>
+        <p class="text-sm text-[var(--subtle-text-color)] mb-6" data-translate-key="switchDiffModalDesc">Mengubah tingkat kesulitan di tengah kuis akan me-reset progres kuis yang sedang berjalan.</p>
+        <div class="flex gap-3">
+            <button id="confirm-diff-btn" class="btn bg-[var(--error-color)] text-white flex-1 py-2 rounded-lg text-sm font-semibold" data-translate-key="confirmSwitchBtn">Ya, Reset</button>
+            <button id="cancel-diff-btn" class="btn btn-secondary flex-1 py-2 rounded-lg text-sm font-semibold" data-translate-key="cancelSwitchBtn">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pilihan Filter Mode History -->
+<div id="history-filter-modal" class="modal">
+    <div class="card rounded-2xl w-full max-w-sm m-4 overflow-hidden shadow-2xl">
+        <div class="p-4 border-b border-[var(--card-border-color)] flex items-center justify-between">
+            <h3 class="font-bold text-base" data-translate-key="filterModalTitle">Filter by Mode</h3>
+            <button onclick="closeHistoryFilterModal()" class="text-[var(--subtle-text-color)] hover:text-[var(--text-color)] transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--secondary-color)]">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-2" id="history-filter-options">
+            <!-- Di-generate oleh JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pilihan Sort History -->
+<div id="history-sort-modal" class="modal">
+    <div class="card rounded-2xl w-full max-w-sm m-4 overflow-hidden shadow-2xl">
+        <div class="p-4 border-b border-[var(--card-border-color)] flex items-center justify-between">
+            <h3 class="font-bold text-base" data-translate-key="sortModalTitle">Sort By</h3>
+            <button onclick="closeHistoryFilterModal()" class="text-[var(--subtle-text-color)] hover:text-[var(--text-color)] transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--secondary-color)]">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-2" id="history-sort-options">
+            <!-- Di-generate oleh JS -->
+        </div>
+    </div>
+</div>
+
+<div id="switch-mode-modal" class="modal">
+    <div class="card rounded-xl p-6 w-full max-w-sm m-4 text-center shadow-2xl relative overflow-hidden">
+        <div class="w-12 h-12 bg-[rgba(var(--error-color-rgb),0.1)] text-[var(--error-color)] rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        </div>
+        <h3 class="text-lg font-bold mb-2 text-[var(--text-color)]" data-translate-key="switchModalTitle">Beralih Mode Kuis?</h3>
+        <p class="text-sm text-[var(--subtle-text-color)] mb-6" data-translate-key="switchModalDesc">Mengubah jenis input kuis di tengah permainan akan me-reset seluruh progres kuis berjalan Anda.</p>
+        <div class="flex gap-3 relative z-10">
+            <button id="confirm-switch-btn" class="btn bg-[var(--error-color)] hover:brightness-110 text-white flex-1 py-2 rounded-lg text-sm font-semibold transition" data-translate-key="confirmSwitchBtn">Ya, Reset</button>
+            <button id="cancel-switch-btn" class="btn btn-secondary flex-1 py-2 rounded-lg text-sm font-semibold transition" data-translate-key="cancelSwitchBtn">Batal</button>
+        </div>
+    </div>
+</div>
         
         <div id="level-up-modal" class="modal">
         <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-sm m-4 text-center relative overflow-hidden">
@@ -599,7 +781,62 @@
                 AWESOME!
             </button>
         </div>
-    </div>  
+    </div>
+
+    <!-- Streak Milestone Modal -->
+    <div id="streak-milestone-modal" class="modal">
+        <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-sm m-4 text-center relative overflow-hidden">
+            <div class="mb-3 relative z-10 flex justify-center">
+                <i class="fa-solid fa-fire text-6xl text-orange-400 glow-icon-effect" style="filter: drop-shadow(0 0 20px rgba(251,146,60,0.9));"></i>
+            </div>
+            <h3 id="streak-milestone-title" class="text-3xl font-black mb-2 relative z-10" style="background: linear-gradient(135deg, #f97316, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                7-Day Streak!
+            </h3>
+            <p class="text-subtle mb-2 relative z-10 font-medium text-base" id="streak-milestone-sub">Incredible consistency!</p>
+            <div class="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-lg p-3 mb-6 relative z-10">
+                <p class="text-orange-400 font-bold text-lg" id="streak-milestone-bonus">+25% XP Bonus active!</p>
+                <p class="text-xs text-subtle mt-1" id="streak-milestone-bonus-sub">Applied to all quiz XP while streak lasts</p>
+            </div>
+            <button id="close-streak-milestone-btn" class="btn py-3 px-8 w-full relative z-10 text-lg font-bold text-white" style="background: linear-gradient(135deg, #f97316, #f59e0b);" data-translate-key="letsGoBtn">
+                LET'S GO!
+            </button>
+        </div>
+    </div>
+    
+    <div id="notification-modal" class="modal">
+    <div class="card glass-fun-fact rounded-lg p-8 w-full max-w-sm m-4 text-center relative overflow-hidden">
+        <div class="mb-3 relative z-10 flex justify-center">
+            <i class="fa-solid fa-bell text-5xl text-white-400 glow-icon-effect"></i>
+        </div>
+        <h3 class="text-2xl font-bold mb-2 relative z-10 text-[var(--primary-color)]">Aktifkan Pengingat?</h3>
+        <p class="text-subtle mb-6 relative z-10 font-medium text-sm">
+            Kami akan mengirimkan notifikasi harian agar Streak kamu tidak hangus dan terus berlanjut!
+        </p>
+        <div class="flex gap-3 relative z-10">
+            <button id="decline-notif-btn" class="btn btn-secondary flex-1 py-2 text-sm font-bold">Nanti Saja</button>
+            <button id="accept-notif-btn" class="btn btn-primary flex-1 py-2 text-sm text-white font-bold">Izinkan</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Share Card Modal -->
+    <div id="share-card-modal" class="modal">
+        <div class="card rounded-xl p-5 w-full max-w-sm m-4 text-center">
+            <h3 class="text-xl font-bold mb-3" data-translate-key="shareCardTitle">Share Your Score</h3>
+            <div class="mb-3 rounded-xl overflow-hidden border border-[var(--card-border-color)]">
+                <canvas id="share-canvas" width="400" height="480" class="w-full"></canvas>
+            </div>
+            <div class="flex gap-2 mb-2">
+                <button id="download-card-btn" class="btn btn-primary flex-1 py-2.5 flex items-center justify-center gap-2 text-white font-bold">
+                    <i class="fa-solid fa-download"></i> <span data-translate-key="downloadBtn">Save</span>
+                </button>
+                <button id="share-card-btn" class="btn btn-secondary flex-1 py-2.5 flex items-center justify-center gap-2 font-bold">
+                    <i class="fa-solid fa-share-nodes"></i> <span data-translate-key="shareBtn">Share</span>
+                </button>
+            </div>
+            <button id="close-share-card-btn" class="btn btn-secondary w-full py-2 text-sm" data-translate-key="closeBtn">Close</button>
+        </div>
+    </div>
 
     <button id="scroll-to-top-btn" class="btn btn-primary" aria-label="Scroll to top">
         <i class="fa-solid fa-arrow-up"></i>
@@ -622,8 +859,12 @@
         <i class="fa-solid fa-trophy"></i>
         <span data-translate-key="navLeaderboard">Rank</span>
     </button>
+    <button onclick="showQuizHistory()" class="nav-item" id="nav-history">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span data-translate-key="navHistory">History</span>
+    </button>
 </nav>
     
-    <script type="module" src="script.js" defer></script>
+    <script type="module" src="script2.js" defer></script>
 </body>
 </html>
