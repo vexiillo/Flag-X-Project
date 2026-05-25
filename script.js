@@ -3291,18 +3291,20 @@ async function getFunFact(itemName) {
     const modalTitle = document.getElementById('gemini-modal-title');
 
     geminiModal.classList.add('active');
-    document.body.classList.add('modal-open'); 
+    document.body.classList.add('modal-open');
+
+    // ✅ Pindahkan ke sini, SEBELUM innerHTML
+    const currentLang = settings.language || 'en';
     
     geminiContentEl.innerHTML = `
     <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
         <div class="loader"></div>
         <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-    ${translations[currentLang].generatingFunFact || "Generating Fun Facts..."}
-</p>
+            ${translations[currentLang].generatingFunFact || "Generating Fun Facts..."}
+        </p>
     </div>
     `;
-
-    const currentLang = settings.language || 'en'; 
+    
     const titleLabel = (translations[currentLang] && translations[currentLang].funFact) 
                        ? translations[currentLang].funFact 
                        : "Fun Fact";
