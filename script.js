@@ -517,7 +517,7 @@ if (infoBtn) {
 
             endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your XP will be finalized.",
 
-            endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X  2025. All Rights Reserved.",
+            endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X © 2025. All Rights Reserved.",
 
             settingsLanguage: "Language", settingsDifficulty: "Difficulty (Options)", difficultyEasy: "Easy", difficultyNormal: "Normal", difficultyHard: "Hard", settingsContact: "Contact",
 
@@ -604,10 +604,10 @@ timeAttackResultMessage: "You answered {questions} questions and gained {score} 
 
             disclaimerTitle: "Flag Accuracy Note",
 
-    disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encountereven the most unrecognizable onesthe broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
+            disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encounter–even the most unrecognizable ones–the broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
 
 // Tambahkan di dalam objek 'en', di bawah teks yang sudah ada:
-toastNameBlank: "Name cannot be blank!",
+toastNameBlank: "Name cannot be blank! ⚠️",
 toastNameSaved: "Name saved!",
 toastSaveFailed: "Failed to save. Try again.",
 btnSaving: "Saving...",
@@ -637,7 +637,7 @@ correctAnswer: "Correct:",
 wrongAnswer: "Answer:",
 correctCapital: "Capital:",
 wrongCapital: "Capital:",
-bookmarkAdded: "Bookmarked! \u2B50",
+bookmarkAdded: "Bookmarked! ⭐",
 bookmarkRemoved: "Bookmark removed",
 noBookmarksMsg: "No bookmarks yet! Star flags in the library.",
 noBookmarksSub: "Explore the library and click the star icon on any flag to save it here for a quick study session!",
@@ -720,7 +720,7 @@ inputModeLocked: "Reach Level 10 to unlock Input Mode"
 
             endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? XP Anda akan difinalisasi.",
 
-            endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X  2025. Hak Cipta Dilindungi.",
+            endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X © 2025. Hak Cipta Dilindungi.",
 
             settingsLanguage: "Bahasa", settingsDifficulty: "Tingkat Kesulitan (Opsi)", difficultyEasy: "Mudah", difficultyNormal: "Normal", difficultyHard: "Sulit", settingsContact: "Kontak",
 
@@ -807,10 +807,10 @@ inputModeLocked: "Reach Level 10 to unlock Input Mode"
 
             disclaimerTitle: "Catatan Akurasi Bendera",
 
-    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temuibahkan yang paling sulit dikenali sekalipunsemakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
+    disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temui–bahkan yang paling sulit dikenali sekalipun–semakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
 
 // Tambahkan di dalam objek 'id', di bawah teks yang sudah ada:
-toastNameBlank: "Nama tidak boleh kosong!",
+toastNameBlank: "Nama tidak boleh kosong! ⚠️",
 toastNameSaved: "Nama disimpan!",
 toastSaveFailed: "Gagal menyimpan. Coba lagi.",
 btnSaving: "Menyimpan...",
@@ -840,7 +840,7 @@ correctAnswer: "Benar:",
 wrongAnswer: "Jawaban:",
 correctCapital: "Ibu Kota:",
 wrongCapital: "Ibu Kota:",
-bookmarkAdded: "Ditandai! \u2B50",
+bookmarkAdded: "Ditandai! ⭐",
 bookmarkRemoved: "Tanda dihapus",
 noBookmarksMsg: "Belum ada bookmark! Tandai bendera di pustaka.",
 noBookmarksSub: "Jelajahi pustaka dan klik ikon bintang pada bendera mana pun untuk menyimpannya di sini agar dapat dipelajari dengan cepat!",
@@ -875,7 +875,7 @@ shareBtn: "Bagikan",
 closeBtn: "Tutup",
 tabAllTime: "Sepanjang Masa",
 tabThisWeek: "Minggu Ini",
-leaderboardStreak: "🔥 Streak",
+leaderboardStreak: "Streak",
 navHistory: "Riwayat",
 switchModalTitle: "Ganti Mode Kuis?",
 switchModalDesc: "Mengubah jenis input kuis di tengah permainan akan memuat ulang seluruh progres kuis berjalan Anda.",
@@ -4516,7 +4516,7 @@ window._doc = doc;
 window._db = db;
     // Selipkan ini di baris akhir sebelum penutup fungsi renderLeaderboardRows
     window.cekLeaderboard = renderLeaderboardRows;
-    
+       
     // ========================================================
 // 🛠️ DEVELOPER BACKDOOR: OVERRIDE AUTH & FIREBASE REGISTER
 // ========================================================
