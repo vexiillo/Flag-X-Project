@@ -1711,29 +1711,31 @@ function renderLeaderboardRows(allData, tab) {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer) return;
 
+    // Apply the base animation class to hide it initially
+    listContainer.classList.remove('active-slide');
+    listContainer.classList.add('leaderboard-slide');
+
     // Filter for This Week: lastActive within last 7 days
     let data = allData;
     if (tab === 'thisweek') {
-    const now = new Date();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    monday.setHours(0, 0, 0, 0);
-    const currentWeekStart = monday.toISOString();
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        monday.setHours(0, 0, 0, 0);
+        const currentWeekStart = monday.toISOString();
 
-    data = allData
-        .filter(d => {
-            // Hanya tampilkan user yang weekStart-nya sama dengan minggu ini
-            // DAN punya weeklyScore > 0
-            return d.weekStart === currentWeekStart && (d.weeklyScore || 0) > 0;
-        })
-        .sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0));
-}
+        data = allData
+            .filter(d => {
+                return d.weekStart === currentWeekStart && (d.weeklyScore || 0) > 0;
+            })
+            .sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0));
+    }
     let html = '';
 
     // Guest CTA banner
     if (!auth || !auth.currentUser) {
         html += `
-            <div class="bg-[var(--secondary-color)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)]">
+            <div class="bg-[var(--secondary-color)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)] mb-4">
                 <p class="text-sm font-semibold text-[var(--text-color)]">${translations[settings.language].leaderboardGuestCTA}</p>
                 <button id="leaderboard-login-btn" class="btn btn-primary px-6 py-2 shadow-md flex items-center gap-2">
                     <i class="fa-brands fa-google"></i> <span>${translations[settings.language].loginBtn}</span>
@@ -1745,17 +1747,22 @@ function renderLeaderboardRows(allData, tab) {
     if (data.length === 0) {
         html += `<div class="p-8 text-center text-subtle">${translations[settings.language].leaderboardNoData || 'No data for this period.'}</div>`;
         listContainer.innerHTML = html;
+        
+        // Trigger animation
+        void listContainer.offsetWidth; 
+        listContainer.classList.add('active-slide');
         return;
     }
 
     const MEDALS = ['🥇', '🥈', '🥉'];
-const formatStreak = (days) => {
-    if (days <= 0) return `0d`;
-    const years = Math.floor(days / 365);
-    if (years >= 2) return `${years}yrs`;
-    if (years === 1) return `1yr`;
-    return `${days}d`;
-};
+    const formatStreak = (days) => {
+        if (days <= 0) return `0d`;
+        const years = Math.floor(days / 365);
+        if (years >= 2) return `${years}yrs`;
+        if (years === 1) return `1yr`;
+        return `${days}d`;
+    };
+
     data.forEach((d, i) => {
         const rank = i + 1;
         const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
@@ -1773,42 +1780,49 @@ const formatStreak = (days) => {
         else if (rank === 2) rankColor = "text-gray-300";
         else if (rank === 3) rankColor = "text-amber-600";
 
-        const rowClass = `grid grid-cols-12 gap-2 p-3 items-center border-b border-[var(--card-border-color)] text-sm hover:bg-[var(--card-bg-color)] transition ${isMe ? 'bg-[rgba(var(--primary-color-rgb),0.2)] border-[var(--primary-color)]' : ''}`;
+        // 🔥 GOALS 2 & 3: Upgraded Row Styles! 
+        // Changed from plain border-b to a floating card style (rounded-xl, drop-shadow, dynamic border)
+        const rowClass = `grid grid-cols-12 gap-2 p-3 mb-2.5 items-center bg-[var(--card-bg-color)] border rounded-xl text-sm shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:border-[var(--primary-color)] hover:-translate-y-0.5 relative overflow-hidden group ${isMe ? 'border-2 border-[var(--primary-color)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.6)] bg-[rgba(var(--primary-color-rgb),0.15)] z-10' : 'border-[var(--card-border-color)]'}`;
 
-html += `<div class="${rowClass}">
-    <div class="col-span-1 font-bold text-center ${rankColor}">${rankDisplay}</div>
-    <div class="col-span-4 flex items-center gap-2 pl-1 min-w-0">        
-<img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-7 h-7 rounded-full border border-[var(--card-border-color)] object-cover flex-shrink-0">
-        <span class="font-semibold leading-tight break-words min-w-0 text-left ${isMe ? 'text-[var(--primary-color)]' : ''}">
-    ${displayName}
-</span>
-    </div>
-    
-    <div class="col-span-3 flex justify-center items-center min-w-0">
-    ${streakVal > 0 
-        ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border-0 ring-0 max-w-full">
-                <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
-                <span class="text-white font-black text-xs leading-tight drop-shadow-md min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
-           </div>`
-        : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border-0 ring-0 max-w-full">
-                <i class="fa-solid fa-fire text-gray-400 text-xs flex-shrink-0"></i>
-                <span class="text-gray-400 font-black text-xs leading-tight min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
-           </div>`
-    }
-</div> 
+        html += `<div class="${rowClass}">
+            <div class="col-span-1 font-bold text-center ${rankColor}">${rankDisplay}</div>
+            <div class="col-span-4 flex items-center gap-2 pl-1 min-w-0">        
+        <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-7 h-7 rounded-full border border-[var(--card-border-color)] object-cover flex-shrink-0">
+                <span class="font-semibold leading-tight break-words min-w-0 text-left ${isMe ? 'text-[var(--primary-color)]' : ''}">
+            ${displayName}
+        </span>
+            </div>
+            
+            <div class="col-span-3 flex justify-center items-center min-w-0">
+            ${streakVal > 0 
+                ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border-0 ring-0 max-w-full">
+                        <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
+                        <span class="text-white font-black text-xs leading-tight drop-shadow-md min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
+                   </div>`
+                : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border-0 ring-0 max-w-full">
+                        <i class="fa-solid fa-fire text-gray-400 text-xs flex-shrink-0"></i>
+                        <span class="text-gray-400 font-black text-xs leading-tight min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
+                   </div>`
+            }
+        </div> 
 
-    <div class="col-span-2 flex justify-center items-center">
-    <div class="flex justify-center items-center px-2 py-1 bg-[rgba(var(--primary-color-rgb),0.2)] rounded-lg border border-[rgba(var(--primary-color-rgb),0.3)]">
-        <span class="text-[var(--primary-color)]  font-black text-xs leading-none">Lv.${userLevel}</span>
-    </div>
-</div>
-    <div class="col-span-2 text-right font-semibold pr-1 text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">
-    ${formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0))}
-</div>
-</div>`;
+            <div class="col-span-2 flex justify-center items-center">
+            <div class="flex justify-center items-center px-2 py-1 bg-[rgba(var(--primary-color-rgb),0.2)] rounded-lg border border-[rgba(var(--primary-color-rgb),0.3)]">
+                <span class="text-[var(--primary-color)]  font-black text-xs leading-none">Lv.${userLevel}</span>
+            </div>
+        </div>
+            <div class="col-span-2 text-right font-semibold pr-1 text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">
+            ${formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0))}
+        </div>
+        </div>`;
     });
         
-    listContainer.innerHTML = html;
+    // Wrapped in a padded div to prevent glowing borders from clipping on the scrollbar
+    listContainer.innerHTML = `<div class="p-1 pb-4">${html}</div>`;
+
+    // Force browser reflow to trigger the CSS transition
+    void listContainer.offsetWidth; 
+    listContainer.classList.add('active-slide');
 
     if (!auth || !auth.currentUser) {
         const loginBtn = document.getElementById('leaderboard-login-btn');
@@ -1820,6 +1834,7 @@ function filterLeaderboard(tab) {
     leaderboardCurrentTab = tab;
     const allBtn = document.getElementById('tab-alltime');
     const weekBtn = document.getElementById('tab-thisweek');
+    
     if (allBtn && weekBtn) {
         if (tab === 'alltime') {
             allBtn.className = 'btn btn-primary flex-1 py-2 text-sm font-bold';
@@ -1829,8 +1844,18 @@ function filterLeaderboard(tab) {
             allBtn.className = 'btn btn-secondary flex-1 py-2 text-sm font-bold';
         }
     }
+    
+    // Smoothly render the slide animation when switching tabs
+    const listContainer = document.getElementById('leaderboard-list');
+    if (listContainer) {
+        listContainer.classList.remove('active-slide');
+    }
+
     if (leaderboardAllData.length > 0) {
-        renderLeaderboardRows(leaderboardAllData, tab);
+        // A slight timeout allows the removal of the class to register before re-rendering
+        setTimeout(() => {
+            renderLeaderboardRows(leaderboardAllData, tab);
+        }, 10);
     }
 }
 

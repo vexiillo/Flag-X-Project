@@ -1298,3 +1298,18 @@ footer {
         left: 200%; /* Cahaya diam menunggu di luar kanan selama 3.2 detik sisanya */
     }
 }
+
+/* ============================================================
+   LEADERBOARD ANIMATION & TWEAKS
+   ============================================================ */
+.leaderboard-slide {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+    transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.leaderboard-slide.active-slide {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
