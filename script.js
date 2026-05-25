@@ -1661,23 +1661,33 @@ if (auth) {
 
 
     // 5. Load Leaderboard
+// Tambahkan guard flag di luar fungsi
+let isLeaderboardLoading = false; 
 
-        const loadLeaderboard = async () => {
+const loadLeaderboard = async () => {
     const listContainer = document.getElementById('leaderboard-list');
-    if (!listContainer) return;
+    
+    // Cegah fungsi berjalan dobel jika sedang loading
+    if (!listContainer || isLeaderboardLoading) return; 
 
-    listContainer.innerHTML = `
-        <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
-            <div class="loader"></div>
-            <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-                Loading Leaderboard...
-            </p>
-        </div>
-    `;   
+    isLeaderboardLoading = true;
+
+    // Cek apakah loader sudah ada bawaan dari HTML. 
+    // Jika belum ada (misal setelah refresh list), baru kita inject.
+    // Ini mencegah animasi loader ter-reset dan patah/glitch.
+    if (!listContainer.querySelector('.loader')) {
+        listContainer.innerHTML = `
+            <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
+                <div class="loader"></div>
+                <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+                    Loading Leaderboard...
+                </p>
+            </div>
+        `;
+    }
 
     try {
-        // TRICK UX: Berikan jeda waktu agar browser sempat merender animasi loading di atas.
-        // Ini memastikan pengguna tahu tombolnya bekerja karena ada feedback visual!
+        // TRICK UX: Berikan jeda waktu agar browser sempat merender animasi
         await new Promise(resolve => setTimeout(resolve, 400));
 
         // Ambil data dari Firestore
@@ -1712,6 +1722,9 @@ if (auth) {
 
         const retryBtn = document.getElementById('retry-leaderboard-btn');
         if (retryBtn) retryBtn.addEventListener('click', () => { loadLeaderboard(); });
+    } finally {
+        // Bebaskan kembali pengaman setelah proses selesai
+        isLeaderboardLoading = false; 
     }
 };
 
@@ -2023,13 +2036,21 @@ function showToast(message) {
 let originalUsername = '';
 
 usernameInput.addEventListener('focus', () => {
-    originalUsername = usernameInput.value;
+    // Hanya simpan originalUsername saat action button masih sembunyi 
+    // (mencegah variabel tertimpa jika user klik bolak-balik)
+    if (usernameActions.classList.contains('hidden')) {
+        originalUsername = usernameInput.value;
+    }
     usernameActions.classList.remove('hidden');
     usernameActions.classList.add('flex');
 });
 
 cancelUsernameBtn.addEventListener('click', () => {
     usernameInput.value = originalUsername;
+    
+    // PENTING: Trigger event 'input' secara manual agar character counter (0/15) ikut terupdate!
+    usernameInput.dispatchEvent(new Event('input')); 
+    
     usernameInput.classList.remove('shake-input'); // Bersihkan error jika ada
     usernameActions.classList.add('hidden');
     usernameActions.classList.remove('flex');
