@@ -159,18 +159,18 @@
     <div id="auth-logged-in" class="hidden">
 
         <!-- Hero Banner -->
-        <div class="relative px-6 pt-6 pb-8 text-center overflow-hidden"
-             style="background: linear-gradient(160deg, rgba(var(--primary-color-rgb),0.18) 0%, transparent 65%)">
-            <!-- Decorative glow orb -->
-            <div class="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none"
-                 style="background: radial-gradient(circle, rgba(var(--primary-color-rgb),0.22), transparent 70%); transform: translate(35%,-35%)"></div>
+        <div class="relative px-6 pt-6 pb-5 text-center overflow-hidden"
+             style="background: linear-gradient(160deg, rgba(var(--primary-color-rgb),0.12) 0%, transparent 65%)">
 
-            <!-- Avatar with gradient ring -->
+            <!-- Decorative glow -->
+            <div class="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none"
+                 style="background: radial-gradient(circle, rgba(var(--primary-color-rgb),0.18), transparent 70%); transform: translate(35%,-35%)"></div>
+
+            <!-- Avatar dengan live gradient ring (sama seperti Fun Fact button) -->
             <div class="inline-block relative z-10">
-                <div class="p-[3px] rounded-full"
-                     style="background: linear-gradient(135deg, var(--primary-color), #ec4899, #f97316)">
+                <div class="profile-avatar-ring p-[3px] rounded-full">
                     <div class="w-[76px] h-[76px] rounded-full overflow-hidden"
-                         style="border: 2px solid var(--bg-color)">
+                         style="border: 2px solid var(--bg-color-dark)">
                         <img id="user-panel-img" src="https://via.placeholder.com/150"
                              alt="User Photo" class="w-full h-full object-cover">
                     </div>
@@ -179,42 +179,12 @@
 
             <!-- Name -->
             <p id="profile-name" class="font-black text-xl mt-3 leading-tight relative z-10">User</p>
-
-            <!-- Level badge -->
-            <div class="inline-flex mt-2 relative z-10">
-                <span id="profile-level-badge"
-                      class="px-3 py-1 rounded-full text-xs font-black text-white shadow-lg"
-                      style="background: linear-gradient(135deg, var(--primary-color), #a855f7)">
-                    Lv. 1
-                </span>
-            </div>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="px-5 py-3 grid grid-cols-3 gap-2 border-t border-b"
-             style="border-color: var(--card-border-color)">
-            <div class="rounded-2xl py-3 text-center"
-                 style="background: rgba(var(--primary-color-rgb),0.07); border: 1px solid rgba(var(--primary-color-rgb),0.12)">
-                <i class="fa-solid fa-star text-[10px] mb-1" style="color: var(--primary-color); opacity: 0.7"></i>
-                <p id="profile-xp-stat" class="font-black text-sm leading-tight" style="color: var(--primary-color)">0</p>
-                <p class="text-[9px] font-semibold uppercase tracking-wide mt-0.5" style="color: var(--subtle-text-color)">XP</p>
-            </div>
-            <div class="rounded-2xl py-3 text-center"
-                 style="background: rgba(var(--primary-color-rgb),0.07); border: 1px solid rgba(var(--primary-color-rgb),0.12)">
-                <i class="fa-solid fa-shield-halved text-[10px] mb-1" style="color: var(--primary-color); opacity: 0.7"></i>
-                <p id="profile-level-stat" class="font-black text-sm leading-tight" style="color: var(--primary-color)">1</p>
-                <p class="text-[9px] font-semibold uppercase tracking-wide mt-0.5" style="color: var(--subtle-text-color)">Level</p>
-            </div>
-            <div class="rounded-2xl py-3 text-center"
-                 style="background: rgba(249,115,22,0.07); border: 1px solid rgba(249,115,22,0.15)">
-                <i class="fa-solid fa-fire text-[10px] mb-1 text-orange-500"></i>
-                <p id="profile-streak-stat" class="font-black text-sm leading-tight text-orange-500">0</p>
-                <p class="text-[9px] font-semibold uppercase tracking-wide mt-0.5" style="color: var(--subtle-text-color)">Streak</p>
-            </div>
         </div>
 
         <!-- Edit Name + Actions -->
-        <div class="p-5 flex flex-col gap-3">
+        <div class="p-5 flex flex-col gap-3 border-t" style="border-color: var(--card-border-color)">
+
+            <!-- Input nama -->
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-widest mb-1.5"
                    style="color: var(--subtle-text-color)" data-translate-key="yourName">Display Name</p>
@@ -228,33 +198,38 @@
                         <i class="fa-solid fa-pencil text-xs"></i>
                     </div>
                 </div>
+
+                <!-- Cancel & Save: ghost style mengikuti pola badge-hist -->
                 <div id="username-actions" class="flex gap-2 mt-2 hidden">
                     <button id="cancel-username-btn"
                             class="flex-1 py-2 text-xs font-bold rounded-xl transition-all active:scale-95"
-                            style="background: rgba(var(--error-color-rgb),0.1); color: var(--error-color); border: 1px solid rgba(var(--error-color-rgb),0.2)"
+                            style="background: rgba(var(--error-color-rgb),0.12); color: var(--error-color); border: 1px solid rgba(var(--error-color-rgb),0.3)"
                             data-translate-key="cancelBtn">Cancel</button>
                     <button id="save-username-btn"
                             class="flex-1 py-2 text-xs font-bold rounded-xl transition-all active:scale-95"
-                            style="background: rgba(var(--success-color-rgb),0.1); color: var(--success-color); border: 1px solid rgba(var(--success-color-rgb),0.2)"
+                            style="background: rgba(var(--success-color-rgb),0.12); color: var(--success-color); border: 1px solid rgba(var(--success-color-rgb),0.3)"
                             data-translate-key="saveBtn">Save</button>
                 </div>
             </div>
 
+            <!-- Switch Account: solid primary gradient -->
             <button onclick="switchAccount()"
-                    class="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-                    style="background: rgba(var(--primary-color-rgb),0.08); color: var(--primary-color); border: 1px solid rgba(var(--primary-color-rgb),0.15)">
+                    class="btn btn-primary w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 text-white">
                 <i class="fa-solid fa-users-between-lines text-xs"></i>
                 <span data-translate-key="switchAccount">Switch Account</span>
             </button>
 
+            <!-- Logout: solid merah -->
             <button id="logout-btn"
-                    class="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-                    style="background: rgba(var(--error-color-rgb),0.08); color: var(--error-color); border: 1px solid rgba(var(--error-color-rgb),0.15)">
+                    class="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 text-white transition-all active:scale-95"
+                    style="background: var(--error-color)">
                 <i class="fa-solid fa-right-from-bracket text-xs"></i>
                 <span data-translate-key="logoutBtn">Logout</span>
             </button>
+
         </div>
     </div>
+
 </div>
 
         <div id="settings-panel" class="card rounded-lg p-4">

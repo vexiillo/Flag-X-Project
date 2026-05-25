@@ -381,10 +381,8 @@ if (profileBtn) {
         const isActive = profilePanel.classList.contains('active');
         closeAllPanels();
         if (!isActive) {
-            profilePanel.classList.add('active');
-            // Refresh stats setiap kali panel dibuka
-            if (auth && auth.currentUser) _refreshProfileStats();
-        }
+    profilePanel.classList.add('active');
+}
     });
 }
     // 2. Logika Tombol Settings
@@ -1461,9 +1459,7 @@ function updateProfileUI(user, customName = null) {
             if (userPhotoPanel)  userPhotoPanel.src = user.photoURL;
         }
 
-        // Sync stats ke panel
-        _refreshProfileStats();
-
+        
     } else {
         if (loggedOutView) loggedOutView.classList.remove('hidden');
         if (loggedInView)  loggedInView.classList.add('hidden');
@@ -1473,24 +1469,6 @@ function updateProfileUI(user, customName = null) {
         if (profileNameDisplay) profileNameDisplay.textContent = 'Guest';
     }
 }
-
-// Helper: refresh angka XP, Level, Streak di profile panel
-function _refreshProfileStats() {
-    const xp     = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-    const level  = calculateLevel(xp);
-    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
-
-    const badge   = document.getElementById('profile-level-badge');
-    const xpStat  = document.getElementById('profile-xp-stat');
-    const lvStat  = document.getElementById('profile-level-stat');
-    const strStat = document.getElementById('profile-streak-stat');
-
-    if (badge)   badge.textContent   = `Lv. ${level}`;
-    if (xpStat)  xpStat.textContent  = formatXP(xp);
-    if (lvStat)  lvStat.textContent  = level;
-    if (strStat) strStat.textContent = streak;
-}
-window._refreshProfileStats = _refreshProfileStats;
 
 // 2. Fungsi onAuthStateChanged (JANGAN DIBUANG, TAPI DIUPDATE)
 if (auth) {

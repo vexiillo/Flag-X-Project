@@ -1260,3 +1260,10 @@ footer {
     background: var(--primary-color);
     box-shadow: 0 0 6px rgba(var(--primary-color-rgb), 0.6);
 }
+
+/* Live gradient ring untuk avatar di profile panel — sama seperti Fun Fact button */
+.profile-avatar-ring {
+    background: linear-gradient(270deg, var(--primary-color), #d53f8c, var(--primary-hover-color));
+    background-size: 400% 400%;
+    animation: gradientShiftFOTD 15s ease infinite;
+}
