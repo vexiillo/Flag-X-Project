@@ -1508,7 +1508,10 @@ function updateProfileUI(user, customName = null) {
         if (loggedInView)  loggedInView.classList.remove('hidden');
 
         const finalName = customName || user.displayName || 'User';
-        if (usernameInput)    usernameInput.value       = finalName;
+        if (usernameInput) {
+    usernameInput.value = finalName;
+    usernameInput.dispatchEvent(new Event('input')); // Memaksa updateCharCount berjalan
+}
         if (profileNameDisplay) profileNameDisplay.textContent = finalName;
 
         if (user.photoURL) {
