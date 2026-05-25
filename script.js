@@ -1786,12 +1786,10 @@ html += `<div class="${rowClass}">
     <!-- Kolom Streak: Ditambah min-w-0 agar patuh pada lebar grid -->
     <div class="col-span-3 flex justify-center items-center min-w-0">
     ${streakVal > 0 
-        ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-[0_2px_8px_rgba(249,115,22,0.4)] border border-white/20 max-w-full">
-                <!-- flex-shrink-0 agar api tetap pada ukuran aslinya & sejajar di tengah -->
-                <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
-                <!-- min-w-0 & break-all agar angka super panjang bisa turun ke bawah -->
-                <span class="text-white font-black text-xs leading-tight drop-shadow-md min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
-           </div>`
+        ? `<div class="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl shadow-[0_2px_8px_rgba(249,115,22,0.4)] border border-white/20">
+    <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
+    <span class="text-white font-black text-xs leading-tight drop-shadow-md whitespace-nowrap">${formatStreak(streakVal)}</span>
+</div>`
         : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-xl border border-white/10 max-w-full">
                 <i class="fa-solid fa-fire text-gray-400 text-xs flex-shrink-0"></i>
                 <span class="text-gray-400 font-black text-xs leading-tight min-w-0 break-all text-left">${formatStreak(streakVal)}</span>
