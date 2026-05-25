@@ -389,17 +389,29 @@ if (profileBtn) {
             
             // Render ke elemen stat panel
             const levelStat = document.getElementById('profile-level-stat');
-            const xpStat = document.getElementById('profile-xp-stat');
-            const streakStat = document.getElementById('profile-streak-stat');
+const xpStat = document.getElementById('profile-xp-stat');
+const streakStat = document.getElementById('profile-streak-stat');
 
-            if (levelStat) levelStat.textContent = `Lv. ${level}`;
-            if (xpStat) xpStat.textContent = xp.toLocaleString();
-            if (streakStat) streakStat.textContent = streak;
+if (levelStat) levelStat.textContent = `Lv. ${level}`;
+if (xpStat) xpStat.textContent = xp.toLocaleString();
 
-            // Buka panel setelah data siap
-            profilePanel.classList.add('active');
+if (streakStat) {
+    streakStat.textContent = streak;
+    const fireIcon = streakStat.previousElementSibling; // Mengambil icon api (<i>) tepat sebelum span angka
+    
+    if (streak < 1) {
+        // 1. Tampilan abu-abu pasif jika Streak = 0
+        streakStat.className = "font-black text-gray-400 text-sm";
+        if (fireIcon) {
+            fireIcon.className = "fa-solid fa-fire text-gray-400 text-xs"; // Menghapus efek pulse & warna orange
         }
-    });
+    } else {
+        // 2. Kembalikan ke tampilan api menyala aktif jika Streak >= 1
+        streakStat.className = "font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-sm drop-shadow-md";
+        if (fireIcon) {
+            fireIcon.className = "fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
+        }
+    }
 }
     // 2. Logika Tombol Settings
 
