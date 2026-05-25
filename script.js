@@ -1478,12 +1478,9 @@ const profileIconDefault = document.getElementById('profile-icon-default');
 const charCountEl = document.getElementById('char-count');
 
 if (usernameInput && charCountEl) {
-    // Fungsi untuk memperbarui teks dan warna counter
     const updateCharCount = () => {
         const length = usernameInput.value.length;
         charCountEl.textContent = `${length}/15`;
-        
-        // Ubah warna menjadi merah jika sudah mencapai batas maksimal
         if (length >= 15) {
             charCountEl.style.color = 'var(--error-color)';
         } else {
@@ -1491,11 +1488,10 @@ if (usernameInput && charCountEl) {
         }
     };
 
-    // Dengarkan ketikan pengguna
     usernameInput.addEventListener('input', updateCharCount);
-    
-    // Panggil sekali saat input difokuskan agar angka tidak 0/15 jika sudah ada isinya
     usernameInput.addEventListener('focus', updateCharCount);
+
+    updateCharCount();
 }
 
 function updateProfileUI(user, customName = null) {
