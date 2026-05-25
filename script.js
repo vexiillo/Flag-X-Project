@@ -413,6 +413,11 @@ if (streakStat) {
         }
     }
 }
+            // Buka panel setelah data siap
+            profilePanel.classList.add('active');
+        }
+    });
+}
     // 2. Logika Tombol Settings
 
     const settingsBtn = document.getElementById('settings-btn');
