@@ -705,7 +705,12 @@ typeCapitalPlaceholder: "Type the capital city...",
 typeSubdivisionPlaceholder: "Type the region/state name...",
 typeOrgPlaceholder: "Type the organization name...",
 yearInputDisabledHint: "Input Mode unavailable for Year Guess",
-inputModeLocked: "Reach Level 10 to unlock Input Mode"
+inputModeLocked: "Reach Level 10 to unlock Input Mode",
+usernamePlaceholder: "Your name...",
+guestName: "Guest Explorer",
+flagOfTheDay: "Flag of the Day",
+loadingLeaderboard: "Loading Leaderboard...",
+generatingFunFact: "Generating Fun Facts..."
         },
 
         id: {
@@ -909,6 +914,11 @@ typeSubdivisionPlaceholder: "Ketik nama wilayah/negara bagian...",
 typeOrgPlaceholder: "Ketik nama organisasi...",
 yearInputDisabledHint: "Mode Input tidak tersedia untuk Year Guess",
 inputModeLocked: "Raih Level 10 untuk membuka Mode Input",
+usernamePlaceholder: "Nama kamu...",
+guestName: "Penjelajah Tamu",
+flagOfTheDay: "Bendera Hari Ini",
+loadingLeaderboard: "Memuat Papan Peringkat...",
+generatingFunFact: "Menghasilkan Fakta Menarik..."
         },
     };
 
@@ -1679,13 +1689,12 @@ const loadLeaderboard = async () => {
     // Ini mencegah animasi loader ter-reset dan patah/glitch.
     if (!listContainer.querySelector('.loader')) {
         listContainer.innerHTML = `
-            <div class="p-8 flex flex-col items-center justify-center gap-3 h-full">
-                <div class="loader"></div>
-                <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-                    Loading Leaderboard...
-                </p>
-            </div>
-        `;
+  <div class="p-8 flex flex-col items-center justify-center gap-3">
+      <div class="loader"></div>
+      <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+          ${translations[settings.language].loadingLeaderboard || "Loading Leaderboard..."}
+      </p>
+  </div>`;
     }
 
     try {
@@ -3287,7 +3296,9 @@ async function getFunFact(itemName) {
     geminiContentEl.innerHTML = `
     <div class="flex flex-col items-center justify-center gap-3 py-4 w-full">
         <div class="loader"></div>
-        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">Generating Fun Facts...</p>
+        <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
+    ${translations[currentLang].generatingFunFact || "Generating Fun Facts..."}
+</p>
     </div>
     `;
 

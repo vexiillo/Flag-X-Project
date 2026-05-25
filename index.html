@@ -143,7 +143,7 @@
             <i class="fa-solid fa-user" style="color: var(--subtle-text-color)"></i>
         </div>
         <div class="text-center">
-            <p class="font-bold">Guest Explorer</p>
+            <p class="font-bold" data-translate-key="guestName">Guest Explorer</p>
             <p class="text-sm mt-1" style="color: var(--subtle-text-color)" data-translate-key="loginPrompt">
                 Login to save your XP to the global leaderboard!
             </p>
@@ -192,9 +192,9 @@
 </div>
                 <div class="relative">
                     <input type="text" id="username-input"
-                           class="w-full rounded-xl px-4 py-2.5 pr-10 font-semibold text-sm focus:outline-none transition-all"
-                           style="background: var(--input-bg-color); border: 1px solid var(--card-border-color); color: var(--text-color)"
-                           placeholder="Your name..." maxlength="15">
+       ...
+       data-translate-key="usernamePlaceholder"
+       placeholder="Your name..." maxlength="15">
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
                          style="color: var(--subtle-text-color)">
                         <i class="fa-solid fa-pencil text-xs"></i>
@@ -221,7 +221,7 @@
         <span id="profile-level-stat" class="font-black text-[var(--primary-color)] text-sm">Lv. ?</span>
     </div>
     <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-2 flex flex-col items-center justify-center shadow-sm">
-        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5">Streak</span>
+        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5" data-translate-key="leaderboardStreak">Streak</span>
         <div class="flex items-center justify-center gap-1">
             <i class="fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]"></i>
             <span id="profile-streak-stat" class="font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-sm drop-shadow-md">0</span>
@@ -387,7 +387,7 @@
         </div>
 
         <div class="flex-1 flex flex-col items-center justify-center text-center gap-1">
-            <span class="text-[12px] font-black tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa] uppercase w-full">Flag of the Day</span>
+            <span class="text-[12px] font-black tracking-[0.15em] bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa] uppercase w-full" data-translate-key="flagOfTheDay">Flag of the Day</span>
             
             <h2 id="fotd-name" class="text-sm font-bold leading-tight w-full mb-1 px-1">
                 Loading...
