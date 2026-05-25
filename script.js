@@ -1712,8 +1712,9 @@ function renderLeaderboardRows(allData, tab) {
     if (!listContainer) return;
 
     // Apply the base animation class to hide it initially
-    listContainer.classList.remove('active-slide');
-    listContainer.classList.add('leaderboard-slide');
+    listContainer.classList.remove('active-slide', 'leaderboard-slide');
+void listContainer.offsetWidth;
+listContainer.classList.add('leaderboard-slide');
 
     // Filter for This Week: lastActive within last 7 days
     let data = allData;
@@ -1749,8 +1750,11 @@ function renderLeaderboardRows(allData, tab) {
         listContainer.innerHTML = html;
         
         // Trigger animation
-        void listContainer.offsetWidth; 
+        requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
         listContainer.classList.add('active-slide');
+    });
+});
         return;
     }
 
@@ -1821,8 +1825,11 @@ function renderLeaderboardRows(allData, tab) {
     listContainer.innerHTML = `<div class="p-1 pb-4">${html}</div>`;
 
     // Force browser reflow to trigger the CSS transition
-    void listContainer.offsetWidth; 
-    listContainer.classList.add('active-slide');
+    requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+        listContainer.classList.add('active-slide');
+    });
+});
 
     if (!auth || !auth.currentUser) {
         const loginBtn = document.getElementById('leaderboard-login-btn');
@@ -1846,17 +1853,9 @@ function filterLeaderboard(tab) {
     }
     
     // Smoothly render the slide animation when switching tabs
-    const listContainer = document.getElementById('leaderboard-list');
-    if (listContainer) {
-        listContainer.classList.remove('active-slide');
-    }
-
     if (leaderboardAllData.length > 0) {
-        // A slight timeout allows the removal of the class to register before re-rendering
-        setTimeout(() => {
-            renderLeaderboardRows(leaderboardAllData, tab);
-        }, 10);
-    }
+    renderLeaderboardRows(leaderboardAllData, tab);
+}
 }
 
     function renderQuizModes() {
@@ -4153,7 +4152,7 @@ if (sortMode === 'highest') {
                     acc >= 70 ? '<i class="fa-solid fa-fire text-orange-500 text-xs drop-shadow-md"></i>' : '';
 
         return `
-        <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-4 text-left animate-fadeIn shadow-[0_4px_15px_rgba(0,0,0,0.1)] relative overflow-hidden group hover:border-[var(--primary-color)] transition-all duration-300">
+        <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-4 text-left animate-fadeIn shadow-[0_4px_15px_rgba(0,0,0,0.1)] relative overflow-hidden group hover:border-[var(--primary-color)] hover:-translate-y-0.5 transition-all duration-300">
             
             <div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-90" style="background-color: ${info.color};"></div>
             
