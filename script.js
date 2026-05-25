@@ -2008,22 +2008,32 @@ saveUsernameBtn.addEventListener('click', async () => {
     if (auth.currentUser) {
         try {
             const originalBtnText = saveUsernameBtn.innerText;
-            saveUsernameBtn.innerText = translations[settings.language].btnSaving;
+            saveUsernameBtn.innerText = translations[settings.language].btnSaving || "Saving...";
             saveUsernameBtn.classList.add('btn-loading');
 
+            // 1. Simpan nama baru ke Firebase
             await setDoc(doc(db, "users", auth.currentUser.uid), { username: newName }, { merge: true });
+
+            // 2. UPDATE DOM SECARA INSTAN DI SINI
+            const profileNameDisplay = document.getElementById('profile-name');
+            if (profileNameDisplay) {
+                profileNameDisplay.textContent = newName; // Teks besar di bawah avatar langsung berubah
+            }
+            
+            // 3. Update variabel originalUsername agar tombol "Cancel" tahu nama terbarunya
+            originalUsername = newName; 
 
             showToast(translations[settings.language].toastNameSaved);
             
             usernameActions.classList.add('hidden');
             usernameActions.classList.remove('flex');
-            saveUsernameBtn.innerText = originalBtnText; // Kembali ke teks asli (Save/Simpan)
+            saveUsernameBtn.innerText = originalBtnText; 
             saveUsernameBtn.classList.remove('btn-loading');
 
         } catch (e) { 
             console.error(e);
             showToast(translations[settings.language].toastSaveFailed);
-            saveUsernameBtn.innerText = translations[settings.language].saveBtn; // Fallback text
+            saveUsernameBtn.innerText = translations[settings.language].saveBtn; 
             saveUsernameBtn.classList.remove('btn-loading');
         }
     }
