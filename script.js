@@ -394,7 +394,7 @@ if (profileBtn) {
 
             if (levelStat) levelStat.textContent = `Lv. ${level}`;
             if (xpStat) xpStat.textContent = xp.toLocaleString();
-            if (streakStat) streakStat.textContent = streak > 0 ? `🔥${streak}` : '0';
+            if (streakStat) streakStat.textContent = streak;
 
             // Buka panel setelah data siap
             profilePanel.classList.add('active');

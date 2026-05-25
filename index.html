@@ -181,22 +181,6 @@
             <p id="profile-name" class="font-black text-xl mt-3 leading-tight relative z-10">User</p>
         </div>
         
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-2 px-6 pb-5 mt-2 relative z-10">
-    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-lg p-2 flex flex-col items-center shadow-sm">
-        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5" data-translate-key="levelingSystem">Level</span>
-        <span id="profile-level-stat" class="font-black text-[var(--primary-color)] text-sm">Lv. ?</span>
-    </div>
-    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-lg p-2 flex flex-col items-center shadow-sm">
-        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5" data-translate-key="totalScoreLabel">XP</span>
-        <span id="profile-xp-stat" class="font-black text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">0</span>
-    </div>
-    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-lg p-2 flex flex-col items-center shadow-sm">
-        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5">Streak</span>
-        <span id="profile-streak-stat" class="font-black text-orange-500 text-sm drop-shadow-md">0</span>
-    </div>
-</div>
-
         <!-- Edit Name + Actions -->
         <div class="p-5 flex flex-col gap-3 border-t" style="border-color: var(--card-border-color)">
 
@@ -228,7 +212,26 @@
                             style="background: rgba(var(--success-color-rgb),0.12); color: var(--success-color); border: 1px solid rgba(var(--success-color-rgb),0.3)"
                             data-translate-key="saveBtn">Save</button>
                 </div>
-            </div>
+            </div>            
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-2 px-5 pb-5 mt-2 relative z-10 text-center">
+    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-2 flex flex-col items-center justify-center shadow-sm">
+        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5">Level</span>
+        <span id="profile-level-stat" class="font-black text-[var(--primary-color)] text-sm">Lv. ?</span>
+    </div>
+    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-2 flex flex-col items-center justify-center shadow-sm">
+        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5" data-translate-key="totalScoreLabel">XP</span>
+        <span id="profile-xp-stat" class="font-black text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">0</span>
+    </div>
+    <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-2 flex flex-col items-center justify-center shadow-sm">
+        <span class="text-[10px] text-subtle font-bold uppercase tracking-wider mb-0.5">Streak</span>
+        <div class="flex items-center justify-center gap-1">
+            <i class="fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]"></i>
+            <span id="profile-streak-stat" class="font-black text-orange-500 text-sm drop-shadow-md">0</span>
+        </div>
+    </div>
+</div>
 
             <!-- Switch Account: solid primary gradient -->
             <button onclick="switchAccount()"
