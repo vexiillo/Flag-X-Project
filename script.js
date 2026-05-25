@@ -4212,29 +4212,6 @@ if (sortMode === 'highest') {
 }
 
 // ============================================
-// FEATURE: ADMIN RESET ALL SCORES
-// ============================================
-async function adminResetAllScores() {
-    if (!db || !auth || !auth.currentUser) { console.error('Must be logged in to reset scores.'); return; }
-    if (!confirm('⚠️ ADMIN: This will reset ALL user totalScores to 0. Are you sure?')) return;
-    console.log('Starting batch reset...');
-    const q = query(collection(db, "users"));
-    const snap = await getDocs(q);
-    const batches = [];
-    let batch = writeBatch(db);
-    let count = 0;
-    snap.forEach((docSnap) => {
-        batch.update(doc(db, "users", docSnap.id), { totalScore: 0 });
-        count++;
-        if (count % 499 === 0) { batches.push(batch); batch = writeBatch(db); }
-    });
-    batches.push(batch);
-    for (const b of batches) await b.commit();
-    console.log(`✅ Reset ${count} users to 0 XP.`);
-    alert(`Reset complete: ${count} users reset.`);
-}
-
-// ============================================
 // FEATURE: MISSED FLAGS REVIEW
 // ============================================
 function renderMissedFlags(missed) {
@@ -4528,6 +4505,68 @@ window.devLogin = async function(namaPalsu = "Sahrul Dev Mobile", skorPalsu = 25
         console.error("❌ Gagal mendaftarkan user ke Firestore:", error);
     }
 };
+
+// ============================================
+// FEATURE: ADMIN RESET ALL SCORES (SAPU JAGAT)
+// ============================================
+async function adminResetAllScores() {
+    // 1. Peringatan pop-up jika belum login
+    if (!db || !auth || !auth.currentUser) { 
+        alert('⚠️ GAGAL: Kamu harus Login ke dalam game terlebih dahulu untuk mereset database.');
+        console.error('Must be logged in to reset scores.'); 
+        return; 
+    }
+
+    // 2. Konfirmasi Ganda
+    if (!confirm('⚠️ SUPER ADMIN: Ini akan mereset XP, Level, Streak, dan Leaderboard (All Time & Weekly) untuk SEMUA USER di Firestore. Lanjutkan?')) {
+        return;
+    }
+
+    console.log('Memulai proses reset massal...');
+    try {
+        const q = query(collection(db, "users"));
+        const snap = await getDocs(q);
+        
+        const batches = [];
+        let batch = writeBatch(db);
+        let count = 0;
+        
+        // 3. Menyapu Firestore
+        snap.forEach((docSnap) => {
+            batch.update(doc(db, "users", docSnap.id), { 
+                totalScore: 0,
+                weeklyScore: 0,
+                streak: 0,
+                weekStart: null // Reset minggu
+            });
+            count++;
+            if (count % 499 === 0) { 
+                batches.push(batch); 
+                batch = writeBatch(db); 
+            }
+        });
+        
+        batches.push(batch);
+        for (const b of batches) await b.commit();
+        
+        // 4. Bersihkan History Kuis & XP di Local Storage (Perangkat Admin)
+        localStorage.removeItem('flagx-totalscore');
+        localStorage.removeItem('flagx-streak');
+        localStorage.removeItem('flagx-quiz-history');
+        localStorage.removeItem('flagx-last-played');
+        localStorage.removeItem('lastQuizResult');
+        
+        console.log(`✅ Reset ${count} users to 0 XP.`);
+        alert(`✅ Sukses! ${count} akun user telah di-reset ke nol.\nHalaman akan dimuat ulang.`);
+        
+        // 5. Muat ulang halaman
+        window.location.reload();
+
+    } catch (error) {
+        console.error("Gagal melakukan reset:", error);
+        alert("Error: Gagal mereset data. Cek tab Console untuk melihat detail.");
+    }
+}
 
     // Jalankan initApp HANYA SEKALI di sini
 
