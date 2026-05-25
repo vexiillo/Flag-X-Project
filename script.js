@@ -1712,9 +1712,9 @@ function renderLeaderboardRows(allData, tab) {
     if (!listContainer) return;
 
     // Apply the base animation class to hide it initially
-    listContainer.classList.remove('active-slide', 'leaderboard-slide');
-void listContainer.offsetWidth;
-listContainer.classList.add('leaderboard-slide');
+    listContainer.style.transition = 'none';
+    listContainer.classList.remove('active-slide');
+    listContainer.classList.add('leaderboard-slide');
 
     // Filter for This Week: lastActive within last 7 days
     let data = allData;
@@ -1826,10 +1826,11 @@ listContainer.classList.add('leaderboard-slide');
 
     // Force browser reflow to trigger the CSS transition
     requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-        listContainer.classList.add('active-slide');
+        listContainer.style.transition = '';
+        requestAnimationFrame(() => {
+            listContainer.classList.add('active-slide');
+        });
     });
-});
 
     if (!auth || !auth.currentUser) {
         const loginBtn = document.getElementById('leaderboard-login-btn');
