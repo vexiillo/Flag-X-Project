@@ -1774,16 +1774,41 @@ function renderLeaderboardRows(allData, tab) {
         `;
     }
 
+    // 🔥 UPGRADED GOAL: Premium Empty State (No Data for This Period)
+        // 🔥 UPGRADED GOAL: Empty State Identik dengan Tampilan Error
     if (data.length === 0) {
-        html += `<div class="p-8 text-center text-subtle">${translations[settings.language].leaderboardNoData || 'No data for this period.'}</div>`;
-        listContainer.innerHTML = html;
+        html += `
+            <div class="p-10 text-center flex flex-col items-center gap-4 animate-fadeIn">
+                <div class="w-16 h-16 bg-[rgba(var(--primary-color-rgb),0.1)] rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-xmark text-3xl text-[var(--primary-color)]"></i>
+                </div>
+                
+                <div>
+                    <p class="text-[var(--text-color)] font-bold text-lg">
+                        ${translations[settings.language].leaderboardNoData || 'No data for this period.'}
+                    </p>
+                    <p class="text-[var(--subtle-text-color)] text-sm mt-1">
+                        ${translations[settings.language].leaderboardNoDataSub || 'Be the first to score points and claim the top spot!'}
+                    </p>
+                </div>
+            </div>
+        `;
         
-        // Trigger animation
+        listContainer.innerHTML = `<div class="p-1 pb-4">${html}</div>`;
+        
+        // Force browser reflow to trigger the CSS transition
         requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-        listContainer.classList.add('active-slide');
-    });
-});
+            listContainer.style.transition = '';
+            requestAnimationFrame(() => {
+                listContainer.classList.add('active-slide');
+            });
+        });
+
+        // Pastikan tombol login guest tetap bekerja
+        if (!auth || !auth.currentUser) {
+            const loginBtn = document.getElementById('leaderboard-login-btn');
+            if (loginBtn) loginBtn.addEventListener('click', () => { handleLogin(); });
+        }
         return;
     }
 
@@ -1813,8 +1838,6 @@ function renderLeaderboardRows(allData, tab) {
         else if (rank === 2) rankColor = "text-gray-300";
         else if (rank === 3) rankColor = "text-amber-600";
 
-        // 🔥 GOALS 2 & 3: Upgraded Row Styles! 
-        // Changed from plain border-b to a floating card style (rounded-xl, drop-shadow, dynamic border)
         const rowClass = `grid grid-cols-12 gap-2 p-3 mb-2.5 items-center bg-[var(--card-bg-color)] border rounded-xl text-sm shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:border-[var(--primary-color)] hover:-translate-y-0.5 relative overflow-hidden group ${isMe ? 'border-2 border-[var(--primary-color)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.6)] bg-[rgba(var(--primary-color-rgb),0.15)] z-10' : 'border-[var(--card-border-color)]'}`;
 
         html += `<div class="${rowClass}">
@@ -4489,6 +4512,8 @@ function closeOnboarding() {
     window._setDoc = setDoc;
 window._doc = doc;
 window._db = db;
+    // Selipkan ini di baris akhir sebelum penutup fungsi renderLeaderboardRows
+    window.cekLeaderboard = renderLeaderboardRows;
     
     // ========================================================
 // 🛠️ DEVELOPER BACKDOOR: OVERRIDE AUTH & FIREBASE REGISTER
