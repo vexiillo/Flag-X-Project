@@ -374,15 +374,31 @@ window.openLevelInfo = openLevelInfo;
 
     // 1. Logika Tombol Profile
 
-// --- PERBAIKAN: Logika Tombol Profile ---
+// --- PERBAIKAN: Logika Tombol Profile + Update Stats ---
 if (profileBtn) {
     profileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isActive = profilePanel.classList.contains('active');
         closeAllPanels();
+        
         if (!isActive) {
-    profilePanel.classList.add('active');
-}
+            // Ambil data terbaru dari localStorage
+            const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+            const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+            const level = calculateLevel(xp); // Menggunakan fungsi yang sudah ada
+            
+            // Render ke elemen stat panel
+            const levelStat = document.getElementById('profile-level-stat');
+            const xpStat = document.getElementById('profile-xp-stat');
+            const streakStat = document.getElementById('profile-streak-stat');
+
+            if (levelStat) levelStat.textContent = `Lv. ${level}`;
+            if (xpStat) xpStat.textContent = xp.toLocaleString();
+            if (streakStat) streakStat.textContent = streak > 0 ? `🔥${streak}` : '0';
+
+            // Buka panel setelah data siap
+            profilePanel.classList.add('active');
+        }
     });
 }
     // 2. Logika Tombol Settings
@@ -670,7 +686,8 @@ typeNamePlaceholder: "Type country name...",
 typeCapitalPlaceholder: "Type the capital city...",
 typeSubdivisionPlaceholder: "Type the region/state name...",
 typeOrgPlaceholder: "Type the organization name...",
-yearInputDisabledHint: "Input Mode unavailable for Year Guess"
+yearInputDisabledHint: "Input Mode unavailable for Year Guess",
+inputModeLocked: "Reach Level 10 to unlock Input Mode"
         },
 
         id: {
@@ -871,7 +888,8 @@ typeNamePlaceholder: "Ketik nama negara...",
 typeCapitalPlaceholder: "Ketik nama ibu kota...",
 typeSubdivisionPlaceholder: "Ketik nama wilayah/negara bagian...",
 typeOrgPlaceholder: "Ketik nama organisasi...",
-yearInputDisabledHint: "Mode Input tidak tersedia untuk Year Guess"
+yearInputDisabledHint: "Mode Input tidak tersedia untuk Year Guess",
+inputModeLocked: "Raih Level 10 untuk membuka Mode Input",
         },
     };
 
@@ -957,11 +975,33 @@ renderSelectorScreen('historical-library-screen', Object.keys(historicalFlagsByC
             const totalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
             const lvl = calculateLevel(totalXP);
             if (lvl >= 10) {
-                typeNameSettingDiv.classList.remove('hidden');
-            } else {
-                typeNameSettingDiv.classList.add('hidden');
-                settings.typeNameMode = false;
-            }
+    typeNameSettingDiv.classList.remove('hidden');
+    // Hapus hint locked jika ada
+    document.getElementById('input-mode-locked-hint')?.remove();
+} else {
+    typeNameSettingDiv.classList.remove('hidden'); // tetap tampil
+    settings.typeNameMode = false;
+
+    // Disable toggle secara visual
+    const toggleLabel = typeNameSettingDiv.querySelector('label[onclick="toggleTypeNameMode()"]');
+    if (toggleLabel) {
+        toggleLabel.style.opacity = '0.4';
+        toggleLabel.style.pointerEvents = 'none';
+        toggleLabel.style.cursor = 'not-allowed';
+    }
+
+    // Tambahkan hint jika belum ada
+    if (!document.getElementById('input-mode-locked-hint')) {
+        const hint = document.createElement('p');
+        hint.id = 'input-mode-locked-hint';
+        hint.className = 'text-xs mt-2';
+        hint.style.color = 'var(--subtle-text-color)';
+        hint.setAttribute('data-translate-key', 'inputModeLocked');
+        hint.textContent = translations[settings.language].inputModeLocked
+            || 'Reach Level 10 to unlock Input Mode';
+        typeNameSettingDiv.appendChild(hint);
+    }
+}
             if (settings.typeNameMode) {
     typeNameTrack.classList.add('bg-[var(--primary-color)]');
     typeNameTrack.classList.remove('bg-[var(--secondary-color)]');
@@ -1434,7 +1474,29 @@ const profileImg = document.getElementById('profile-img');
 
 const profileIconDefault = document.getElementById('profile-icon-default');
 
+// --- LOGIKA PENGHITUNG KARAKTER USERNAME ---
+const charCountEl = document.getElementById('char-count');
 
+if (usernameInput && charCountEl) {
+    // Fungsi untuk memperbarui teks dan warna counter
+    const updateCharCount = () => {
+        const length = usernameInput.value.length;
+        charCountEl.textContent = `${length}/15`;
+        
+        // Ubah warna menjadi merah jika sudah mencapai batas maksimal
+        if (length >= 15) {
+            charCountEl.style.color = 'var(--error-color)';
+        } else {
+            charCountEl.style.color = 'var(--subtle-text-color)';
+        }
+    };
+
+    // Dengarkan ketikan pengguna
+    usernameInput.addEventListener('input', updateCharCount);
+    
+    // Panggil sekali saat input difokuskan agar angka tidak 0/15 jika sudah ada isinya
+    usernameInput.addEventListener('focus', updateCharCount);
+}
 
 function updateProfileUI(user, customName = null) {
     const loggedOutView = document.getElementById('auth-logged-out');
@@ -3595,22 +3657,26 @@ function requestNotificationPermission() {
     document.getElementById('accept-notif-btn').onclick = () => {
         if ("Notification" in window) {
             Notification.requestPermission().then(permission => {
+                // BARU
                 if (permission === "granted") {
-                    // SESUDAH
-const lang = settings.language;
-new Notification(
-    translations[lang].notifGrantedTitle || "Flag-X Reminder Active!",
-    {
-        body: translations[lang].notifGrantedBody || "Great! We'll remind you to keep your Streak alive.",
-        icon: "logo.png"
-    }
-);
+                    const lang = settings.language;
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification(
+                                translations[lang].notifGrantedTitle || "Flag-X Reminder Active!",
+                                {
+                                    body: translations[lang].notifGrantedBody || "Great! We'll remind you to keep your Streak alive.",
+                                    icon: "logo.png"
+                                }
+                            );
+                        });
+                    }
                 }
-            });
-        }
-        localStorage.setItem('flagx-notif-asked', 'true');
-        notifModal.classList.remove('active');
-    };
+                localStorage.setItem('flagx-notif-asked', 'true');
+                notifModal.classList.remove('active');
+            }); // <-- 1. Diperbaiki: Ditambah ')' untuk menutup .then()
+        } // <-- 2. Diperbaiki: Ditambah '}' untuk menutup if ("Notification"...)
+    }; // <-- 3. Diperbaiki: Ditambah '};' untuk menutup onclick = () =>
 
     document.getElementById('decline-notif-btn').onclick = () => {
         localStorage.setItem('flagx-notif-asked', 'true');
