@@ -956,7 +956,7 @@ function renderLeaderboardRows(allData, tab) {
             <div class="col-span-3 flex justify-center items-center min-w-0">
             ${streakVal > 0 
                 ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border-0 ring-0 max-w-full">
-                        <i class="fa-solid fa-fire text-white text-xs animate-pulse flex-shrink-0"></i>
+                        <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
                         <span class="text-white font-black text-xs leading-tight min-w-0 text-left">${formatStreak(streakVal)}</span>
                    </div>`
                 : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border-0 ring-0 max-w-full">
