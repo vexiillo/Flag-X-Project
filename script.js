@@ -39,6 +39,40 @@ try {
 }
 
 // ============================================================================
+// SISTEM LOCK MAINTENANCE (KODE 2 MODULAR)
+// ============================================================================
+const VEXIILLO_UID = "wE4eP1X9iefGC6GnKIT101RqZk72"; 
+
+// Firebase Auth Listener (Menggunakan variabel 'auth' bawaan v10 kamu)
+onAuthStateChanged(auth, (user) => {
+    if (user && user.uid === VEXIILLO_UID) {
+        // --- JIKA YANG LOGIN ADALAH KAMU ---
+        console.log("Admin terdeteksi. Membuka kunci web...");
+
+        // 1. Singkirkan layar maintenance
+        document.getElementById('maintenance-screen').style.display = 'none';
+        
+        // 2. Munculkan UI web aslinya
+        document.getElementById('app-container').style.display = 'flex'; 
+        
+        // 3. Panggil Eruda Console khusus untukmu
+        var script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/eruda";
+        document.body.appendChild(script);
+        script.onload = function () { eruda.init(); };
+
+        // 4. Lanjutkan proses load data web bawaan Flag-X
+        loadTotalScore();[span_9](start_span)[span_9](end_span)
+        loadTheme();[span_10](start_span)[span_10](end_span)
+        
+    } else {
+        // --- JIKA PENGUNJUNG BIASA ATAU ORANG LAIN ---
+        console.log("Akses ditolak. Menampilkan mode maintenance.");
+        // Layar maintenance tetap aktif mengunci halaman web
+    }
+});
+
+// ============================================================================
 // 3. GLOBAL STATE & VARIABLES
 // ============================================================================
 // Audio
@@ -64,6 +98,21 @@ let pendingDifficulty = null;
 let isLeaderboardLoading = false;
 let historyActiveFilter = 'all';
 let historyActiveSort = 'newest';
+const historyFilterOptions = [
+    { value: 'all', labelKey: 'filterAll', icon: 'fa-border-all' },
+    { value: 'bookmarks', label: 'Bookmarks', icon: 'fa-bookmark' },
+    { value: 'classic', label: 'Classic', icon: 'fa-globe' },
+    { value: 'continent', label: 'Continent', icon: 'fa-map' },
+    { value: 'capitalGuess', label: 'Capital Guess', icon: 'fa-building-columns' },
+    { value: 'yearGuess', label: 'Year Guess', icon: 'fa-calendar-days' },
+    { value: 'timeAttack', label: 'Time Attack', icon: 'fa-stopwatch' },
+    { value: 'survival', label: 'Survival', icon: 'fa-heart-pulse' },
+    { value: 'combo', label: 'Combo', icon: 'fa-bomb' }
+];
+const historySortOptions = [
+    { value: 'newest', labelKey: 'sortNewest', icon: 'fa-clock-rotate-left' },
+    { value: 'highest', labelKey: 'sortHighest', icon: 'fa-arrow-up-wide-short' }
+];
 let originalUsername = '';
 
 let settings = { language: 'en', difficulty: 4, typeNameMode: false, soundEnabled: true };
@@ -256,8 +305,15 @@ function levenshtein(a, b) {
 }
 
 function fuzzyMatch(input, target) {
-    const a = input.trim().toLowerCase();
-    const b = target.trim().toLowerCase();
+    const normalize = (str) => str.trim().toLowerCase()
+        .replace(/\bst\.?\b/g, 'saint')
+        .replace(/\bsts\.?\b/g, 'saints')
+        .replace(/\brep\.?\b/g, 'republic')
+        .replace(/\bdem\.?\b/g, 'democratic')
+        .replace(/\bisls?\.?\b/g, 'island')
+        .replace(/\s+/g, ' ').trim();
+    const a = normalize(input);
+    const b = normalize(target);
     if (a === b) return true;
     const bSimple = b.replace(/\s*\(.*?\)/g, '').trim();
     if (a === bSimple) return true;
@@ -269,6 +325,10 @@ function fuzzyMatch(input, target) {
 // 6. UI & NAVIGATION LOGIC
 // ============================================================================
 function showScreen(screenId) {
+    if (screenId !== 'quiz-screen' && currentQuiz && currentQuiz.timerId) {
+        clearInterval(currentQuiz.timerId);
+        currentQuiz.timerId = null;
+    }
     const screens = document.querySelectorAll('.screen');
     screens.forEach(s => s.classList.remove('active'));
     
@@ -402,7 +462,8 @@ function updateHomeXPBar() {
     if (xp < 5000) { level = Math.floor(xp / 500) + 1; currentXPInLevel = xp % 500; nextLevelXPThreshold = 500; }
     else if (xp < 20000) { level = 10 + Math.floor((xp - 5000) / 1000); currentXPInLevel = (xp - 5000) % 1000; nextLevelXPThreshold = 1000; }
     else if (xp < 57500) { level = 25 + Math.floor((xp - 20000) / 2500); currentXPInLevel = (xp - 20000) % 2500; nextLevelXPThreshold = 2500; }
-    else { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; }
+    else if (xp < 102500) { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; }
+    else { level = 50; currentXPInLevel = 1; nextLevelXPThreshold = 1; }
     const pct = Math.min(100, (currentXPInLevel / nextLevelXPThreshold) * 100);
     
     const lvLabel = document.getElementById('home-level-label');
@@ -608,7 +669,15 @@ if (auth) {
 // 9. SETTINGS & LANGUAGE
 // ============================================================================
 function loadSettings() {
-    const savedSettings = JSON.parse(localStorage.getItem('flagx-settings'));
+    let savedSettings = null;
+    try {
+        const raw = localStorage.getItem('flagx-settings');
+        if (raw) savedSettings = JSON.parse(raw);
+    } catch (e) {
+        console.warn('Settings corrupt, using defaults:', e);
+        localStorage.removeItem('flagx-settings'); // bersihkan data corrupt
+    }
+        
     if (savedSettings) settings = savedSettings;
     
     document.querySelector(`input[name="language"][value="${settings.language}"]`)?.setAttribute('checked', true);
@@ -1370,7 +1439,7 @@ function startQuiz(mode, subMode = null) {
 
     switch (mode) {
         case 'classic': currentQuiz.dataset = shuffle(officialCountries); currentQuiz.totalQuestions = 20; break;
-        case 'continent': currentQuiz.dataset = shuffle(continentFlags[subMode]); currentQuiz.totalQuestions = 20; break;
+        case 'continent': currentQuiz.dataset = shuffle(continentFlags[subMode] || []); currentQuiz.totalQuestions = 20; break;
         case 'capitalGuess': currentQuiz.dataset = shuffle(officialCountries.filter(f => f.capital)); currentQuiz.totalQuestions = 20; break;
         case 'yearGuess': currentQuiz.dataset = shuffle(historicalFlags); currentQuiz.totalQuestions = 20; break;
         case 'timeAttack': currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions, ...territories]); currentQuiz.totalQuestions = Infinity; currentQuiz.timeLeft = 60; break;
@@ -1588,9 +1657,9 @@ function generateFlagQuestion(targetData, isYear = false) {
 
     const distractorPool = globalPool.filter(item => item.name !== currentQuiz.correctAnswer.name).sort(() => 0.5 - Math.random());
     while (options.length < settings.difficulty && distractorPool.length > 0) options.push(distractorPool.shift());
-    options = options.filter(opt => opt && opt[answerKey]);
+    options = options.filter(opt => opt && typeof opt[answerKey] === 'string' && opt[answerKey].trim() !== '');
 
-    if (settings.typeNameMode && !isYear && document.getElementById('quiz-prompt').dataset.translateKey !== 'quizPromptGuessCapital') return; 
+    if (settings.typeNameMode && !isYear) return;
     
     options.sort(() => 0.5 - Math.random()).forEach(option => {
         const button = document.createElement('button');
@@ -1632,7 +1701,7 @@ function checkAnswer(selectedOption) {
     const flagImg = document.querySelector("#flag-display-quiz img");
 
     if (selectedId === correctId) { 
-        if (settings.soundEnabled !== false) sfxCorrect.play();
+        if (settings.soundEnabled !== false) sfxCorrect.play().catch(e => {});
         currentQuiz.correctCount++;
         
         let xpReward = 10; 
@@ -1681,6 +1750,8 @@ function checkAnswer(selectedOption) {
     } 
     
     if ((currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') && currentQuiz.lives <= 0) {
+        clearInterval(currentQuiz.timerId);
+        currentQuiz.timerId = null;
         setTimeout(endQuiz, 1500);
     } else {
         setTimeout(() => { if(flagImg) flagImg.classList.remove("correct-flag", "incorrect-flag"); loadQuestion(); }, 1500);
@@ -1866,7 +1937,7 @@ function checkDailyStreakReset() {
     const lastDate = new Date(lastPlayedStr); lastDate.setHours(0,0,0,0);
     const today = new Date(); today.setHours(0,0,0,0);
     const diffTime = today - lastDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays > 1) { 
         localStorage.setItem('flagx-streak', '0');

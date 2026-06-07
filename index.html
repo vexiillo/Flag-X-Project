@@ -56,13 +56,17 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-title" content="Flag-X" />
 <link rel="manifest" href="/site.webmanifest" />
-    
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>    
+        
 </head>
 
 <body class="antialiased">
-    <div id="app-container" class="min-h-[100dvh] flex flex-col p-4 sm:p-6">
+    <!-- Layar Penutup (Kode 1) -->
+    <div id="maintenance-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #100C1F; color: white; position: fixed; inset: 0; z-index: 9999;">
+       <h1>⚠️ Under Maintenance ⚠️</h1>
+       <p>Flag-X sedang ditingkatkan.</p>
+    </div>
+    <!-- Container UI Web Asli (Ditambahkan style="display: none;") -->
+    <div id="app-container" style="display: none;" class="min-h-[100dvh] flex flex-col p-4 sm:p-6">
         <header class="w-full max-w-[95%] mx-auto mb-6 flex justify-between items-center relative">
              <div class="flex items-center justify-between w-full px-4 py-3">
 
@@ -92,12 +96,7 @@
         <i class="fa-solid fa-circle-info text-xs"></i>
         <span data-translate-key="levelingSystem">Leveling System</span>
     </div>
-    
-
-
-    <ul class="text-[10px] text-left space-y-2 font-medium text-[var(--subtle-text-color)]">
-        </ul>
-
+       
     <ul class="text-[10px] text-left space-y-2 font-medium text-[var(--subtle-text-color)]">
         <li class="flex justify-between border-b border-[var(--card-border-color)] pb-1.5">
             <span>Lv. 1 - 10</span>
