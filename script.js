@@ -41,9 +41,20 @@ try {
 // ============================================================================
 // SISTEM LOCK MAINTENANCE (KODE 2 MODULAR)
 // ============================================================================
-const VEXIILLO_UID = "wE4eP1X9iefGC6GnKIT101RqZk72"; 
+const VEXIILLO_UID = "wE4eP1X9iefGC6GnKIT101RqZk72";
 
-// Firebase Auth Listener (Menggunakan variabel 'auth' bawaan v10 kamu)
+// Secret tap counter pada kata "X"
+let secretTapCount = 0;
+document.getElementById('secret-trigger').addEventListener('click', () => {
+    secretTapCount++;
+    if (secretTapCount >= 5) {
+        secretTapCount = 0;
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider);
+    }
+});
+
+// Firebase Auth Listener
 onAuthStateChanged(auth, (user) => {
     if (user && user.uid === VEXIILLO_UID) {
         // --- JIKA YANG LOGIN ADALAH KAMU ---
@@ -53,22 +64,27 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('maintenance-screen').style.display = 'none';
         
         // 2. Munculkan UI web aslinya
-        document.getElementById('app-container').style.display = 'flex'; 
+        document.getElementById('app-container').style.display = 'flex';
+
+        // 3. Munculkan navbar
+        document.getElementById('bottom-nav').classList.remove('hidden-nav');
         
-        // 3. Panggil Eruda Console khusus untukmu
+        // 4. Panggil Eruda Console khusus untukmu
         var script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/eruda";
         document.body.appendChild(script);
         script.onload = function () { eruda.init(); };
 
-        // 4. Lanjutkan proses load data web bawaan Flag-X
-        loadTotalScore();[span_9](start_span)[span_9](end_span)
-        loadTheme();[span_10](start_span)[span_10](end_span)
+        // 5. Lanjutkan proses load data web bawaan Flag-X
+        loadTotalScore();
+        loadTheme();
         
     } else {
         // --- JIKA PENGUNJUNG BIASA ATAU ORANG LAIN ---
         console.log("Akses ditolak. Menampilkan mode maintenance.");
-        // Layar maintenance tetap aktif mengunci halaman web
+
+        // Sembunyikan navbar dari pengunjung
+        document.getElementById('bottom-nav').classList.add('hidden-nav');
     }
 });
 

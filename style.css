@@ -939,6 +939,10 @@ body:not(.nav-hidden) #scroll-to-top-btn {
     transition: all 0.3s ease; /* Transisi smooth saat ganti tema */
 }
 
+.bottom-nav.hidden-nav {
+    display: none !important;
+}
+
 .nav-item {
     display: flex;
     flex-direction: column;

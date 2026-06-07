@@ -61,10 +61,10 @@
 
 <body class="antialiased">
     <!-- Layar Penutup (Kode 1) -->
-    <div id="maintenance-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: #100C1F; color: white; position: fixed; inset: 0; z-index: 9999;">
-       <h1>⚠️ Under Maintenance ⚠️</h1>
-       <p>Flag-X sedang ditingkatkan.</p>
-    </div>
+<div id="maintenance-screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: white; position: fixed; inset: 0; z-index: 9999;">
+   <h1>⚠️ Under Maintenance ⚠️</h1>
+   <p><b>Flag-<span id="secret-trigger" style="cursor:default;">X</span></b> under development.</p>
+</div>
     <!-- Container UI Web Asli (Ditambahkan style="display: none;") -->
     <div id="app-container" style="display: none;" class="min-h-[100dvh] flex flex-col p-4 sm:p-6">
         <header class="w-full max-w-[95%] mx-auto mb-6 flex justify-between items-center relative">
@@ -923,7 +923,7 @@
         <i class="fa-solid fa-arrow-up"></i>
     </button>
     
-    <nav class="bottom-nav">
+    <nav class="bottom-nav hidden-nav" id="bottom-nav">
     <button onclick="showScreen('home-screen')" class="nav-item active" id="nav-home">
         <i class="fa-solid fa-house"></i>
         <span data-translate-key="navHome">Home</span>
