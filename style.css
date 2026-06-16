@@ -1317,3 +1317,21 @@ footer {
     opacity: 1;
     transform: translateX(0) scale(1);
 }
+
+#maintenance-screen h1 {
+    font-weight: 700;    
+}
+
+#maintenance-screen p {
+    color: var(--subtle-text-color);
+}
+
+@media (min-width: 768px) {
+    #maintenance-screen h1 {
+        font-size: 1.25rem;
+    }
+
+    #maintenance-screen p {
+        font-size: 1rem;
+    }
+}

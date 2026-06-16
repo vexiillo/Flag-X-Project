@@ -75,9 +75,8 @@ onAuthStateChanged(auth, (user) => {
         document.body.appendChild(script);
         script.onload = function () { eruda.init(); };
 
-        // 5. Lanjutkan proses load data web bawaan Flag-X
-        loadTotalScore();
-        loadTheme();
+        // 5. Jalankan app
+        initApp();
         
     } else {
         // --- JIKA PENGUNJUNG BIASA ATAU ORANG LAIN ---
@@ -2590,4 +2589,3 @@ window.adminResetAllScores = async function() {
 // ============================================================================
 // START APP
 // ============================================================================
-initApp();
