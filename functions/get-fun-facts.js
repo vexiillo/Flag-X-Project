@@ -19,7 +19,7 @@ export async function onRequestPost(context) {
         const targetLangName = (language === 'id') ? "Indonesian" : "English";
 
         // 4. Panggil Gemini API
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
         const geminiResponse = await fetch(apiUrl, {
             method: 'POST',
