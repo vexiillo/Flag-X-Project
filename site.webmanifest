@@ -7,9 +7,15 @@
       "sizes": "1254x1254",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-1254x1254.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
+  "theme_color": "#080221",
+  "background_color": "#080221",
   "display": "standalone"
 }
