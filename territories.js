@@ -1,4 +1,19 @@
 // --- TERRITORIES ---
+// --- AZERBAIJAN ---
+const azerbaijanNakhchivanDistricts = [
+  { name: "Babek", capital: "Babek", flag: "", status: "Hypothetical" },
+  { name: "Julfa", capital: "Julfa", flag: "", status: "Hypothetical" },
+  { name: "Kangarli", capital: "Givraq", flag: "", status: "Hypothetical" },
+  { name: "Ordubad", capital: "Ordubad", flag: "", status: "Hypothetical" },
+  { name: "Sadarak", capital: "Sadarak", flag: "", status: "Hypothetical" },
+  { name: "Shahbuz", capital: "Shahbuz", flag: "", status: "Hypothetical" },
+  { name: "Sharur", capital: "Sharur", flag: "", status: "Hypothetical" }
+];
+
+const azerbaijanNakhchivanIndependentCity = [
+  { name: "Nakhchivan City", capital: "Nakhchivan", flag: "", status: "Hypothetical" }
+];
+
 // --- AUSTRALIA EXTERNAL TERRITORIES ---
 const australiaExternalTerritories = [
   { name: "Ashmore and Cartier Islands", capital: "Uninhabited", flag: "https://static.wikia.nocookie.net/vexillology/images/e/ef/Flag_of_the_Ashmore_and_Cartier_Islands.png/960px-Flag_of_the_Ashmore_and_Cartier_Islands.png.png", status: "Proposed" },
@@ -15,27 +30,7 @@ const brazilSpecialStatus = [
   { name: "Fernando de Noronha", capital: "Vila dos Remédios", flag: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bandeira_de_Fernando_de_Noronha.png" }
 ];
 
-// --- CHINA ---
-const chinaSARs = [
-  { name: "Hong Kong", capital: "Hong Kong", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5b/Flag_of_Hong_Kong.svg" },
-  { name: "Macau", capital: "Macau", flag: "https://upload.wikimedia.org/wikipedia/commons/6/63/Flag_of_Macau.svg" }
-];
-
-// --- CANADA ---
-const canadaTerritories = [
-  { name: "Northwest Territories", capital: "Yellowknife", flag: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Flag_of_the_Northwest_Territories.svg" },
-  { name: "Nunavut", capital: "Iqaluit", flag: "https://upload.wikimedia.org/wikipedia/commons/9/90/Flag_of_Nunavut.svg" },
-  { name: "Yukon", capital: "Whitehorse", flag: "https://upload.wikimedia.org/wikipedia/commons/6/69/Flag_of_Yukon.svg" }
-];
-
 // --- FRANCE ---
-const franceOverseasRegions = [
-  { name: "French Guiana", capital: "Cayenne", flag: "https://upload.wikimedia.org/wikipedia/commons/2/29/Flag_of_French_Guiana.svg" },
-  { name: "Guadeloupe", capital: "Basse-Terre", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Flag_of_Guadeloupe_%28local%29_variant.svg/960px-Flag_of_Guadeloupe_%28local%29_variant.svg.png" },
-  { name: "Martinique", capital: "Fort-de-France", flag: "https://upload.wikimedia.org/wikipedia/commons/2/27/Flag-of-Martinique.svg" },
-  { name: "Mayotte", capital: "Mamoudzou", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Flag_of_Mayotte_%28local%29.svg/960px-Flag_of_Mayotte_%28local%29.svg.png" },
-  { name: "Réunion", capital: "Saint-Denis", flag: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Proposed_flag_of_R%C3%A9union_%28VAR%29.svg" },
-];
 const franceOverseasCollectivities = [
   { name: "French Polynesia", capital: "Papeete", flag: "https://upload.wikimedia.org/wikipedia/commons/d/db/Flag_of_French_Polynesia.svg" },
   { name: "New Caledonia", capital: "Nouméa", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Flag_of_FLNKS.svg/960px-Flag_of_FLNKS.svg.png" },
@@ -122,20 +117,17 @@ const usMinorOutlyingIslands = [
 // =============================================================================
 
 export const allTerritoriesRaw = [
+// Azerbaijan
+  ...azerbaijanNakhchivanDistricts.map(s => ({ ...s, country: "Azerbaijan", type: "Nakhchivan Districts" })),
+  ...azerbaijanNakhchivanIndependentCity.map(s => ({ ...s, country: "Azerbaijan", type: "Nakhchivan Independent City" })),
+  
 // Australia
   ...australiaExternalTerritories.map(s => ({ ...s, country: "Australia", type: "External Territories" })),
  
 // Brazil
   ...brazilSpecialStatus.map(s => ({ ...s, country: "Brazil", type: "Special Status" })),
- 
-// Canada
-  ...canadaTerritories.map(t => ({ ...t, country: "Canada", type: "Territories" })),
-  
- // China
-  ...chinaSARs.map(s => ({ ...s, country: "China", type: "Special Administrative Regions" })),
   
   // France
-  ...franceOverseasRegions.map(s => ({ ...s, country: "France", type: "Overseas Regions" })),
   ...franceOverseasCollectivities.map(s => ({ ...s, country: "France", type: "Overseas Collectivities" })),
   ...franceOverseasTerritory.map(s => ({ ...s, country: "France", type: "Overseas Territory" })),
   ...franceSpecialStatus.map(s => ({ ...s, country: "France", type: "Special Status" })),
@@ -146,7 +138,8 @@ export const allTerritoriesRaw = [
   // Russia
   ...russiaClaimedTerritories.map(s => ({ ...s, country: "Russia", type: "Claimed Territories" })),
   
-  // UK
+    // UK
+  ...ukCrownDependencies.map(t => ({ ...t, country: "UK", type: "Crown Dependencies" })),
   ...ukOverseasTerritories.map(t => ({ ...t, country: "UK", type: "Overseas Territories" })),
   
  // USA
