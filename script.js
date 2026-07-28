@@ -211,6 +211,7 @@ const translations = {
         submitBtn: "Submit", resCorrect: "Correct", resWrong: "Wrong", resAccuracy: "Accuracy", resTimeout: "Timeout", resAvgTime: "Avg. Time", historyTitle: "Quiz History",
         homeHistory: "Quiz History", shareCardTitle: "Share Your Score", downloadBtn: "Save", shareBtn: "Share", tabAllTime: "All Time", tabThisWeek: "This Week", leaderboardWeeklyReset: "WEEKLY RESET", leaderboardResetsIn: "Resets in", leaderboardYou: "You", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
         profileTotalQuizzes: "Total Quizzes", profileAccuracy: "Accuracy", profileRank: "Rank", profileLevelLabel: "Level", profileMemberSince: "Member since {date}",
+        profileBestStreak: "Best", profileTotalQuizzesDesc: "Quizzes taken",
         profileMotivationNew: "Keep learning!", profileMotivationExcellent: "Excellent! You're a flag master!", profileMotivationGreat: "Great work! Keep it up!", profileMotivationGood: "Good effort! Practice more!", profileMotivationPractice: "Keep practicing!",
         achievementSheetTitle: "Achievements", homeQuickExplore: "Quick Explore",
         leaderboardStreak: "Streak", navHistory: "History", switchModalTitle: "Switch Quiz Mode?", switchModalDesc: "Changing the input type mid-game will reset all of your current quiz progress.",
@@ -296,6 +297,7 @@ const translations = {
         settingsSound: "Suara", soundLabel: "Efek Suara", submitBtn: "Kirim", resCorrect: "Benar", resWrong: "Salah", resAccuracy: "Akurasi", resTimeout: "Habis Waktu", resAvgTime: "Rata-rata",
         historyTitle: "Riwayat Kuis", homeHistory: "Riwayat Kuis", shareCardTitle: "Bagikan Skor", downloadBtn: "Simpan", shareBtn: "Bagikan", tabAllTime: "Sepanjang Masa", tabThisWeek: "Minggu Ini", leaderboardWeeklyReset: "RESET MINGGUAN", leaderboardResetsIn: "Reset dalam", leaderboardYou: "Kamu", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
         profileTotalQuizzes: "Total Kuis", profileAccuracy: "Akurasi", profileRank: "Peringkat", profileLevelLabel: "Level", profileMemberSince: "Bergabung sejak {date}",
+        profileBestStreak: "Terbaik", profileTotalQuizzesDesc: "Kuis dimainkan",
         profileMotivationNew: "Ayo mulai belajar!", profileMotivationExcellent: "Luar biasa! Kamu master bendera!", profileMotivationGreat: "Kerja bagus! Terus pertahankan!", profileMotivationGood: "Usaha bagus! Terus berlatih!", profileMotivationPractice: "Terus berlatih!",
         achievementSheetTitle: "Achievement", homeQuickExplore: "Jelajah Cepat",
         leaderboardStreak: "Streak", navHistory: "Riwayat", switchModalTitle: "Ganti Mode Kuis?", switchModalDesc: "Mengubah jenis input kuis di tengah permainan akan memuat ulang seluruh progres kuis berjalan Anda.",
@@ -2734,6 +2736,8 @@ function updateStreak() {
         
         localStorage.setItem('flagx-last-played', today);
         localStorage.setItem('flagx-streak', streak);
+        const bestStreakSoFar = Math.max(streak, parseInt(localStorage.getItem('flagx-beststreak') || 0));
+        localStorage.setItem('flagx-beststreak', bestStreakSoFar);
 
         if (auth && auth.currentUser && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
@@ -3994,6 +3998,17 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
             if (fireIcon) fireIcon.className = "fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
         }
     }
+
+    const storedBestStreak = parseInt(localStorage.getItem('flagx-beststreak') || 0);
+    const bestStreak = Math.max(streak, storedBestStreak);
+    if (bestStreak !== storedBestStreak) localStorage.setItem('flagx-beststreak', bestStreak);
+    const bestStreakStat = document.getElementById('profile-best-streak-stat');
+    if (bestStreakStat) bestStreakStat.textContent = bestStreak;
+
+    const pillStreak = document.getElementById('profile-pill-streak');
+    if (pillStreak) pillStreak.textContent = streak;
+    const pillLevel = document.getElementById('profile-pill-level');
+    if (pillLevel) pillLevel.textContent = `Lv. ${level}`;
 
     const totalQuizzesStat = document.getElementById('profile-total-quizzes-stat');
     const accuracyStat = document.getElementById('profile-accuracy-stat');
