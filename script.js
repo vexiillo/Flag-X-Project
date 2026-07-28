@@ -211,7 +211,7 @@ const translations = {
         submitBtn: "Submit", resCorrect: "Correct", resWrong: "Wrong", resAccuracy: "Accuracy", resTimeout: "Timeout", resAvgTime: "Avg. Time", historyTitle: "Quiz History",
         homeHistory: "Quiz History", shareCardTitle: "Share Your Score", downloadBtn: "Save", shareBtn: "Share", tabAllTime: "All Time", tabThisWeek: "This Week", leaderboardWeeklyReset: "WEEKLY RESET", leaderboardResetsIn: "Resets in", leaderboardYou: "You", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
         profileTotalQuizzes: "Total Quizzes", profileAccuracy: "Accuracy", profileRank: "Rank", profileLevelLabel: "Level", profileMemberSince: "Member since {date}",
-        profileBestStreak: "Best", profileTotalQuizzesDesc: "Quizzes taken",
+        profileBestStreak: "Best Streak", profileTotalQuizzesDesc: "Quizzes taken",
         profileMotivationNew: "Keep learning!", profileMotivationExcellent: "Excellent! You're a flag master!", profileMotivationGreat: "Great work! Keep it up!", profileMotivationGood: "Good effort! Practice more!", profileMotivationPractice: "Keep practicing!",
         achievementSheetTitle: "Achievements", homeQuickExplore: "Quick Explore",
         leaderboardStreak: "Streak", navHistory: "History", switchModalTitle: "Switch Quiz Mode?", switchModalDesc: "Changing the input type mid-game will reset all of your current quiz progress.",
@@ -297,7 +297,7 @@ const translations = {
         settingsSound: "Suara", soundLabel: "Efek Suara", submitBtn: "Kirim", resCorrect: "Benar", resWrong: "Salah", resAccuracy: "Akurasi", resTimeout: "Habis Waktu", resAvgTime: "Rata-rata",
         historyTitle: "Riwayat Kuis", homeHistory: "Riwayat Kuis", shareCardTitle: "Bagikan Skor", downloadBtn: "Simpan", shareBtn: "Bagikan", tabAllTime: "Sepanjang Masa", tabThisWeek: "Minggu Ini", leaderboardWeeklyReset: "RESET MINGGUAN", leaderboardResetsIn: "Reset dalam", leaderboardYou: "Kamu", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
         profileTotalQuizzes: "Total Kuis", profileAccuracy: "Akurasi", profileRank: "Peringkat", profileLevelLabel: "Level", profileMemberSince: "Bergabung sejak {date}",
-        profileBestStreak: "Terbaik", profileTotalQuizzesDesc: "Kuis dimainkan",
+        profileBestStreak: "Streak Terbaik", profileTotalQuizzesDesc: "Kuis dimainkan",
         profileMotivationNew: "Ayo mulai belajar!", profileMotivationExcellent: "Luar biasa! Kamu master bendera!", profileMotivationGreat: "Kerja bagus! Terus pertahankan!", profileMotivationGood: "Usaha bagus! Terus berlatih!", profileMotivationPractice: "Terus berlatih!",
         achievementSheetTitle: "Achievement", homeQuickExplore: "Jelajah Cepat",
         leaderboardStreak: "Streak", navHistory: "Riwayat", switchModalTitle: "Ganti Mode Kuis?", switchModalDesc: "Mengubah jenis input kuis di tengah permainan akan memuat ulang seluruh progres kuis berjalan Anda.",
@@ -2565,6 +2565,18 @@ function renderAchievementSheet() {
     if (profileCount) profileCount.textContent = countText;
 }
 
+function renderAchievementPreviewRow() {
+    const row = document.getElementById('profile-achievement-preview-row');
+    if (!row) return;
+    const stats = getPlayerStatsSnapshot();
+    const lang = settings.language;
+    row.innerHTML = ACHIEVEMENTS.map(a => {
+        const unlocked = a.test(stats);
+        const label = (a.name[lang] || a.name.en).replace(/"/g, '&quot;');
+        return `<div class="achv-hex-badge ${unlocked ? 'unlocked' : ''}" title="${label}"><i class="fa-solid ${unlocked ? a.icon : 'fa-lock'}"></i></div>`;
+    }).join('');
+}
+
 function fireConfetti() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const colors = ['#7B47F5', '#EC41B1', '#facc15', '#a78bfa', '#22c55e'];
@@ -3977,38 +3989,23 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
     
     const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
-    const level = calculateLevel(xp);
     const lang = settings.language;
-
-    const levelStat = document.getElementById('profile-level-stat');
-    const hexLevelText = document.getElementById('profile-hex-level-text');
-    const xpStat = document.getElementById('profile-xp-stat');
-    const streakStat = document.getElementById('profile-streak-stat');
-    if (levelStat) levelStat.textContent = level;
-    if (hexLevelText) hexLevelText.textContent = level;
-    if (xpStat) xpStat.textContent = xp.toLocaleString();
-    if (streakStat) {
-        streakStat.textContent = streak;
-        const fireIcon = streakStat.previousElementSibling; 
-        if (streak < 1) {
-            streakStat.className = "font-black text-gray-400 text-xl";
-            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-gray-400 text-lg mb-1";
-        } else {
-            streakStat.className = "font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-xl drop-shadow-md";
-            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-orange-500 text-lg mb-1 animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
-        }
-    }
 
     const storedBestStreak = parseInt(localStorage.getItem('flagx-beststreak') || 0);
     const bestStreak = Math.max(streak, storedBestStreak);
     if (bestStreak !== storedBestStreak) localStorage.setItem('flagx-beststreak', bestStreak);
     const bestStreakStat = document.getElementById('profile-best-streak-stat');
-    if (bestStreakStat) bestStreakStat.textContent = bestStreak;
-
-    const pillStreak = document.getElementById('profile-pill-streak');
-    if (pillStreak) pillStreak.textContent = streak;
-    const pillLevel = document.getElementById('profile-pill-level');
-    if (pillLevel) pillLevel.textContent = `Lv. ${level}`;
+    const bestStreakIcon = document.getElementById('profile-beststreak-icon');
+    if (bestStreakStat) {
+        bestStreakStat.textContent = bestStreak;
+        if (bestStreak < 1) {
+            bestStreakStat.className = "font-black text-lg leading-none text-gray-400";
+            if (bestStreakIcon) bestStreakIcon.className = "fa-solid fa-fire text-gray-400 text-sm";
+        } else {
+            bestStreakStat.className = "font-black text-lg leading-none bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500";
+            if (bestStreakIcon) bestStreakIcon.className = "fa-solid fa-fire text-orange-500 text-sm";
+        }
+    }
 
     const totalQuizzesStat = document.getElementById('profile-total-quizzes-stat');
     const accuracyStat = document.getElementById('profile-accuracy-stat');
@@ -4017,9 +4014,6 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
     const accuracyPct = lifetimeAttempted > 0 ? Math.round((lifetimeCorrect / lifetimeAttempted) * 100) : 0;
     if (totalQuizzesStat) totalQuizzesStat.textContent = parseInt(localStorage.getItem('flagx-totalquizzes') || 0).toLocaleString();
     if (accuracyStat) accuracyStat.textContent = lifetimeAttempted > 0 ? accuracyPct + '%' : '–';
-
-    const motivationEl = document.getElementById('profile-motivation-text');
-    if (motivationEl) motivationEl.textContent = getProfileMotivationText(lifetimeAttempted, accuracyPct, lang);
 
     const memberSinceEl = document.getElementById('profile-member-since');
     if (memberSinceEl) memberSinceEl.textContent = (auth && auth.currentUser && auth.currentUser.metadata) ? formatMemberSince(auth.currentUser.metadata.creationTime, lang) : '';
@@ -4039,6 +4033,7 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
     }
 
     renderAchievementSheet();
+    renderAchievementPreviewRow();
     drawer.classList.add('active');
     document.body.classList.add('modal-open');
 });
