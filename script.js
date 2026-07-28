@@ -3991,11 +3991,11 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
         streakStat.textContent = streak;
         const fireIcon = streakStat.previousElementSibling; 
         if (streak < 1) {
-            streakStat.className = "font-black text-gray-400 text-sm";
-            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-gray-400 text-xs";
+            streakStat.className = "font-black text-gray-400 text-xl";
+            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-gray-400 text-lg mb-1";
         } else {
-            streakStat.className = "font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-sm drop-shadow-md";
-            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
+            streakStat.className = "font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-xl drop-shadow-md";
+            if (fireIcon) fireIcon.className = "fa-solid fa-fire text-orange-500 text-lg mb-1 animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
         }
     }
 
