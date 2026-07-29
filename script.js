@@ -392,19 +392,48 @@ const accentColors = {
 // meski data asli (cache/network) sudah siap lebih cepat dari durasi ini.
 const SKELETON_MIN_DELAY = 2500;
 
-// Toast Notification
-function showToast(message) {
-    let toast = document.querySelector('.toast-msg');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.className = 'toast-msg';
-        document.body.appendChild(toast);
+// Toast Notification — stacked, closable, slides in from the right
+const TOAST_MAX_STACK = 3;
+
+function showToast(message, duration = 2500) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        container.setAttribute('aria-live', 'polite');
+        document.body.appendChild(container);
     }
-    toast.innerText = message;
-    toast.classList.remove('show');
-    void toast.offsetWidth; 
+
+    const visible = container.querySelectorAll('.toast-msg:not(.hide)');
+    if (visible.length >= TOAST_MAX_STACK) dismissToast(visible[visible.length - 1]);
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `
+        <span class="toast-msg-text"></span>
+        <button class="toast-msg-close" type="button" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        <span class="toast-msg-progress"></span>`;
+    toast.querySelector('.toast-msg-text').textContent = message;
+    toast.querySelector('.toast-msg-progress').style.animationDuration = `${duration}ms`;
+
+    container.prepend(toast);
+    void toast.offsetWidth;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+
+    const timer = setTimeout(() => dismissToast(toast), duration);
+    toast.querySelector('.toast-msg-close').addEventListener('click', () => {
+        clearTimeout(timer);
+        dismissToast(toast);
+    });
+}
+
+function dismissToast(toast) {
+    if (!toast || !toast.isConnected || toast.classList.contains('hide')) return;
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    setTimeout(() => toast.remove(), 500);
 }
 
 // Fuzzy Matching
@@ -4239,35 +4268,33 @@ function showPWABanner() {
     if (document.getElementById('pwa-banner')) return;
     const banner = document.createElement('div');
     banner.id = 'pwa-banner';
-    banner.className = 'fixed z-50 card rounded-xl p-4 flex items-center gap-3 shadow-xl';
-    banner.style.cssText = 'bottom: 85px; left: 12px; right: 12px; border: 1px solid var(--primary-color);';
+    banner.className = 'card rounded-xl p-3 flex items-center gap-2.5 shadow-xl';
     banner.innerHTML = `
-        <div class="text-2xl flex-shrink-0">📱</div>
+        <div class="text-xl flex-shrink-0">📱</div>
         <div class="flex-1 min-w-0">
             <p class="font-bold text-sm leading-tight">Install Flag-X</p>
-            <p class="text-xs leading-tight" style="color:var(--subtle-text-color)">Play offline, faster access!</p>
+            <p class="pwa-banner-desc text-xs leading-tight" style="color:var(--subtle-text-color)">Play offline, faster access!</p>
         </div>
         <button onclick="installPWA()" class="btn btn-primary px-3 py-1.5 text-xs text-white font-bold flex-shrink-0">Install</button>
         <button onclick="dismissPWA()" class="flex-shrink-0 ml-1" style="color:var(--subtle-text-color)"><i class="fa-solid fa-xmark"></i></button>`;
     document.body.appendChild(banner);
-    setTimeout(() => banner?.remove(), 12000);
+    void banner.offsetWidth;
+    banner.classList.add('show');
+    setTimeout(() => hidePWABanner(false), 12000);
 }
 
-function installPWA() {
-    if (window._pwaPrompt) {
-        window._pwaPrompt.prompt();
-        window._pwaPrompt.userChoice.then(c => {
-            if (c.outcome === 'accepted') showToast('🎉 Flag-X installed!');
-            localStorage.setItem('flagx-pwa-dismissed', 'true');
-            window._pwaPrompt = null;
-        });
-    }
-    document.getElementById('pwa-banner')?.remove();
+function hidePWABanner(markDismissed) {
+    if (markDismissed) localStorage.setItem('flagx-pwa-dismissed', 'true');
+    const banner = document.getElementById('pwa-banner');
+    if (!banner) return;
+    banner.classList.remove('show');
+    banner.classList.add('hide');
+    banner.addEventListener('transitionend', () => banner.remove(), { once: true });
+    setTimeout(() => banner.remove(), 500);
 }
 
 function dismissPWA() {
-    localStorage.setItem('flagx-pwa-dismissed', 'true');
-    document.getElementById('pwa-banner')?.remove();
+    hidePWABanner(true);
 }
 
 function initApp() {
