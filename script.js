@@ -1365,8 +1365,8 @@ function renderLeaderboardRows(allData, tab) {
             ? `<i class="fa-solid fa-star text-[var(--primary-color)] text-[10px]"></i>${xpVal} &middot; Lv.${userLevel}`
             : `<i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}`;
         const wrapClass = sticky
-            ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[rgba(0,0,0,0.15)] shadow-[0_-6px_18px_rgba(0,0,0,0.45),0_0_16px_rgba(var(--primary-color-rgb),0.3)]'
-            : `mb-2 transition-all duration-300 hover:border-[var(--primary-color)] active:border-[var(--primary-color)] hover:-translate-y-0.5 active:-translate-y-0.5 ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)]'}`;
+    ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]'
+    : `mb-2 ... ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : '...'}`;
         const rankColor = sticky ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]';
         const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]');
         const youTag = sticky ? ` <span class="font-normal opacity-70">(${translations[settings.language].leaderboardYou})</span>` : '';
