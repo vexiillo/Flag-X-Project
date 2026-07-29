@@ -1182,8 +1182,8 @@ function renderLeaderboardPodium(topThree, tab) {
                     ${rank === 1 ? `<i class="lb-podium-crown fa-solid fa-crown text-2xl text-yellow-400 absolute -top-6 left-1/2 -translate-x-1/2 drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] opacity-0 scale-50 transition-all duration-350 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:scale-100"></i>` : ''}
                     <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="${t.avatar} rounded-full object-cover ring-4 ${ringClass} ${glowClass}">
                     <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--card-bg-color)] border-2 border-[var(--card-border-color)] flex items-center justify-center text-xs font-black ${t.textColor}">${rank}</div>
-                </div>
-                <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] line-clamp-2 min-h-[2.3em] px-0.5 ${isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]'}">${displayName}</p>
+                </div>                
+                <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] line-clamp-2 min-h-[2.3em] px-0.5 text-[var(--text-color)]">${displayName}</p>
                 <p class="text-[11px] font-semibold bg-clip-text text-transparent bg-gradient-to-r ${valGradient} mb-2">${valDisplay}</p>
                 <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner"></div>
             </div>`;
