@@ -2575,7 +2575,8 @@ function renderAchievementPreviewRow() {
         const unlocked = a.test(stats);
         if (unlocked) unlockedCount++;
         const label = (a.name[lang] || a.name.en).replace(/"/g, '&quot;');
-        return `<div class="achv-hex-badge ${unlocked ? 'unlocked' : ''}" title="${label}"><i class="fa-solid ${unlocked ? a.icon : 'fa-lock'}"></i></div>`;
+        const hexPoints = '15,2 28,9.5 28,24.5 15,32 2,24.5 2,9.5';
+        return `<div class="achv-hex-badge ${unlocked ? 'unlocked' : ''}" title="${label}"><svg class="achv-hex-bg" viewBox="0 0 30 34"><polygon points="${hexPoints}"/></svg><i class="fa-solid ${unlocked ? a.icon : 'fa-lock'}"></i></div>`;
     }).join('');
     const progressBar = document.getElementById('profile-achievement-progress-bar');
     if (progressBar) progressBar.style.width = `${Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}%`;
