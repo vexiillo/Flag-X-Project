@@ -1167,9 +1167,10 @@ function renderLeaderboardPodium(topThree, tab) {
     const isStreak = leaderboardSortMode === 'streak';
     let html = '<div class="flex items-end justify-center gap-3 sm:gap-5 px-2">';
     topThree.forEach((d, i) => {
-        const rank = i + 1;
-        const t = TIER[rank];
-        const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
+    const rank = i + 1;
+    const t = TIER[rank];
+    const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
+    const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
         const valDisplay = isStreak
             ? (d.streak || 0) + (settings.language === 'id' ? ' hari' : ' days')
             : formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0));
