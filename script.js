@@ -210,7 +210,7 @@ const translations = {
         settingsTypeName: "Input Mode", typeNameLabel: "Type the Answer", typeNamePlaceholder: "Type country name...", settingsSound: "Sound", soundLabel: "Sound Effects",
         submitBtn: "Submit", resCorrect: "Correct", resWrong: "Wrong", resAccuracy: "Accuracy", resTimeout: "Timeout", resAvgTime: "Avg. Time", historyTitle: "Quiz History",
         homeHistory: "Quiz History", shareCardTitle: "Share Your Score", downloadBtn: "Save", shareBtn: "Share", tabAllTime: "All Time", tabThisWeek: "This Week", leaderboardWeeklyReset: "WEEKLY RESET", leaderboardResetsIn: "Resets in", leaderboardYou: "You", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
-        profileTotalQuizzes: "Total Quizzes", profileAccuracy: "Accuracy", profileRank: "Rank", profileLevelLabel: "Level", profileMemberSince: "Member since {date}",
+        profileTotalQuizzes: "Total Quizzes", profileAccuracy: "Accuracy", profileRank: "Rank", profileGlobalRank: "Global Rank", profileLevelLabel: "Level", profileMemberSince: "Member since {date}",
         profileBestStreak: "Best Streak", profileTotalQuizzesDesc: "Quizzes taken",
         profileMotivationNew: "Keep learning!", profileMotivationExcellent: "Excellent! You're a flag master!", profileMotivationGreat: "Great work! Keep it up!", profileMotivationGood: "Good effort! Practice more!", profileMotivationPractice: "Keep practicing!",
         achievementSheetTitle: "Achievements", homeQuickExplore: "Quick Explore",
@@ -296,7 +296,7 @@ const translations = {
         skipBtn: "Lewati", nextBtn: "Lanjut", letsGoBtn: "AYO MULAI!", settingsTypeName: "Mode Input", typeNameLabel: "Ketik Jawaban", typeNamePlaceholder: "Ketik nama negara...",
         settingsSound: "Suara", soundLabel: "Efek Suara", submitBtn: "Kirim", resCorrect: "Benar", resWrong: "Salah", resAccuracy: "Akurasi", resTimeout: "Habis Waktu", resAvgTime: "Rata-rata",
         historyTitle: "Riwayat Kuis", homeHistory: "Riwayat Kuis", shareCardTitle: "Bagikan Skor", downloadBtn: "Simpan", shareBtn: "Bagikan", tabAllTime: "Sepanjang Masa", tabThisWeek: "Minggu Ini", leaderboardWeeklyReset: "RESET MINGGUAN", leaderboardResetsIn: "Reset dalam", leaderboardYou: "Kamu", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
-        profileTotalQuizzes: "Total Kuis", profileAccuracy: "Akurasi", profileRank: "Peringkat", profileLevelLabel: "Level", profileMemberSince: "Bergabung sejak {date}",
+        profileTotalQuizzes: "Total Kuis", profileAccuracy: "Akurasi", profileRank: "Peringkat", profileGlobalRank: "Peringkat Global", profileLevelLabel: "Level", profileMemberSince: "Bergabung sejak {date}",
         profileBestStreak: "Streak Terbaik", profileTotalQuizzesDesc: "Kuis dimainkan",
         profileMotivationNew: "Ayo mulai belajar!", profileMotivationExcellent: "Luar biasa! Kamu master bendera!", profileMotivationGreat: "Kerja bagus! Terus pertahankan!", profileMotivationGood: "Usaha bagus! Terus berlatih!", profileMotivationPractice: "Terus berlatih!",
         achievementSheetTitle: "Achievement", homeQuickExplore: "Jelajah Cepat",
@@ -2570,11 +2570,15 @@ function renderAchievementPreviewRow() {
     if (!row) return;
     const stats = getPlayerStatsSnapshot();
     const lang = settings.language;
+    let unlockedCount = 0;
     row.innerHTML = ACHIEVEMENTS.map(a => {
         const unlocked = a.test(stats);
+        if (unlocked) unlockedCount++;
         const label = (a.name[lang] || a.name.en).replace(/"/g, '&quot;');
         return `<div class="achv-hex-badge ${unlocked ? 'unlocked' : ''}" title="${label}"><i class="fa-solid ${unlocked ? a.icon : 'fa-lock'}"></i></div>`;
     }).join('');
+    const progressBar = document.getElementById('profile-achievement-progress-bar');
+    if (progressBar) progressBar.style.width = `${Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}%`;
 }
 
 function fireConfetti() {
