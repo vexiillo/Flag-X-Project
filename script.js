@@ -1185,7 +1185,10 @@ function renderLeaderboardPodium(topThree, tab) {
                     <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--card-bg-color)] border-2 border-[var(--card-border-color)] flex items-center justify-center text-xs font-black ${t.textColor}">${rank}</div>
                 </div>                
                 <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] line-clamp-2 min-h-[2.3em] px-0.5 text-[var(--text-color)]">${displayName}</p>
-                <p class="text-[11px] font-semibold bg-clip-text text-transparent bg-gradient-to-r ${valGradient} mb-2">${valDisplay}</p>
+                <p class="flex items-center justify-center gap-1 text-[11px] font-semibold mb-2">
+    <i class="fa-solid ${isStreak ? 'fa-fire text-orange-400' : 'fa-star text-yellow-400'} text-[10px]"></i>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r ${valGradient}">${valDisplay}</span>
+</p>
                 <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner"></div>
             </div>`;
     });
@@ -1357,15 +1360,15 @@ function renderLeaderboardRows(allData, tab) {
         const xpVal = formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0));
         const primaryVal = isStreakSort ? streakLabel : xpVal;
         const primaryGradient = isStreakSort ? 'from-orange-400 to-amber-500' : 'from-[var(--primary-color)] to-[#a78bfa]';
+        const primaryIcon = isStreakSort ? 'fa-fire text-orange-400' : 'fa-star text-yellow-400';
         const metaLine = isStreakSort
             ? `<i class="fa-solid fa-star text-[var(--primary-color)] text-[10px]"></i>${xpVal} &middot; Lv.${userLevel}`
             : `<i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}`;
-        // SESUDAH
-const wrapClass = sticky
-    ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[var(--bg-color-dark)] shadow-[0_-6px_18px_rgba(0,0,0,0.45),0_0_16px_rgba(var(--primary-color-rgb),0.3)]'
-    : `mb-2 transition-all duration-300 hover:border-[var(--primary-color)] active:border-[var(--primary-color)] hover:-translate-y-0.5 active:-translate-y-0.5 ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)]'}`;
-const rankColor = sticky ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]';
-const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]');
+        const wrapClass = sticky
+            ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[rgba(0,0,0,0.15)] shadow-[0_-6px_18px_rgba(0,0,0,0.45),0_0_16px_rgba(var(--primary-color-rgb),0.3)]'
+            : `mb-2 transition-all duration-300 hover:border-[var(--primary-color)] active:border-[var(--primary-color)] hover:-translate-y-0.5 active:-translate-y-0.5 ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)]'}`;
+        const rankColor = sticky ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]';
+        const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]');
         const youTag = sticky ? ` <span class="font-normal opacity-70">(${translations[settings.language].leaderboardYou})</span>` : '';
         return `
             <div class="flex items-center gap-2.5 p-2.5 rounded-xl border ${wrapClass}">
@@ -1377,7 +1380,10 @@ const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--
                         ${metaLine}
                     </p>
                 </div>
-                <div class="flex-shrink-0 font-bold text-sm bg-clip-text text-transparent bg-gradient-to-r ${primaryGradient}">${primaryVal}</div>
+                <div class="flex-shrink-0 flex items-center gap-1">
+                    <i class="fa-solid ${primaryIcon} text-xs"></i>
+                    <span class="font-bold text-sm bg-clip-text text-transparent bg-gradient-to-r ${primaryGradient}">${primaryVal}</span>
+                </div>
             </div>`;
     };
 
@@ -1483,11 +1489,11 @@ async function loadHomeLeaderboardPreview() {
 function renderHomeLeaderboardSkeleton(count = 3) {
     let rows = '';
     for (let i = 0; i < count; i++) {
-        rows += `<div class="flex items-center gap-2.5 p-2 rounded-xl mb-1.5">
+        rows += `<div class="flex items-center gap-2.5 p-2.5 rounded-xl mb-1.5">
             <div class="skeleton-block w-5 h-5 rounded-full flex-shrink-0"></div>
-            <div class="skeleton-block w-7 h-7 rounded-full flex-shrink-0"></div>
-            <div class="flex-1 min-w-0"><div class="skeleton-block h-3 w-20 rounded-full"></div></div>
-            <div class="skeleton-block h-3 w-10 rounded-full flex-shrink-0"></div>
+            <div class="skeleton-block w-8 h-8 rounded-full flex-shrink-0"></div>
+            <div class="flex-1 min-w-0"><div class="skeleton-block h-3 w-20 rounded-full mb-1.5"></div><div class="skeleton-block h-2.5 w-14 rounded-full"></div></div>
+            <div class="skeleton-block h-3.5 w-10 rounded-full flex-shrink-0"></div>
         </div>`;
     }
     return rows;
@@ -1502,24 +1508,37 @@ function renderHomeLeaderboardPreview(data) {
         return;
     }
 
-    const rankColors = ['#facc15', '#d1d5db', '#d97706'];
+    const formatPreviewStreak = (days) => {
+        if (days <= 0) return '0d';
+        const years = Math.floor(days / 365);
+        if (years >= 2) return `${years}yrs`;
+        if (years === 1) return `1yr`;
+        return `${days}d`;
+    };
+
+    const rankTextColors = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
     wrap.innerHTML = data.map((d, i) => {
         const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
         const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
         const userLevel = calculateLevel(d.totalScore || 0);
         const xpVal = formatXP(d.totalScore || 0);
+        const streakLabel = formatPreviewStreak(d.streak || 0);
+        const wrapStyle = isMe
+            ? 'border:2px solid var(--primary-color); background:rgba(var(--primary-color-rgb),0.15); box-shadow:0 0 12px rgba(var(--primary-color-rgb),0.5);'
+            : 'border:1px solid var(--card-border-color); background:var(--card-bg-color);';
         return `
-        <div class="flex items-center gap-2.5 p-2 rounded-xl mb-1.5 last:mb-0" style="${isMe ? 'background:rgba(var(--primary-color-rgb),0.14); border:1px solid var(--primary-color);' : 'background:var(--secondary-color); border:1px solid transparent;'}">
-            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0" style="background:${rankColors[i] || 'var(--card-bg-color)'}; color:#1a1330;">${i + 1}</div>
-            <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="w-7 h-7 rounded-full object-cover border border-[var(--card-border-color)] flex-shrink-0">
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl mb-1.5 last:mb-0" style="${wrapStyle}">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 bg-[var(--card-bg-color)] border border-[var(--card-border-color)] ${rankTextColors[i] || 'text-subtle'}">${i + 1}</div>
+            <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="w-8 h-8 rounded-full object-cover border border-[var(--card-border-color)] flex-shrink-0">
             <div class="flex-1 min-w-0 text-left">
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-xs truncate" style="color:${isMe ? 'var(--primary-color)' : 'var(--text-color)'};">${displayName}</span>
-                    <span class="text-[9px] px-1 py-0.5 rounded font-medium flex-shrink-0" style="background:var(--card-bg-color); border:1px solid var(--card-border-color); color:var(--subtle-text-color);">Lv.${userLevel}</span>
-                </div>
+                <p class="font-semibold text-sm truncate" style="color:${isMe ? 'var(--primary-color)' : 'var(--text-color)'};">${displayName}</p>
+                <p class="text-[11px] text-[var(--subtle-text-color)] flex items-center gap-1 mt-0.5">
+                    <i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}
+                </p>
             </div>
-            <div class="flex items-center gap-1 text-xs font-bold flex-shrink-0" style="color:var(--text-color);">
-                <i class="fa-solid fa-star text-[10px]" style="color:#facc15;"></i>${xpVal}
+            <div class="flex-shrink-0 flex items-center gap-1">
+                <i class="fa-solid fa-star text-yellow-400 text-xs"></i>
+                <span class="font-bold text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">${xpVal}</span>
             </div>
         </div>`;
     }).join('');
