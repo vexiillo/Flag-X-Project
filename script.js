@@ -18,13 +18,13 @@ import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/fireb
 // 2. FIREBASE CONFIGURATION & INITIALIZATION
 // ============================================================================
 const firebaseConfig = {
-    apiKey: "AIzaSyA-f-B0RH9CJDsfxytIIdyBWwAxNJ4vDik",
-    authDomain: "flag-x-3439d.firebaseapp.com",
-    projectId: "flag-x-3439d",
-    storageBucket: "flag-x-3439d.firebasestorage.app",
-    messagingSenderId: "576734845240",
-    appId: "1:576734845240:web:620dfc7ee7f9e7ad0149cd",
-    measurementId: "G-1VKSLQQCPN"
+  apiKey: "AIzaSyAlBxWNXoeMgAv4v_B6PP5Xu3KhBm5cWlg",
+  authDomain: "flag-x-project.firebaseapp.com",
+  projectId: "flag-x-project",
+  storageBucket: "flag-x-project.firebasestorage.app",
+  messagingSenderId: "757798247535",
+  appId: "1:757798247535:web:0462758fe10800f88d419a",
+  measurementId: "G-R63CHPZPNE"
 };
 let app, auth, db, googleProvider, messaging;
 try {
@@ -65,6 +65,9 @@ let currentQuiz = {
     responseTimes: [], questionStartTime: null, missedFlags: []
 };
 let leaderboardCurrentTab = 'alltime';
+let powerUp5050Used = false;
+const POWERUP_5050_MAX_USES = 2;
+let powerUp5050Remaining = POWERUP_5050_MAX_USES;
 let leaderboardSortMode = 'xp';
 let leaderboardAllData = [];
 let pendingDifficulty = null;
@@ -142,7 +145,7 @@ const translations = {
     en: {
         totalScoreLabel: "XP", homeSubtitle: "Test Your Global Knowledge", homePlayQuiz: "Play Quiz", homeFlagLibrary: "Flag Library",
         quizModesTitle: "Quiz Modes", backToMenu: "Back to Menu", continentClashTitle: "Choose a Continent", backToQuizModes: "Back to Quiz Modes", backToBookmarks: "Back to Bookmark",
-        quizScore: "XP", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Earned", resultsPlayAgain: "Play Again",
+        quizScore: "XP", quizStreakLabel: "Streak", quizLivesLabel: "Lives", timerSecLabel: "sec left", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Earned", resultsPlayAgain: "Play Again",
         libraryTitle: "Flag Library", continentLibraryTitle: "Choose a Continent", backToLibrary: "Back to Library", backButton: "Back",
         endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your XP will be finalized.",
         endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X © 2025. All Rights Reserved.",
@@ -159,7 +162,7 @@ const translations = {
         mode_capital_title: "Capital Guess", mode_capital_desc: "Guess the capital city based on the flag. 20 questions.",
         mode_year_title: "Year Guess", mode_year_desc: "Guess the year associated with historical flags. 20 questions.",
         mode_time_title: "Time Attack", mode_time_desc: "Answer as many questions as possible in 60 seconds.",
-        mode_survival_title: "Survival Mode", mode_survival_desc: "30 questions, one life. One mistake and the game is over.",
+        mode_survival_title: "Survival Mode", mode_survival_desc: "30 questions, 3 lives. Three mistakes and the game is over.",
         mode_combo_title: "Combo Challenge", mode_combo_desc: "Infinite mixed questions, 90 seconds, one life. The ultimate Flag-X challenge!",
         lib_official_title: "Official Countries", lib_subdivisions_title: "Subdivisions", lib_territories_title: "Territories",
         lib_unofficial_title: "Unofficial", lib_historical_title: "Historical",
@@ -235,7 +238,7 @@ const translations = {
     id: {
         totalScoreLabel: "XP", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
         quizModesTitle: "Mode Kuis", backToMenu: "Kembali ke Menu", continentClashTitle: "Pilih Benua", backToQuizModes: "Kembali ke Mode Kuis", backToBookmarks: "Kembali ke Bookmark",
-        quizScore: "XP", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "XP Diperoleh", resultsPlayAgain: "Main Lagi",
+        quizScore: "XP", quizStreakLabel: "Streak", quizLivesLabel: "Nyawa", timerSecLabel: "detik lagi", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "XP Diperoleh", resultsPlayAgain: "Main Lagi",
         libraryTitle: "Pustaka Bendera", continentLibraryTitle: "Pilih Benua", backToLibrary: "Kembali ke Pustaka", backButton: "Kembali",
         endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? XP Anda akan difinalisasi.",
         endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X © 2025. Hak Cipta Dilindungi.",
@@ -250,7 +253,7 @@ const translations = {
         mode_capital_title: "Tebak Ibu Kota", mode_capital_desc: "Tebak ibu kota berdasarkan benderanya. 20 pertanyaan.",
         mode_year_title: "Tebak Tahun", mode_year_desc: "Tebak tahun yang terkait dengan bendera bersejarah. 20 pertanyaan.",
         mode_time_title: "Serangan Waktu", mode_time_desc: "Jawab sebanyak mungkin pertanyaan dalam 60 detik.",
-        mode_survival_title: "Mode Bertahan", mode_survival_desc: "30 pertanyaan, satu nyawa. Satu kesalahan dan permainan berakhir.",
+        mode_survival_title: "Mode Bertahan", mode_survival_desc: "30 pertanyaan, 3 nyawa. Tiga kesalahan dan permainan berakhir.",
         mode_combo_title: "Tantangan Kombo", mode_combo_desc: "Pertanyaan campuran tanpa batas, 90 detik, satu nyawa. Tantangan Flag-X yang sesungguhnya!",
         lib_official_title: "Negara Resmi", lib_subdivisions_title: "Subdivisi", lib_territories_title: "Wilayah", lib_unofficial_title: "Tidak Resmi", lib_historical_title: "Bersejarah",
         lib_organizations_title: "Organisasi Dunia", lib_continent_title: "Bendera Benua",
@@ -498,7 +501,10 @@ function updateNavActiveState(screenId) {
         document.getElementById(`desktop-${activeId}`)?.classList.add('active');
         const pill = document.getElementById('nav-pill');
         const idx = NAV_ORDER.indexOf(activeId);
-        if (pill && idx !== -1) pill.style.transform = `translateX(${idx * 100}%)`;
+        if (pill && idx !== -1) {
+            pill.style.transform = `translateX(${idx * 100}%)`;
+            pill.style.opacity = activeId === 'nav-home' ? '0' : '1';
+        }
     }
 }
 // --- DESKTOP SIDEBAR: keep settings-panel in the right host, and keep the
@@ -1253,7 +1259,7 @@ function renderLeaderboardRows(allData, tab) {
     let html = '';
     if (!auth || !auth.currentUser) {
         html += `
-            <div class="bg-[var(--secondary-color)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)] mb-4">
+            <div class="bg-[rgba(var(--primary-color-rgb),0.14)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)] mb-4">
                 <p class="text-sm font-semibold text-[var(--text-color)]">${translations[settings.language].leaderboardGuestCTA}</p>
                 <button id="leaderboard-login-btn" class="btn btn-primary btn-shimmer px-6 py-2 shadow-md flex items-center gap-2">
                     <i class="fa-brands fa-google"></i> <span>${translations[settings.language].loginBtn}</span>
@@ -1303,7 +1309,7 @@ function renderLeaderboardRows(allData, tab) {
             : `<i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}`;
         const wrapClass = sticky
     ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]'
-    : `mb-2 ... ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : '...'}`;
+    : `mb-2 ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)]'}`;
         const rankColor = sticky ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]';
         const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]');
         const youTag = sticky ? ` <span class="font-normal opacity-70">(${translations[settings.language].leaderboardYou})</span>` : '';
@@ -1506,7 +1512,8 @@ function renderLibraryCategories() {
     container.innerHTML = '';
     LIBRARY_CATEGORY_DEFS.forEach(cat => {
         const card = document.createElement('div');
-        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${cat.span || ''}`;        
+        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${cat.span || ''}`;
+        card.style.setProperty('--card-accent', accentColors[cat.id] || '');        
         card.innerHTML = `
             <div>
                 <h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${cat.icon} fa-fw mr-3 accent-icon"></i>${translations[settings.language]['lib_'+cat.id+'_title']}</h3>
@@ -1890,7 +1897,7 @@ function renderHomeQuickExplore() {
         chip.style.background = 'var(--card-bg-color)';
         chip.style.border = '1px solid var(--card-border-color)';
         chip.innerHTML = `
-            <i class="fa-solid ${item.icon} text-lg" style="color:var(--home-library-accent);"></i>
+            <i class="fa-solid ${item.icon} text-lg" style="color:${accentColors[item.id] || 'var(--home-library-accent)'};"></i>
             <span class="text-[10px] font-bold leading-tight text-center px-1">${translations[settings.language]['lib_'+item.id+'_title']}</span>`;
         chip.onclick = item.action;
         wrap.appendChild(chip);
@@ -1921,7 +1928,7 @@ function renderQuizModesCarousel() {
         chip.style.background = 'var(--card-bg-color)';
         chip.style.border = '1px solid var(--card-border-color)';
         chip.innerHTML = `
-            <i class="fa-solid ${mode.icon} text-xl accent-icon"></i>
+            <i class="fa-solid ${mode.icon} text-xl" style="color:${accentColors[mode.id] || 'var(--primary-color)'};"></i>
             <span class="text-[11px] font-bold leading-tight text-center px-1">${translations[settings.language]['mode_'+mode.id+'_title']}</span>`;
         chip.onclick = mode.action;
         carousel.appendChild(chip);
@@ -1934,7 +1941,8 @@ function renderQuizModes() {
     renderQuizModesCarousel();
     QUIZ_MODE_DEFS.forEach(mode => {
         const card = document.createElement('div');
-        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${mode.span || ''}`;        
+        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${mode.span || ''}`;
+        card.style.setProperty('--card-accent', accentColors[mode.id] || '');        
         card.innerHTML = `
             <div>
                 <h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${mode.icon} fa-fw mr-3 accent-icon"></i>${translations[settings.language]['mode_'+mode.id+'_title']}</h3>
@@ -1950,7 +1958,7 @@ function startQuiz(mode, subMode = null) {
     if (QUIZ_MODE_PARAM_TO_ID[mode]) recordModeVisit(QUIZ_MODE_PARAM_TO_ID[mode]);
     currentQuiz = {
         ...currentQuiz, mode: mode, lastMode: mode, lastSubMode: subMode, score: 0, questionNumber: 0, 
-        timeLeft: 0, lives: (mode === 'survival' || mode === 'combo') ? 1 : 999, correctCount: 0, wrongCount: 0, 
+        timeLeft: 0, lives: mode === 'survival' ? 3 : (mode === 'combo' ? 1 : 999), correctCount: 0, wrongCount: 0, 
         timeoutCount: 0, responseTimes: [], questionStartTime: null, missedFlags: [], comboStreak: 0
     };
     const shuffle = (array) => [...array].sort(() => 0.5 - Math.random());
@@ -1967,17 +1975,22 @@ function startQuiz(mode, subMode = null) {
     if (scoreEl) scoreEl.textContent = "0";
     const timerEl = document.getElementById('timer');
     const hasTimer = currentQuiz.timeLeft > 0;
-    if (timerEl) { timerEl.style.display = hasTimer ? 'block' : 'none'; timerEl.textContent = currentQuiz.timeLeft; }
+    if (timerEl) { timerEl.textContent = currentQuiz.timeLeft; }
     // Timer bar reset
     const timerBarWrapper = document.getElementById('timer-bar-wrapper');
     const timerBarFill = document.getElementById('timer-bar-fill');
+    const timerCountdownRow = document.getElementById('timer-countdown-row');
     if (timerBarWrapper) timerBarWrapper.classList.toggle('hidden', !hasTimer);
+    if (timerCountdownRow) timerCountdownRow.classList.toggle('hidden', !hasTimer);
     if (timerBarFill && hasTimer) {
         timerBarFill.style.transition = 'none';
         timerBarFill.style.width = '100%';
         timerBarFill.style.background = 'var(--success-color)';
     }
     if (hasTimer) startTimer();
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
     _syncInputModeForMode(mode); 
     showScreen('quiz-screen');
     loadQuestion();
@@ -2018,10 +2031,12 @@ function startDailyChallenge() {
     };
     const scoreEl = document.getElementById('score');
     if (scoreEl) scoreEl.textContent = '0';
-    const timerEl = document.getElementById('timer');
-    if (timerEl) { timerEl.style.display = 'none'; }
     const timerBarWrapper = document.getElementById('timer-bar-wrapper');
     if (timerBarWrapper) timerBarWrapper.classList.add('hidden');
+    document.getElementById('timer-countdown-row')?.classList.add('hidden');
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
     _syncInputModeForMode('daily');
     showScreen('quiz-screen');
     loadQuestion();
@@ -2050,10 +2065,12 @@ function startBookmarkQuiz(quizType = 'flag') {
     
     const scoreEl = document.getElementById('score');
     if (scoreEl) scoreEl.textContent = '0';
-    const timerEl = document.getElementById('timer');
-    if (timerEl) { timerEl.style.display = 'none'; timerEl.textContent = ''; }
     const timerBarWrapper = document.getElementById('timer-bar-wrapper');
     if (timerBarWrapper) timerBarWrapper.classList.add('hidden');
+    document.getElementById('timer-countdown-row')?.classList.add('hidden');
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
     _syncInputModeForMode('bookmarks');
     showScreen('quiz-screen');
     loadQuestion();
@@ -2115,6 +2132,13 @@ function loadQuestion() {
     currentQuiz.questionNumber++;
     currentQuiz.questionStartTime = Date.now();
     updateQuestionCounter();
+    powerUp5050Used = false;
+    const powerupRow = document.getElementById('powerup-row');
+    const fiftyBtn = document.getElementById('powerup-5050-btn');
+    const eligible5050 = settings.difficulty >= 4 && !(settings.typeNameMode && currentQuiz.mode !== 'yearGuess') && powerUp5050Remaining > 0;
+    const isLifeModeForRow = currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo';
+    if (powerupRow) powerupRow.classList.toggle('hidden', !(eligible5050 || isLifeModeForRow));
+    if (fiftyBtn) { fiftyBtn.classList.toggle('hidden', !eligible5050); fiftyBtn.disabled = false; fiftyBtn.style.opacity = '1'; fiftyBtn.style.pointerEvents = 'auto'; updatePowerup5050Label(); }
     const progressWrapper = document.getElementById('quiz-progress-wrapper');
     const progressFill = document.getElementById('quiz-progress-fill');
     if (progressWrapper && progressFill) {
@@ -2317,6 +2341,7 @@ function checkAnswer(selectedOption) {
         if ("vibrate" in navigator) navigator.vibrate([40, 20, 40]); // Haptic: 2 ketukan pendek
         currentQuiz.correctCount++;
         currentQuiz.comboStreak = (currentQuiz.comboStreak || 0) + 1;
+        renderQuizStreak();
         if (currentQuiz.comboStreak >= 2) showComboNotification(currentQuiz.comboStreak);
         
         let xpReward = 10; 
@@ -2348,7 +2373,8 @@ function checkAnswer(selectedOption) {
         if ("vibrate" in navigator) navigator.vibrate(100);
         currentQuiz.wrongCount++;
         currentQuiz.comboStreak = 0; // Reset combo
-        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') currentQuiz.lives--;
+        renderQuizStreak();
+        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') { currentQuiz.lives--; renderQuizLives(); }
         if (!currentQuiz.missedFlags) currentQuiz.missedFlags = [];
         if (currentQuiz.correctAnswer && !currentQuiz.missedFlags.some(f => f.name === currentQuiz.correctAnswer.name)) currentQuiz.missedFlags.push(currentQuiz.correctAnswer);
         const typeNameFeedback = document.getElementById('type-name-feedback');
@@ -2384,6 +2410,56 @@ function showComboNotification(count) {
         </div>`;
     document.body.appendChild(badge);
     setTimeout(() => badge.remove(), 1500);
+}
+function renderQuizStreak() {
+    const iconEl = document.getElementById('quiz-streak-icon');
+    const valEl = document.getElementById('quiz-streak-value');
+    if (!iconEl || !valEl) return;
+    const streak = currentQuiz.comboStreak || 0;
+    valEl.textContent = streak;
+    const active = streak >= 2;
+    iconEl.style.color = active ? '#f97316' : 'var(--subtle-text-color)';
+    valEl.style.color = active ? '#f97316' : 'var(--subtle-text-color)';
+}
+function renderQuizLives() {
+    const wrap = document.getElementById('quiz-lives-wrap');
+    const heartsEl = document.getElementById('quiz-lives-hearts');
+    if (!wrap || !heartsEl) return;
+    const isLifeMode = currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo';
+    wrap.classList.toggle('hidden', !isLifeMode);
+    if (!isLifeMode) return;
+    const maxLives = currentQuiz.mode === 'survival' ? 3 : 1;
+    let html = '';
+    for (let i = 0; i < maxLives; i++) {
+        const filled = i < currentQuiz.lives;
+        html += `<i class="fa-solid fa-heart text-xs" style="color:${filled ? 'var(--error-color)' : 'var(--card-border-color)'};"></i>`;
+    }
+    heartsEl.innerHTML = html;
+}
+function updatePowerup5050Label() {
+    const labelEl = document.getElementById('powerup-5050-count');
+    if (labelEl) labelEl.textContent = `50:50 (${powerUp5050Remaining})`;
+}
+function use5050Powerup() {
+    if (powerUp5050Used || powerUp5050Remaining <= 0 || (settings.typeNameMode && currentQuiz.mode !== 'yearGuess') || settings.difficulty < 4) return;
+    const optionsContainer = document.getElementById('options-container');
+    if (!optionsContainer) return;
+    const buttons = Array.from(optionsContainer.children).filter(b => !b.disabled);
+    if (buttons.length < settings.difficulty) return;
+    const promptEl = document.getElementById('quiz-prompt');
+    const promptKey = promptEl ? promptEl.dataset.translateKey : null;
+    const isCapitalGuess = promptKey === 'quizPromptGuessCapital';
+    const isYearGuess = promptKey === 'quizPromptYear';
+    const correctId = isCapitalGuess ? currentQuiz.correctAnswer.capital : (isYearGuess ? currentQuiz.correctAnswer.years : currentQuiz.correctAnswer.name);
+    const wrongButtons = buttons.filter(b => b.textContent != correctId);
+    const shuffled = [...wrongButtons].sort(() => 0.5 - Math.random());
+    const eliminateCount = Math.floor(settings.difficulty / 2);
+    shuffled.slice(0, eliminateCount).forEach(b => { b.disabled = true; b.classList.add('fifty-fifty-out'); });
+    powerUp5050Used = true;
+    powerUp5050Remaining--;
+    updatePowerup5050Label();
+    const fiftyBtn = document.getElementById('powerup-5050-btn');
+    if (fiftyBtn) { fiftyBtn.disabled = true; fiftyBtn.style.opacity = '0.4'; fiftyBtn.style.pointerEvents = 'none'; }
 }
 function showFloatingXP(amount, targetElement) {
     const xpPopup = document.createElement('div');
@@ -4030,6 +4106,7 @@ window.closeFeedbackModal = closeFeedbackModal;
 window.selectFeedbackType = selectFeedbackType;
 window.updateFeedbackCharCount = updateFeedbackCharCount;
 window.submitFeedback = submitFeedback;
+window.use5050Powerup = use5050Powerup;
 // ============================================================================
 // 20. ADMIN / DEV TOOLS
 // ============================================================================
