@@ -11,7 +11,7 @@ import {
     continentFlags
 } from './flagsData.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, limit, getDocs, writeBatch, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 // ============================================================================
@@ -532,7 +532,7 @@ function syncDesktopProfileCard() {
     const imgEl = document.getElementById('desktop-header-profile-img');
     const iconEl = document.getElementById('desktop-header-profile-icon');
     const achvBadge = document.getElementById('desktop-header-profile-achv-badge');
-    if (auth && auth.currentUser) {
+    if (isRealUser(auth.currentUser)) {
         const shownName = document.getElementById('profile-name')?.textContent;
         nameEl.textContent = (shownName && shownName !== 'User' && shownName !== 'Guest') ? shownName : (auth.currentUser.displayName || 'User');
         const photo = auth.currentUser.photoURL || localStorage.getItem('cachedProfilePic');
@@ -666,7 +666,7 @@ async function addToTotalScore(scoreFromQuiz) {
     
     updateLevelUI(newTotal); 
     syncDesktopProfileCard();
-    if (auth && auth.currentUser) {
+    if (isRealUser(auth.currentUser)) {
         try {
             const userRef = doc(db, "users", auth.currentUser.uid);
             const now = new Date();
@@ -695,6 +695,13 @@ async function addToTotalScore(scoreFromQuiz) {
 // ============================================================================
 // 8. USER, AUTHENTICATION & PROFILE
 // ============================================================================
+// Guest (anonymous) dapat uid asli di background biar FCM token bisa disimpan,
+// TAPI gak boleh dianggap "logged in" untuk hal lain (sync skor/streak, tampilan
+// profil). isRealUser() jadi gerbang buat semua itu — cuma
+// requestNotificationPermission() yang sengaja tetap pakai auth.currentUser polos.
+function isRealUser(user) {
+    return !!(user && !user.isAnonymous);
+}
 const handleLogin = async (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (!auth) {
@@ -738,27 +745,58 @@ const handleLogout = async () => {
     }
 };
 const syncScoreToCloud = async (user) => {
+    const lastUid = localStorage.getItem('flagx-last-uid');
+    const isAccountSwitch = !!(lastUid && lastUid !== user.uid);
     const localScore = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const localStreakBefore = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const localTotalQuizzes = parseInt(localStorage.getItem('flagx-totalquizzes') || 0);
+    const localLifetimeCorrect = parseInt(localStorage.getItem('flagx-lifetimecorrect') || 0);
+    const localLifetimeAttempted = parseInt(localStorage.getItem('flagx-lifetimeattempted') || 0);
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-    let finalScore = localScore;
+    let finalScore, finalStreak, finalTotalQuizzes, finalLifetimeCorrect, finalLifetimeAttempted;
     let username = user.displayName;
     if (userSnap.exists()) {
         const data = userSnap.data();
-        finalScore = Math.max(localScore, data.totalScore || 0);
         username = data.username || user.displayName;
+        if (isAccountSwitch) {
+            finalScore = data.totalScore || 0;
+            finalStreak = data.streak || 0;
+            finalTotalQuizzes = data.totalQuizzes || 0;
+            finalLifetimeCorrect = data.lifetimeCorrect || 0;
+            finalLifetimeAttempted = data.lifetimeAttempted || 0;
+        } else {
+            finalScore = Math.max(localScore, data.totalScore || 0);
+            finalStreak = localStreakBefore;
+            finalTotalQuizzes = Math.max(localTotalQuizzes, data.totalQuizzes || 0);
+            finalLifetimeCorrect = Math.max(localLifetimeCorrect, data.lifetimeCorrect || 0);
+            finalLifetimeAttempted = Math.max(localLifetimeAttempted, data.lifetimeAttempted || 0);
+        }
+    } else {
+        finalScore = isAccountSwitch ? 0 : localScore;
+        finalStreak = isAccountSwitch ? 0 : localStreakBefore;
+        finalTotalQuizzes = isAccountSwitch ? 0 : localTotalQuizzes;
+        finalLifetimeCorrect = isAccountSwitch ? 0 : localLifetimeCorrect;
+        finalLifetimeAttempted = isAccountSwitch ? 0 : localLifetimeAttempted;
     }
     localStorage.setItem('flagx-totalscore', finalScore);
+    localStorage.setItem('flagx-streak', finalStreak);
+    localStorage.setItem('flagx-totalquizzes', finalTotalQuizzes);
+    localStorage.setItem('flagx-lifetimecorrect', finalLifetimeCorrect);
+    localStorage.setItem('flagx-lifetimeattempted', finalLifetimeAttempted);
+    localStorage.setItem('flagx-last-uid', user.uid);
     if (totalscoreValueEl) totalscoreValueEl.textContent = formatXP(finalScore);
     updateLevelUI(finalScore);
-    const localStreak = parseInt(localStorage.getItem('flagx-streak') || 0);
     await setDoc(userRef, {
         username: username,
         photoURL: user.photoURL,
         totalScore: finalScore,
         email: user.email,
         lastActive: new Date(),
-        streak: localStreak
+        streak: finalStreak,
+        totalQuizzes: finalTotalQuizzes,
+        lifetimeCorrect: finalLifetimeCorrect,
+        lifetimeAttempted: finalLifetimeAttempted
     }, { merge: true });
     return { username };
 };
@@ -865,43 +903,59 @@ if (auth) {
         const isLeaderboardActive = leaderboardScreen && leaderboardScreen.classList.contains('active');
         const shouldLoadLeaderboard = isLeaderboardActive && !leaderboardBootHandled;
         leaderboardBootHandled = false;
-        if (user) {
-            // Admin-only Eruda dev console
-            const ADMIN_UID = 'wE4eP1X9iefGC6GnKIT101RqZk72';
-            if (user.uid === ADMIN_UID && !window.eruda) {
-                const s = document.createElement('script');
-                s.src = 'https://cdn.jsdelivr.net/npm/eruda';
-                s.onload = () => eruda.init();
-                document.head.appendChild(s);
-            }
-            let nameToDisplay = user.displayName;
-            if (user.photoURL) localStorage.setItem('cachedProfilePic', user.photoURL);
-            
-            try {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    if (userData.username) nameToDisplay = userData.username;
-                    const userXP = userData.totalScore || 0;
-                    updateLevelUI(userXP); 
-                }
-            } catch (err) { console.error(err); }
-            updateProfileUI(user, nameToDisplay);
-            await syncScoreToCloud(user);
-            await claimLegacyDataIfExists(user);
-            
-            if (loginBtn) loginBtn.classList.add('hidden');
-            if (logoutBtn) logoutBtn.classList.remove('hidden');
-            if (shouldLoadLeaderboard) loadLeaderboard(); 
-            loadHomeLeaderboardPreview();
-        } else {
+        // Belum ada sesi sama sekali → sign-in anonim biar guest dapet uid stabil
+        // (dipakai CUMA buat simpan FCM token). Ini bakal trigger onAuthStateChanged
+        // lagi dengan user anonim barunya, jadi cukup berhenti di sini dulu.
+        if (!user) {
+            try { await signInAnonymously(auth); } catch (e) { console.error("Anonymous sign-in failed:", e); }
             localStorage.removeItem('cachedProfilePic');
             updateProfileUI(null);
             if (loginBtn) loginBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
             if (shouldLoadLeaderboard) loadLeaderboard();
             loadHomeLeaderboardPreview();
+            return;
         }
+        if (user.isAnonymous) {
+            // Guest dengan uid background — tampilan & perilaku persis kayak
+            // logged-out. Gak pernah sync skor/streak/quiz stats ke Firestore.
+            // Uid ini cuma kepake kalau/pas mereka enable notifikasi.
+            localStorage.removeItem('cachedProfilePic');
+            updateProfileUI(null);
+            if (loginBtn) loginBtn.classList.remove('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (shouldLoadLeaderboard) loadLeaderboard();
+            loadHomeLeaderboardPreview();
+            return;
+        }
+        // Admin-only Eruda dev console
+        const ADMIN_UID = 'wE4eP1X9iefGC6GnKIT101RqZk72';
+        if (user.uid === ADMIN_UID && !window.eruda) {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/eruda';
+            s.onload = () => eruda.init();
+            document.head.appendChild(s);
+        }
+        let nameToDisplay = user.displayName;
+        if (user.photoURL) localStorage.setItem('cachedProfilePic', user.photoURL);
+        
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.username) nameToDisplay = userData.username;
+                const userXP = userData.totalScore || 0;
+                updateLevelUI(userXP); 
+            }
+        } catch (err) { console.error(err); }
+        updateProfileUI(user, nameToDisplay);
+        await syncScoreToCloud(user);
+        await claimLegacyDataIfExists(user);
+        
+        if (loginBtn) loginBtn.classList.add('hidden');
+        if (logoutBtn) logoutBtn.classList.remove('hidden');
+        if (shouldLoadLeaderboard) loadLeaderboard(); 
+        loadHomeLeaderboardPreview();
     });
 }
 // ============================================================================
@@ -1165,9 +1219,25 @@ function renderLeaderboardPodium(topThree, tab) {
     const hiddenCls = 'opacity-0 translate-y-6 scale-90';
     const isStreak = leaderboardSortMode === 'streak';
     let html = '<div class="flex items-end justify-center gap-3 sm:gap-5 px-2">';
-    topThree.forEach((d, i) => {
+    for (let i = 0; i < 3; i++) {
     const rank = i + 1;
     const t = TIER[rank];
+    const d = topThree[i];
+    if (!d) {
+        html += `
+            <div class="lb-podium-col flex flex-col items-center flex-shrink-0 w-20 sm:w-24 ${t.order} ${hiddenCls} transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:scale-100" data-rank="${rank}">
+                <div class="relative mb-2">
+                    <div class="${t.avatar} rounded-full flex items-center justify-center ring-4 ${t.ring} opacity-40" style="background: var(--secondary-color);">
+                        <i class="fa-solid fa-user text-subtle text-lg"></i>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--card-bg-color)] border-2 border-[var(--card-border-color)] flex items-center justify-center text-xs font-black ${t.textColor}">${rank}</div>
+                </div>
+                <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] min-h-[2.3em] px-0.5 text-subtle">—</p>
+                <p class="flex items-center justify-center gap-1 text-[11px] font-semibold mb-2 text-subtle">—</p>
+                <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner opacity-30"></div>
+            </div>`;
+        continue;
+    }
     const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
     const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
         const valDisplay = isStreak
@@ -1190,7 +1260,7 @@ function renderLeaderboardPodium(topThree, tab) {
 </p>
                 <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner"></div>
             </div>`;
-    });
+    }
     html += '</div>';
     if (podiumEl) podiumEl.innerHTML = html;
     return html;
@@ -2606,7 +2676,7 @@ async function endQuiz() {
     localStorage.setItem('flagx-totalquizzes', newTotalQuizzes);
     localStorage.setItem('flagx-lifetimecorrect', newLifetimeCorrect);
     localStorage.setItem('flagx-lifetimeattempted', newLifetimeAttempted);
-    if (auth && auth.currentUser) {
+    if (isRealUser(auth.currentUser)) {
         try {
             const userRef = doc(db, "users", auth.currentUser.uid);
             await setDoc(userRef, {
@@ -2728,7 +2798,7 @@ function updateStreak() {
         localStorage.setItem('flagx-streak', streak);
         const bestStreakSoFar = Math.max(streak, parseInt(localStorage.getItem('flagx-beststreak') || 0));
         localStorage.setItem('flagx-beststreak', bestStreakSoFar);
-        if (auth && auth.currentUser && db) {
+        if (isRealUser(auth.currentUser) && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
             setDoc(userRef, { streak: streak, lastActive: new Date() }, { merge: true }).catch(e => console.error("Streak sync error:", e));
         }
@@ -2774,7 +2844,7 @@ function checkDailyStreakReset() {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays > 1) { 
         localStorage.setItem('flagx-streak', '0');
-        if (auth && auth.currentUser && db) {
+        if (isRealUser(auth.currentUser) && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
             setDoc(userRef, { streak: 0 }, { merge: true }).catch(console.error);
         }
@@ -3805,11 +3875,11 @@ if (profileBtn) profileBtn.addEventListener('click', (e) => {
     if (totalQuizzesStat) totalQuizzesStat.textContent = parseInt(localStorage.getItem('flagx-totalquizzes') || 0).toLocaleString();
     if (accuracyStat) accuracyStat.textContent = lifetimeAttempted > 0 ? accuracyPct + '%' : '–';
     const memberSinceEl = document.getElementById('profile-member-since');
-    if (memberSinceEl) memberSinceEl.textContent = (auth && auth.currentUser && auth.currentUser.metadata) ? formatMemberSince(auth.currentUser.metadata.creationTime, lang) : '';
+    if (memberSinceEl) memberSinceEl.textContent = (isRealUser(auth.currentUser) && auth.currentUser.metadata) ? formatMemberSince(auth.currentUser.metadata.creationTime, lang) : '';
     const rankStat = document.getElementById('profile-rank-stat');
     if (rankStat) {
         rankStat.textContent = '…';
-        if (auth && auth.currentUser) {
+        if (isRealUser(auth.currentUser)) {
             const myToken = ++_rankFetchToken;
             fetchUserRank(xp).then(rank => {
                 if (myToken !== _rankFetchToken) return;
