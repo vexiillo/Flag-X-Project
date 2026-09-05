@@ -233,7 +233,8 @@ const translations = {
         feedbackSuccess: "✅ Thank you! Feedback sent.", feedbackFailed: "Failed to send. Please try again.",
         homeHeroTagline: "Learn flags. Beat quizzes. Climb the leaderboard.", fotdTagline: "A new flag to discover, every single day.",
         streakKeepGoing: "Keep it going!", leaderboardViewAll: "View All",
-        reviewSub: "See wrong answers", shareScoreSub: "Challenge friends", backToQuizModesSub: "Choose a mode", backToBookmarksSub: "Back to your list"
+        reviewSub: "See wrong answers", shareScoreSub: "Challenge friends", backToQuizModesSub: "Choose a mode", backToBookmarksSub: "Back to your list",
+        legacyDataRestored: "🎉 Your old progress has been restored!"
     },
     id: {
         totalScoreLabel: "XP", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
@@ -321,7 +322,8 @@ const translations = {
         feedbackSuccess: "✅ Terima kasih! Masukan terkirim.", feedbackFailed: "Gagal mengirim. Silakan coba lagi.",
         homeHeroTagline: "Pelajari bendera. Taklukkan kuis. Naik ke puncak peringkat.", fotdTagline: "Satu bendera baru untuk dipelajari, setiap hari.",
         streakKeepGoing: "Terus pertahankan!", leaderboardViewAll: "Lihat Semua",
-        reviewSub: "Lihat jawaban salah", shareScoreSub: "Tantang teman", backToQuizModesSub: "Pilih mode lain", backToBookmarksSub: "Kembali ke daftar"
+        reviewSub: "Lihat jawaban salah", shareScoreSub: "Tantang teman", backToQuizModesSub: "Pilih mode lain", backToBookmarksSub: "Kembali ke daftar",
+        legacyDataRestored: "🎉 Data lama kamu berhasil dipulihkan!"
         }
 };
 // Bagian judul hero di-split manual (bukan lewat data-translate-key) karena kata yang di-highlight
@@ -760,6 +762,42 @@ const syncScoreToCloud = async (user) => {
     }, { merge: true });
     return { username };
 };
+async function claimLegacyDataIfExists(user) {
+    if (!user.email) return;
+    try {
+        const q = query(collection(db, "legacy_users"), where("email", "==", user.email), where("claimed", "==", false));
+        const snap = await getDocs(q);
+        if (snap.empty) return;
+
+        const legacyDoc = snap.docs[0];
+        const legacyData = legacyDoc.data();
+
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, {
+            totalScore: legacyData.totalScore || 0,
+            weeklyScore: legacyData.weeklyScore || 0,
+            weekStart: legacyData.weekStart || null,
+            streak: legacyData.streak || 0,
+            totalQuizzes: legacyData.totalQuizzes || 0,
+            lifetimeCorrect: legacyData.lifetimeCorrect || 0,
+            lifetimeAttempted: legacyData.lifetimeAttempted || 0,
+        }, { merge: true });
+
+        localStorage.setItem('flagx-totalscore', legacyData.totalScore || 0);
+        localStorage.setItem('flagx-streak', legacyData.streak || 0);
+        localStorage.setItem('flagx-totalquizzes', legacyData.totalQuizzes || 0);
+        localStorage.setItem('flagx-lifetimecorrect', legacyData.lifetimeCorrect || 0);
+        localStorage.setItem('flagx-lifetimeattempted', legacyData.lifetimeAttempted || 0);
+
+        await setDoc(doc(db, "legacy_users", legacyDoc.id), { claimed: true }, { merge: true });
+
+        showToast(translations[settings.language].legacyDataRestored);
+        loadTotalScore();
+        displayStreak();
+    } catch (e) {
+        console.error("Gagal klaim data lama:", e);
+    }
+}
 function updateProfileUI(user, customName = null) {
     const loggedOutView = document.getElementById('auth-logged-out');
     const loggedInView  = document.getElementById('auth-logged-in');
@@ -850,6 +888,7 @@ if (auth) {
             } catch (err) { console.error(err); }
             updateProfileUI(user, nameToDisplay);
             await syncScoreToCloud(user);
+            await claimLegacyDataIfExists(user);
             
             if (loginBtn) loginBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
@@ -2761,7 +2800,7 @@ async function requestNotificationPermission() {
             const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
             // Ambil FCM token
             const fcmToken = await getToken(messaging, {
-                vapidKey: 'BFyttser0oI2dq7FRsg8q-6d0Pg44_3UcIW1FGaInlqiu4ujubTb9WTVOCgwZ60KJFat6pQ4BMg8NLccqzdHr0M',
+                vapidKey: 'BLSoXuuYw_9rW_93NZYX6V88a370iSwzkDhAJBlgzeluiR640_q2IqxGrE4-CS9Nl4tLUA0jY3iAhPfrb4rrkhU',
                 serviceWorkerRegistration: swReg
             });
             if (fcmToken && auth.currentUser) {
