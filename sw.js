@@ -33,6 +33,16 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Batas waktu tunggu network sebelum nyerah & pakai cache — mencegah fetch()
+// nyangkut tanpa batas kalau koneksi lagi stall (mis. abis app di-background
+// lalu dibuka lagi, radio device butuh waktu nyambung ulang).
+const NETWORK_TIMEOUT_MS = 6000;
+function fetchWithTimeout(request, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(request, { signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 // 3. Fetch: Strategi Campuran (Network-First untuk Kode, Cache-First untuk Gambar)
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
@@ -53,7 +63,7 @@ self.addEventListener('fetch', (event) => {
   // B. STRATEGI FILE UTAMA (Network-First: Cek Internet dulu baru Cache)
   else {
     event.respondWith(
-      fetch(event.request)
+      fetchWithTimeout(event.request, NETWORK_TIMEOUT_MS)
         .then((networkResponse) => {
           // Jika internet ok, simpan hasil terbaru ke cache
           return caches.open(CACHE_NAME).then((cache) => {
