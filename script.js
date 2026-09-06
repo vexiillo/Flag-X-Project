@@ -800,42 +800,7 @@ const syncScoreToCloud = async (user) => {
     }, { merge: true });
     return { username };
 };
-async function claimLegacyDataIfExists(user) {
-    if (!user.email) return;
-    try {
-        const q = query(collection(db, "legacy_users"), where("email", "==", user.email), where("claimed", "==", false));
-        const snap = await getDocs(q);
-        if (snap.empty) return;
 
-        const legacyDoc = snap.docs[0];
-        const legacyData = legacyDoc.data();
-
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, {
-            totalScore: legacyData.totalScore || 0,
-            weeklyScore: legacyData.weeklyScore || 0,
-            weekStart: legacyData.weekStart || null,
-            streak: legacyData.streak || 0,
-            totalQuizzes: legacyData.totalQuizzes || 0,
-            lifetimeCorrect: legacyData.lifetimeCorrect || 0,
-            lifetimeAttempted: legacyData.lifetimeAttempted || 0,
-        }, { merge: true });
-
-        localStorage.setItem('flagx-totalscore', legacyData.totalScore || 0);
-        localStorage.setItem('flagx-streak', legacyData.streak || 0);
-        localStorage.setItem('flagx-totalquizzes', legacyData.totalQuizzes || 0);
-        localStorage.setItem('flagx-lifetimecorrect', legacyData.lifetimeCorrect || 0);
-        localStorage.setItem('flagx-lifetimeattempted', legacyData.lifetimeAttempted || 0);
-
-        await setDoc(doc(db, "legacy_users", legacyDoc.id), { claimed: true }, { merge: true });
-
-        showToast(translations[settings.language].legacyDataRestored);
-        loadTotalScore();
-        displayStreak();
-    } catch (e) {
-        console.error("Gagal klaim data lama:", e);
-    }
-}
 function updateProfileUI(user, customName = null) {
     const loggedOutView = document.getElementById('auth-logged-out');
     const loggedInView  = document.getElementById('auth-logged-in');
@@ -949,8 +914,7 @@ if (auth) {
             }
         } catch (err) { console.error(err); }
         updateProfileUI(user, nameToDisplay);
-        await syncScoreToCloud(user);
-        await claimLegacyDataIfExists(user);
+        await syncScoreToCloud(user);      
         
         if (loginBtn) loginBtn.classList.add('hidden');
         if (logoutBtn) logoutBtn.classList.remove('hidden');
