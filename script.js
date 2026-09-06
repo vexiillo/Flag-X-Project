@@ -10,95 +10,53 @@ import {
     worldOrganizations,
     continentFlags
 } from './flagsData.js';
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, limit, getDocs, writeBatch, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 // ============================================================================
 // 2. FIREBASE CONFIGURATION & INITIALIZATION
 // ============================================================================
 const firebaseConfig = {
-    apiKey: "AIzaSyA-f-B0RH9CJDsfxytIIdyBWwAxNJ4vDik",
-    authDomain: "flag-x-3439d.firebaseapp.com",
-    projectId: "flag-x-3439d",
-    storageBucket: "flag-x-3439d.firebasestorage.app",
-    messagingSenderId: "576734845240",
-    appId: "1:576734845240:web:620dfc7ee7f9e7ad0149cd",
-    measurementId: "G-1VKSLQQCPN"
+  apiKey: "AIzaSyAlBxWNXoeMgAv4v_B6PP5Xu3KhBm5cWlg",
+  authDomain: "flag-x-project.firebaseapp.com",
+  projectId: "flag-x-project",
+  storageBucket: "flag-x-project.firebasestorage.app",
+  messagingSenderId: "757798247535",
+  appId: "1:757798247535:web:0462758fe10800f88d419a",
+  measurementId: "G-R63CHPZPNE"
 };
-
-let app, auth, db, googleProvider;
+let app, auth, db, googleProvider, messaging;
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
     googleProvider = new GoogleAuthProvider();
+    messaging = getMessaging(app);
 } catch (e) {
     console.error("Firebase Init Error:", e);
 }
-
-// ============================================================================
-// SISTEM LOCK MAINTENANCE (KODE 2 MODULAR)
-// ============================================================================
-const VEXIILLO_UID = "wE4eP1X9iefGC6GnKIT101RqZk72";
-
-// Secret tap counter pada kata "X"
-let secretTapCount = 0;
-document.getElementById('secret-trigger').addEventListener('click', () => {
-    secretTapCount++;
-    if (secretTapCount >= 5) {
-        secretTapCount = 0;
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider);
-    }
-});
-
-// Firebase Auth Listener
-onAuthStateChanged(auth, (user) => {
-    if (user && user.uid === VEXIILLO_UID) {
-        // --- JIKA YANG LOGIN ADALAH KAMU ---
-        console.log("Admin terdeteksi. Membuka kunci web...");
-
-        // 1. Singkirkan layar maintenance
-        document.getElementById('maintenance-screen').style.display = 'none';
-        
-        // 2. Munculkan UI web aslinya
-        document.getElementById('app-container').style.display = 'flex';
-
-        // 3. Munculkan navbar
-        document.getElementById('bottom-nav').classList.remove('hidden-nav');
-        
-        // 4. Panggil Eruda Console khusus untukmu
-        var script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/eruda";
-        document.body.appendChild(script);
-        script.onload = function () { eruda.init(); };
-
-        // 5. Jalankan app
-        initApp();
-        
-    } else {
-        // --- JIKA PENGUNJUNG BIASA ATAU ORANG LAIN ---
-        console.log("Akses ditolak. Menampilkan mode maintenance.");
-
-        // Sembunyikan navbar dari pengunjung
-        document.getElementById('bottom-nav').classList.add('hidden-nav');
-    }
-});
-
 // ============================================================================
 // 3. GLOBAL STATE & VARIABLES
 // ============================================================================
 // Audio
 const sfxCorrect = new Audio('./correct.mp3');
 sfxCorrect.volume = 1.0;
-
 // Flag Pools
-const beginnerFlagPool = [...officialCountries, ...subdivisions, ...territories, ...unofficial];
-const masterFlagPool = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
-const capitalGuessData = officialCountries.filter(f => f.capital);
-
+// Item hanya boleh dijadikan SOAL (gambar ditampilkan) kalau field flag terisi.
+const hasFlagImage = (item) => !!(item && item.flag && item.flag.trim() !== '');
+const beginnerFlagPool = [...officialCountries, ...subdivisions, ...territories, ...unofficial].filter(hasFlagImage);
+const masterFlagPool = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations].filter(hasFlagImage);
+// Capital Guess: official countries + subdivisions (yang punya capital sendiri)
+// Sengaja TIDAK difilter hasFlagImage di sini — pool ini juga sumber distractor teks ibu
+// kota di generateCapitalQuestion(). Filter gambar diterapkan saat pemilihan soal saja.
+const capitalGuessData = [...officialCountries, ...subdivisions].filter(f => f.capital);
+// Sub-tipe "capital" di Combo: pool lebih luas. historicalFlags disiapkan untuk masa depan —
+// otomatis aktif begitu field capital ditambahkan di historical.js nanti.
+// (Sama seperti capitalGuessData: tidak difilter agar tetap kaya sebagai distractor.)
+const comboCapitalPool = [...officialCountries, ...subdivisions, ...territories, ...historicalFlags, ...worldOrganizations, ...unofficial].filter(f => f.capital);
+// Pool khusus Time Attack & Survival — wajib punya gambar karena langsung jadi soal
+const generalFlagPool = [...officialCountries, ...subdivisions, ...territories, ...worldOrganizations, ...unofficial].filter(hasFlagImage);
 // Game State
 let currentQuiz = {
     mode: null, dataset: [], score: 0, questionNumber: 0, totalQuestions: 0, 
@@ -106,16 +64,52 @@ let currentQuiz = {
     lastSubMode: null, correctCount: 0, wrongCount: 0, timeoutCount: 0, 
     responseTimes: [], questionStartTime: null, missedFlags: []
 };
-
 let leaderboardCurrentTab = 'alltime';
+let powerUp5050Used = false;
+const POWERUP_5050_MAX_USES = 2;
+let powerUp5050Remaining = POWERUP_5050_MAX_USES;
+let leaderboardSortMode = 'xp';
 let leaderboardAllData = [];
 let pendingDifficulty = null;
 let isLeaderboardLoading = false;
+let leaderboardBootHandled = false;
+let lbCountdownInterval = null;
+let activeLibCard = null;
+let _rankFetchToken = 0;
+const APP_LOADING_STEPS = ['fonts', 'auth', 'appInit'];
+const appLoadingState = {};
+function markAppLoadingStep(step) {
+    if (appLoadingState[step]) return;
+    appLoadingState[step] = true;
+    const doneCount = Object.keys(appLoadingState).length;
+    const pct = Math.min(100, Math.round((doneCount / APP_LOADING_STEPS.length) * 100));
+    const ring = document.getElementById('app-loading-ring');
+    const percentText = document.getElementById('app-loading-percent');
+    const circumference = 301.6;
+    if (ring) ring.style.strokeDashoffset = circumference - (circumference * pct / 100);
+    if (percentText) percentText.textContent = pct + '%';
+    if (doneCount >= APP_LOADING_STEPS.length) {
+        const screen = document.getElementById('app-loading-screen');
+        if (screen) {
+            setTimeout(() => {
+                screen.style.opacity = '0';
+                setTimeout(() => screen.remove(), 400);
+            }, 250);
+        }
+    }
+}
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => markAppLoadingStep('fonts')).catch(() => markAppLoadingStep('fonts'));
+} else {
+    markAppLoadingStep('fonts');
+}
+setTimeout(() => APP_LOADING_STEPS.forEach(markAppLoadingStep), 6000);
 let historyActiveFilter = 'all';
 let historyActiveSort = 'newest';
 const historyFilterOptions = [
     { value: 'all', labelKey: 'filterAll', icon: 'fa-border-all' },
     { value: 'bookmarks', label: 'Bookmarks', icon: 'fa-bookmark' },
+    { value: 'daily', labelKey: 'mode_daily_title', icon: 'fa-calendar-check' },    
     { value: 'classic', label: 'Classic', icon: 'fa-globe' },
     { value: 'continent', label: 'Continent', icon: 'fa-map' },
     { value: 'capitalGuess', label: 'Capital Guess', icon: 'fa-building-columns' },
@@ -129,9 +123,7 @@ const historySortOptions = [
     { value: 'highest', labelKey: 'sortHighest', icon: 'fa-arrow-up-wide-short' }
 ];
 let originalUsername = '';
-
 let settings = { language: 'en', difficulty: 4, typeNameMode: false, soundEnabled: true };
-
 // DOM Elements
 const totalscoreValueEl = document.getElementById('totalscore-value');
 const settingsPanel = document.getElementById('settings-panel');
@@ -146,7 +138,6 @@ const usernameInput = document.getElementById('username-input');
 const usernameActions = document.getElementById('username-actions');
 const saveUsernameBtn = document.getElementById('save-username-btn');
 const cancelUsernameBtn = document.getElementById('cancel-username-btn');
-
 // ============================================================================
 // 4. TRANSLATIONS DICTIONARY
 // ============================================================================
@@ -154,26 +145,35 @@ const translations = {
     en: {
         totalScoreLabel: "XP", homeSubtitle: "Test Your Global Knowledge", homePlayQuiz: "Play Quiz", homeFlagLibrary: "Flag Library",
         quizModesTitle: "Quiz Modes", backToMenu: "Back to Menu", continentClashTitle: "Choose a Continent", backToQuizModes: "Back to Quiz Modes", backToBookmarks: "Back to Bookmark",
-        quizScore: "XP", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Results:", resultsPlayAgain: "Play Again",
+        quizScore: "XP", quizStreakLabel: "Streak", quizLivesLabel: "Lives", timerSecLabel: "sec left", quizEnd: "End Quiz", resultsTitle: "Quiz Over!", resultsFinalScore: "XP Earned", resultsPlayAgain: "Play Again",
         libraryTitle: "Flag Library", continentLibraryTitle: "Choose a Continent", backToLibrary: "Back to Library", backButton: "Back",
         endQuizModalTitle: "End Quiz?", endQuizModalText: "Are you sure you want to end the current quiz? Your XP will be finalized.",
         endQuizModalYes: "Yes, End", endQuizModalCancel: "Cancel", footer: "Flag-X © 2025. All Rights Reserved.",
-        settingsLanguage: "Language", settingsDifficulty: "Difficulty (Options)", difficultyEasy: "Easy", difficultyNormal: "Normal", difficultyHard: "Hard", settingsContact: "Contact",
+        settingsSectionLabel: "Settings", settingsLanguage: "Language", settingsDifficulty: "Difficulty (Options)", difficultyEasy: "Easy", difficultyNormal: "Normal", difficultyHard: "Hard", settingsContact: "Contact",
         quizPromptFlag: "Which flag is this?", quizPromptGuessCapital: "What is the capital of {countryName}?", quizPromptYear: "Which year is this flag from?",
         resultsMessage: "You gained {score} XP!",
         timeAttackResultMessage: "You answered {questions} questions and gained {score} XP!",
         survivalResultMessage: "You survived {questions} questions and gained {score} XP!", 
         comboResultMessage: "You survived the Combo Challenge for {questions} questions and gained {score} XP!",
-        viewDetailBtn: "View Detail", funFact: "Fun Fact", closeBtn: "Close", geminiError: "Sorry, our daily limit has been reached. Please try again tomorrow!", searchPlaceholder: "Search for a flag...",
+        viewDetailBtn: "View Detail", funFact: "Fun Fact", closeBtn: "Close", geminiError: "Sorry, our daily limit has been reached. Please try again tomorrow!",
+        searchPlaceholder: "Search for a flag...", searchCountryPlaceholder: "Search for a country...",
         mode_classic_title: "Classic Mode", mode_classic_desc: "Guess 20 official country flags. No time limit.",
         mode_continent_title: "Continent Clash", mode_continent_desc: "Focus on flags from a single continent. 20 questions.",
-        mode_capital_title: "Capital Guess", mode_capital_desc: "Guess the capital city from the country's flag. 20 questions.",
-        mode_year_title: "Year Guess", mode_year_desc: "Guess the year of historical flags. 20 questions.",
-        mode_time_title: "Time Attack", mode_time_desc: "Infinite questions in 60 seconds. How many can you get?",
-        mode_survival_title: "Survival Mode", mode_survival_desc: "30 questions, one life. Make one mistake and it's over.",
-        mode_combo_title: "Combo Challenge", mode_combo_desc: "Mixed questions, 90 seconds, one life. The ultimate test!",
-        lib_official_title: "Official Countries", lib_subdivisions_title: "Subdivisions", lib_territories_title: "Territories", 
-        lib_unofficial_title: "Unofficial", lib_historical_title: "Historical", lib_organizations_title: "World Organizations", lib_continent_title: "Continent Flags",
+        mode_capital_title: "Capital Guess", mode_capital_desc: "Guess the capital city based on the flag. 20 questions.",
+        mode_year_title: "Year Guess", mode_year_desc: "Guess the year associated with historical flags. 20 questions.",
+        mode_time_title: "Time Attack", mode_time_desc: "Answer as many questions as possible in 60 seconds.",
+        mode_survival_title: "Survival Mode", mode_survival_desc: "30 questions, 3 lives. Three mistakes and the game is over.",
+        mode_combo_title: "Combo Challenge", mode_combo_desc: "Infinite mixed questions, 90 seconds, one life. The ultimate Flag-X challenge!",
+        lib_official_title: "Official Countries", lib_subdivisions_title: "Subdivisions", lib_territories_title: "Territories",
+        lib_unofficial_title: "Unofficial", lib_historical_title: "Historical",
+        lib_organizations_title: "World Organizations", lib_continent_title: "Continent Flags",
+        lib_official_desc: "All internationally recognized sovereign states.",
+        lib_subdivisions_desc: "First-level administrative divisions only. Second-level divisions and below are not included.",
+        lib_territories_desc: "Dependent territories and overseas possessions.",
+        lib_unofficial_desc: "Disputed territories and regions with contested sovereignty.",
+        lib_historical_desc: "Flags formerly used by countries or regions that are no longer in official use.",
+        lib_organizations_desc: "Flags of international organizations such as the UN, NATO, and the EU.",
+        lib_continent_desc: "Official country flags organized by continent and geographic region.",
         subdivisionSelectionTitle: "Choose a Country", territorySelectionTitle: "Choose a Country", historicalSelectionTitle: "Choose a Country",
         playQuizBtn: "Play Quiz", viewBtn: "View", awesomeBtn: "AWESOME!", reachedInfo: "You've reached", levelUpInfo: "LEVEL UP!",
         vexillologyInfo: "Vexillology Corner", languageInfo: "Primary Language", regionInfo: "Region", populationInfo: "Population", establishedInfo: "Established",
@@ -181,89 +181,157 @@ const translations = {
         levelingSystem: "Leveling System", loginPrompt: "Login to save your XP to the global leaderboard!", loginBtn: "Login with Google", logoutBtn: "Logout",
         usernameLabel: "Display Name (Rank)", homeLeaderboard: "Leaderboard", leaderboardTitle: "Top Players", leaderboardUser: "Player", leaderboardScore: "XP",
         disclaimerTitle: "Flag Accuracy Note",
-        disclaimerText: "At Flag-X, we want to provide the maximum global challenge! Please note that some flag images in the Subdivisions, Territories, and Historical Flags categories may not be current official designs or are reconstructions/fan-made. This is because not all regions or historical periods have standardized official flags.\n\nWhy do we still include them? > Because the more flag variations you encounter–even the most unrecognizable ones–the broader your knowledge becomes! Consider this as eye and brain training to recognize unique symbols from all corners of the world and history. Happy learning and playing!",
+        disclaimerText: "At Flag-X, our goal is to provide the ultimate global flag challenge! Please note that some flags in the Subdivisions, Territories, and Historical Flags categories are labeled as Unofficial. These flags are not necessarily current official designs, as not every region, territory, or historical period has an officially recognized or well-documented flag.\n\nWhy do we still include them? Because discovering a wider variety of flags—even the rarest or most unfamiliar ones—helps expand your knowledge of world geography, history, and vexillology. Think of it as training your eyes and brain to recognize unique symbols from around the world. Happy learning and have fun!",
         toastNameBlank: "Name cannot be blank! ⚠️", toastNameSaved: "Name saved!", toastSaveFailed: "Failed to save. Try again.", btnSaving: "Saving...",
         maxLevelReached: "MAX LEVEL reached!", leaderboardError: "Error loading leaderboard.", leaderboardErrorSub: "Check your internet connection and try again in a moment.",
-        libNoFlags: "No flags available.", searchNoFlags: "No flags found.", searchTryDifferent: "Try a different keyword.", detailNoInfo: "No specific vexillology info provided.",
+        libNoFlags: "No flags available.", searchNoFlags: "No flags found.", searchTryDifferent: "Try a different keyword.", detailNoInfo: "No specific vexillology info provided.", noDesignAvailable: "No design available.",
+        unofficialModalTitle: "Unofficial", unofficialModalText: "This flag has no officially recognized legal status. It may be an unofficial flag in real-world use, a proposed design, a hypothetical reconstruction, or a fan-made creation. It is displayed for educational and vexillological purposes only.",
         toastLoginSuccess: "Login successful!", toastLoginFailed: "Login failed: ", switchAccount: "Switch Account", toastSwitchSuccess: "Successfully switched account!",
         toastSwitchFailed: "Failed to switch account: ", leaderboardGuestCTA: "Login to enter global rankings and compete with others!", retryBtn: "Try Again",
         navHome: "Home", navPlay: "Play", navLibrary: "Library", navLeaderboard: "Rank", dayStreak: "day streak", shareScore: "Share Score", scoredCopied: "Score copied to clipboard!",
-        missedFlagsTitle: "Flags to Review", correctAnswer: "Correct:", wrongAnswer: "Answer:", correctCapital: "Capital:", wrongCapital: "Capital:",
+        missedFlagsTitle: "Flags to Review", missedFlagsShort: "Review", missedFlagsNone: "Perfect run — no mistakes!", correctAnswer: "Correct:", wrongAnswer: "Answer:", correctCapital: "Capital:", wrongCapital: "Capital:",
         bookmarkAdded: "Bookmarked! ⭐", bookmarkRemoved: "Bookmark removed", noBookmarksMsg: "No bookmarks yet! Star flags in the library.",
         noBookmarksSub: "Explore the library and click the star icon on any flag to save it here for a quick study session!", notEnoughBookmarks: "Add at least 4 bookmarked flags to start a quiz.",
-        lib_bookmarks_title: "My Bookmarks", startBookmarkQuiz: "Study Quiz", onboardingWelcomeTitle: "Welcome to Flag-X!",
+        notEnoughBookmarksCapital: "Add at least 4 bookmarked flags that have a capital to start this quiz.",
+        bookmarkQuizTypeModalTitle: "Choose Quiz Type", bookmarkQuizFlagDesc: "Guess the name from the flag", bookmarkQuizCapitalDesc: "Guess the capital city",
+        lib_bookmarks_title: "My Bookmarks", lib_bookmarks_desc: "Save your favorite flags for quick access and focused study.", startBookmarkQuiz: "Study Quiz",
+        startBookmarkQuizCapital: "Capital Quiz", onboardingWelcomeTitle: "Welcome to Flag-X!",
         onboardingWelcomeText: "Test your knowledge of world flags from official countries, subdivisions, historical flags, and more.", onboardingXpTitle: "Earn XP & Level Up",
         onboardingXpText: "Answer correctly to earn XP. Progress through 50 levels and compete on the global leaderboard!", onboardingStreakTitle: "Build Your Streak",
         onboardingStreakText: "Play every day to keep your streak alive, bookmark flags to study, and share your best scores!", skipBtn: "Skip", nextBtn: "Next", letsGoBtn: "LET'S GO!",
         settingsTypeName: "Input Mode", typeNameLabel: "Type the Answer", typeNamePlaceholder: "Type country name...", settingsSound: "Sound", soundLabel: "Sound Effects",
         submitBtn: "Submit", resCorrect: "Correct", resWrong: "Wrong", resAccuracy: "Accuracy", resTimeout: "Timeout", resAvgTime: "Avg. Time", historyTitle: "Quiz History",
-        homeHistory: "Quiz History", shareCardTitle: "Share Your Score", downloadBtn: "Save", shareBtn: "Share", tabAllTime: "All Time", tabThisWeek: "This Week",
+        homeHistory: "Quiz History", shareCardTitle: "Share Your Score", downloadBtn: "Save", shareBtn: "Share", tabAllTime: "All Time", tabThisWeek: "This Week", leaderboardWeeklyReset: "WEEKLY RESET", leaderboardResetsIn: "Resets in", leaderboardYou: "You", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
+        profileTotalQuizzes: "Total Quizzes", profileAccuracy: "Accuracy", profileRank: "Rank", profileGlobalRank: "Global Rank", profileLevelLabel: "Level", profileMemberSince: "Member since {date}",
+        profileBestStreak: "Best Streak", profileTotalQuizzesDesc: "Quizzes taken",
+        profileMotivationNew: "Keep learning!", profileMotivationExcellent: "Excellent! You're a flag master!", profileMotivationGreat: "Great work! Keep it up!", profileMotivationGood: "Good effort! Practice more!", profileMotivationPractice: "Keep practicing!",
+        achievementSheetTitle: "Achievements", homeQuickExplore: "Quick Explore",
         leaderboardStreak: "Streak", navHistory: "History", switchModalTitle: "Switch Quiz Mode?", switchModalDesc: "Changing the input type mid-game will reset all of your current quiz progress.",
         confirmSwitchBtn: "Yes, Reset", cancelSwitchBtn: "Cancel", notifModalTitle: "Enable Reminders?", notifModalDesc: "We'll send you a daily notification so your Streak doesn't break!",
         notifLaterBtn: "Maybe Later", notifAllowBtn: "Allow", historyEmptyTitle: "No History Yet", historyEmptyDesc: "Play your first quiz and become a flag master!",
         streakLegendary: "Legendary dedication! 🏆", streakOnFire: "You're on fire! Keep it going!", streakWeekly: "One week streak! Amazing consistency!", streakBonusSub: "Applied to all quiz XP while streak lasts",
         leaderboardNoData: "No data for this period.", leaderboardNoDataSub: "Be the first to claim the top spot on the leaderboard!", notifGrantedTitle: "Flag-X Reminder Active!",
-        notifGrantedBody: "Great! We'll remind you to keep your Streak alive.", switchDiffModalTitle: "Change Difficulty?", switchDiffModalDesc: "Changing difficulty mid-quiz will reset all current quiz progress.",
+        notifGrantedBody: "Great! We'll remind you to keep your Streak alive.", notifNotSupported: "Notifications are not supported on this browser.",
+        notifAlreadyActive: "🔔 Streak reminders are already active!", notifBlocked: "Notifications are blocked. Enable them in your browser settings.",
+        switchDiffModalTitle: "Change Difficulty?", switchDiffModalDesc: "Changing difficulty mid-quiz will reset all current quiz progress.",
         filterModalTitle: "Filter by Mode", sortModalTitle: "Sort By", filterAll: "All Modes", sortNewest: "Newest First", sortHighest: "Highest XP",
-        diffDisabledHint: "Difficulty locked while Input Mode is active", typeCapitalPlaceholder: "Type the capital city...", typeSubdivisionPlaceholder: "Type the region/state name...",
+        deleteModalTitle: "Delete History", delete24h: "Last 24 Hours", delete7d: "Last 7 Days", delete30d: "Last 30 Days", deleteAll: "All History",
+        deleteConfirmTitle: "Delete History?", confirmDeleteBtn: "Yes, Delete", historyDeleted: "History deleted!",
+        deleteConfirm24h: "This will permanently delete all quiz history from the last 24 hours. This cannot be undone.",
+        deleteConfirm7d: "This will permanently delete all quiz history from the last 7 days. This cannot be undone.",
+        deleteConfirm30d: "This will permanently delete all quiz history from the last 30 days. This cannot be undone.",
+        deleteConfirmAll: "This will permanently delete ALL of your quiz history. This cannot be undone.",
+        diffDisabledHint: "Difficulty locked while Input Mode is active", typeCapitalPlaceholder: "Type the capital city...", typeSubdivisionPlaceholder: "Type the region name...",
         typeOrgPlaceholder: "Type the organization name...", yearInputDisabledHint: "Input Mode unavailable for Year Guess", inputModeLocked: "Reach Level 10 to unlock Input Mode",
-        usernamePlaceholder: "Your name...", guestName: "Guest Explorer", flagOfTheDay: "Flag of the Day", loadingLeaderboard: "Loading Leaderboard...", generatingFunFact: "Generating Fun Facts..."
+        usernamePlaceholder: "Your name...", guestName: "Guest Explorer", flagOfTheDay: "Flag of the Day", loadingLeaderboard: "Loading Leaderboard...", generatingFunFact: "Generating Fun Facts...",
+        mode_daily_title: "Daily Challenge", mode_daily_desc: "10 same questions for everyone today. Can you beat your friends?",
+        dailyCompleted: "✅ Already completed today! Come back tomorrow.", dailyCompletedTitle: "See You Tomorrow!",
+        feedbackModalTitle: "Send Feedback", feedbackTypeLabel: "What's this about?", feedbackTypeFlag: "Suggest a Flag", feedbackTypeCorrection: "Report Wrong Info",
+        feedbackTypeFeature: "Suggest a Feature", feedbackTypeBug: "Report a Bug", feedbackEntityLabel: "Related Country/Region (Optional)", feedbackEntityPlaceholder: "e.g. Kazakhstan, Tibet...",
+        feedbackMessageLabel: "Your Message", feedbackMessagePlaceholder: "Tell us more...", feedbackSubmitBtn: "Send Feedback", feedbackErrorEmpty: "Please write your message first.",
+        feedbackErrorType: "Please choose a category first.", feedbackCooldown: "Please wait a moment before sending again.", feedbackSending: "Sending...",
+        feedbackSuccess: "✅ Thank you! Feedback sent.", feedbackFailed: "Failed to send. Please try again.",
+        homeHeroTagline: "Learn flags. Beat quizzes. Climb the leaderboard.", fotdTagline: "A new flag to discover, every single day.",
+        streakKeepGoing: "Keep it going!", leaderboardViewAll: "View All",
+        reviewSub: "See wrong answers", shareScoreSub: "Challenge friends", backToQuizModesSub: "Choose a mode", backToBookmarksSub: "Back to your list",
+        legacyDataRestored: "🎉 Your old progress has been restored!"
     },
     id: {
         totalScoreLabel: "XP", homeSubtitle: "Uji Pengetahuan Global Anda", homePlayQuiz: "Main Kuis", homeFlagLibrary: "Pustaka Bendera",
         quizModesTitle: "Mode Kuis", backToMenu: "Kembali ke Menu", continentClashTitle: "Pilih Benua", backToQuizModes: "Kembali ke Mode Kuis", backToBookmarks: "Kembali ke Bookmark",
-        quizScore: "XP", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "Hasil XP:", resultsPlayAgain: "Main Lagi",
+        quizScore: "XP", quizStreakLabel: "Streak", quizLivesLabel: "Nyawa", timerSecLabel: "detik lagi", quizEnd: "Akhiri Kuis", resultsTitle: "Kuis Selesai!", resultsFinalScore: "XP Diperoleh", resultsPlayAgain: "Main Lagi",
         libraryTitle: "Pustaka Bendera", continentLibraryTitle: "Pilih Benua", backToLibrary: "Kembali ke Pustaka", backButton: "Kembali",
         endQuizModalTitle: "Akhiri Kuis?", endQuizModalText: "Apakah Anda yakin ingin mengakhiri kuis saat ini? XP Anda akan difinalisasi.",
         endQuizModalYes: "Ya, Akhiri", endQuizModalCancel: "Batal", footer: "Flag-X © 2025. Hak Cipta Dilindungi.",
-        settingsLanguage: "Bahasa", settingsDifficulty: "Tingkat Kesulitan (Opsi)", difficultyEasy: "Mudah", difficultyNormal: "Normal", difficultyHard: "Sulit", settingsContact: "Kontak",
+        settingsSectionLabel: "Pengaturan", settingsLanguage: "Bahasa", settingsDifficulty: "Tingkat Kesulitan (Opsi)", difficultyEasy: "Mudah", difficultyNormal: "Normal", difficultyHard: "Sulit", settingsContact: "Kontak",
         quizPromptFlag: "Bendera apakah ini?", quizPromptGuessCapital: "Apakah ibu kota dari {countryName}?", quizPromptYear: "Bendera ini dari tahun berapa?",
         resultsMessage: "Anda mendapatkan {score} XP!", timeAttackResultMessage: "Anda menjawab {questions} pertanyaan dan mendapat {score} XP!",
         survivalResultMessage: "Anda bertahan {questions} pertanyaan dan mendapat {score} XP!", comboResultMessage: "Anda bertahan di Tantangan Kombo selama {questions} pertanyaan dan mendapat {score} XP!",
-        viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeBtn: "Tutup", geminiError: "Maaf, batas harian kami sudah habis. Silakan coba lagi besok!", searchPlaceholder: "Cari bendera...",
-        mode_classic_title: "Mode Klasik", mode_classic_desc: "Tebak 20 bendera negara resmi. Tanpa batas waktu.", mode_continent_title: "Bentrok Benua", mode_continent_desc: "Fokus pada bendera dari satu benua. 20 pertanyaan.",
-        mode_capital_title: "Tebak Ibu Kota", mode_capital_desc: "Tebak ibu kota dari bendera negaranya. 20 pertanyaan.", mode_year_title: "Tebak Tahun", mode_year_desc: "Tebak tahun bendera bersejarah. 20 pertanyaan.",
-        mode_time_title: "Serangan Waktu", mode_time_desc: "Pertanyaan tak terbatas dalam 60 detik. Berapa banyak yang bisa Anda jawab?",
-        mode_survival_title: "Mode Bertahan", mode_survival_desc: "30 pertanyaan, satu nyawa. Satu kesalahan dan permainan berakhir.",
-        mode_combo_title: "Tantangan Kombo", mode_combo_desc: "Soal campuran, 90 detik, satu nyawa. Ujian pamungkas!",
-        lib_official_title: "Negara Resmi", lib_subdivisions_title: "Subdivisi", lib_territories_title: "Wilayah", lib_unofficial_title: "Tidak Resmi", lib_historical_title: "Bersejarah", 
+        viewDetailBtn: "Lihat Detail", funFact: "Fakta Menarik", closeBtn: "Tutup", geminiError: "Maaf, batas harian kami sudah habis. Silakan coba lagi besok!",
+        searchPlaceholder: "Cari bendera...", searchCountryPlaceholder: "Cari negara...",
+        mode_classic_title: "Mode Klasik", mode_classic_desc: "Tebak 20 bendera negara resmi. Tanpa batas waktu.",
+        mode_continent_title: "Bentrok Benua", mode_continent_desc: "Fokus pada bendera dari satu benua. 20 pertanyaan.",
+        mode_capital_title: "Tebak Ibu Kota", mode_capital_desc: "Tebak ibu kota berdasarkan benderanya. 20 pertanyaan.",
+        mode_year_title: "Tebak Tahun", mode_year_desc: "Tebak tahun yang terkait dengan bendera bersejarah. 20 pertanyaan.",
+        mode_time_title: "Serangan Waktu", mode_time_desc: "Jawab sebanyak mungkin pertanyaan dalam 60 detik.",
+        mode_survival_title: "Mode Bertahan", mode_survival_desc: "30 pertanyaan, 3 nyawa. Tiga kesalahan dan permainan berakhir.",
+        mode_combo_title: "Tantangan Kombo", mode_combo_desc: "Pertanyaan campuran tanpa batas, 90 detik, satu nyawa. Tantangan Flag-X yang sesungguhnya!",
+        lib_official_title: "Negara Resmi", lib_subdivisions_title: "Subdivisi", lib_territories_title: "Wilayah", lib_unofficial_title: "Tidak Resmi", lib_historical_title: "Bersejarah",
         lib_organizations_title: "Organisasi Dunia", lib_continent_title: "Bendera Benua",
+        lib_official_desc: "Semua negara berdaulat yang diakui secara internasional.",
+        lib_subdivisions_desc: "Hanya mencakup divisi administratif tingkat pertama. Divisi tingkat kedua dan seterusnya tidak disertakan.",
+        lib_territories_desc: "Wilayah dependensi dan wilayah seberang laut.",
+        lib_unofficial_desc: "Wilayah sengketa dengan status kedaulatan yang masih diperdebatkan.",
+        lib_historical_desc: "Bendera yang pernah digunakan oleh suatu negara atau wilayah, tetapi kini sudah tidak berlaku.",
+        lib_organizations_desc: "Bendera organisasi internasional seperti PBB, NATO, dan UE.",
+        lib_continent_desc: "Bendera negara resmi yang dikelompokkan berdasarkan benua dan kawasan geografis.",
         subdivisionSelectionTitle: "Pilih Negara", territorySelectionTitle: "Pilih Negara", historicalSelectionTitle: "Pilih Negara", playQuizBtn: "Main Kuis", viewBtn: "Lihat",
         awesomeBtn: "LUAR BIASA!", reachedInfo: "Anda telah mencapai", levelUpInfo: "NAIK LEVEL!", vexillologyInfo: "Sudut Vexillologi", languageInfo: "Bahasa Utama", regionInfo: "Wilayah", 
         populationInfo: "Populasi", establishedInfo: "Didirikan", capitalInfo: "Ibukota", versionInfo: "v.2.5 (Versi Beta)", saveBtn: "Simpan", cancelBtn: "Batal", yourName: "Nama Tampilan", 
         maxLevelInfo: "Level Maks: 50", levelingSystem: "Sistem Level", loginPrompt: "Masuk untuk simpan XP ke papan peringkat global!", loginBtn: "Masuk dengan Google", logoutBtn: "Keluar",
         usernameLabel: "Nama Tampilan (Peringkat)", homeLeaderboard: "Papan Peringkat", leaderboardTitle: "Pemain Terbaik", leaderboardUser: "Pemain", leaderboardScore: "XP",
         disclaimerTitle: "Catatan Akurasi Bendera",
-        disclaimerText: "Di Flag-X, kami ingin memberikan tantangan global yang maksimal! Perlu diketahui bahwa beberapa gambar bendera dalam kategori Subdivisions, Territories, dan Historical Flags mungkin bukan merupakan desain resmi saat ini atau bersifat rekonstruksi/fan-made. Hal ini dikarenakan tidak semua wilayah atau periode sejarah memiliki standarisasi bendera resmi.\n\nKenapa tetap kami masukkan? > Karena semakin banyak variasi bendera yang Anda temui–bahkan yang paling sulit dikenali sekalipun–semakin luas pengetahuan yang Anda dapatkan! Anggap ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari seluruh penjuru dunia dan sejarah. Selamat belajar dan bermain!",
+        disclaimerText: "Di Flag-X, tujuan kami adalah memberikan tantangan mengenal bendera dari seluruh dunia semaksimal mungkin! Perlu diketahui bahwa beberapa bendera dalam kategori Subdivisions, Territories, dan Historical Flags diberi status Unofficial (Tidak Resmi). Artinya, bendera tersebut belum tentu merupakan desain resmi yang berlaku saat ini, karena tidak semua wilayah, teritori, maupun periode sejarah memiliki bendera yang diakui secara resmi atau terdokumentasi dengan baik.\n\nMengapa tetap kami tampilkan? Karena semakin banyak variasi bendera yang Anda kenali—termasuk yang paling langka atau sulit dikenali—semakin luas pula pengetahuan Anda tentang geografi, sejarah, dan vexillology. Anggap saja ini sebagai latihan mata dan otak untuk mengenali simbol-simbol unik dari berbagai penjuru dunia. Selamat belajar dan selamat bermain!",
         toastNameBlank: "Nama tidak boleh kosong! ⚠️", toastNameSaved: "Nama disimpan!", toastSaveFailed: "Gagal menyimpan. Coba lagi.", btnSaving: "Menyimpan...",
         maxLevelReached: "LEVEL MAKS tercapai!", leaderboardError: "Gagal memuat papan peringkat.", leaderboardErrorSub: "Periksa koneksi internet Anda dan coba beberapa saat lagi.",
-        libNoFlags: "Tidak ada bendera tersedia.", searchNoFlags: "Bendera tidak ditemukan", searchTryDifferent: "Coba kata kunci lain.", detailNoInfo: "Tidak ada info vexillologi spesifik.",
+        libNoFlags: "Bendera tidak tersedia.", searchNoFlags: "Bendera tidak ditemukan", searchTryDifferent: "Coba kata kunci lain.", detailNoInfo: "Tidak ada info vexillologi spesifik.", noDesignAvailable: "Desain tidak tersedia.",
+        unofficialModalTitle: "Tidak Resmi", unofficialModalText: "Bendera ini tidak memiliki status hukum resmi. Bendera ini dapat berupa bendera yang digunakan secara tidak resmi, desain usulan, rekonstruksi hipotetis, atau karya penggemar. Ditampilkan hanya untuk tujuan edukasi dan pembelajaran vexillology.",
         toastLoginSuccess: "Berhasil masuk!", toastLoginFailed: "Gagal masuk: ", switchAccount: "Ganti Akun", toastSwitchSuccess: "Berhasil mengganti akun!", toastSwitchFailed: "Gagal mengganti akun: ",
         leaderboardGuestCTA: "Login untuk masuk ke peringkat global dan bersaing dengan yang lain!", retryBtn: "Coba Lagi", navHome: "Beranda", navPlay: "Main", navLibrary: "Pustaka", 
-        navLeaderboard: "Peringkat", dayStreak: "hari berturut", shareScore: "Bagikan Skor", scoredCopied: "Skor disalin!", missedFlagsTitle: "Bendera untuk Ditinjau",
+        navLeaderboard: "Peringkat", dayStreak: "hari berturut", shareScore: "Bagikan Skor", scoredCopied: "Skor disalin ke clipboard!", missedFlagsTitle: "Bendera untuk Ditinjau", missedFlagsShort: "Ulas", missedFlagsNone: "Sempurna — tanpa kesalahan!",
         correctAnswer: "Benar:", wrongAnswer: "Jawaban:", correctCapital: "Ibu Kota:", wrongCapital: "Ibu Kota:", bookmarkAdded: "Ditandai! ⭐", bookmarkRemoved: "Tanda dihapus",
         noBookmarksMsg: "Belum ada bookmark! Tandai bendera di pustaka.", noBookmarksSub: "Jelajahi pustaka dan klik ikon bintang pada bendera mana pun untuk menyimpannya di sini agar dapat dipelajari dengan cepat!",
-        notEnoughBookmarks: "Tambahkan minimal 4 bendera bookmark untuk memulai kuis.", lib_bookmarks_title: "Bookmark Saya", startBookmarkQuiz: "Kuis Belajar",
+        notEnoughBookmarks: "Tambahkan minimal 4 bendera bookmark untuk memulai kuis.", notEnoughBookmarksCapital: "Tambahkan minimal 4 bookmark yang punya ibu kota untuk memulai kuis ini.",
+        bookmarkQuizTypeModalTitle: "Pilih Jenis Kuis", bookmarkQuizFlagDesc: "Tebak nama dari benderanya", bookmarkQuizCapitalDesc: "Tebak ibu kotanya",
+        lib_bookmarks_title: "Bookmark Saya", lib_bookmarks_desc: "Bendera yang kamu simpan untuk akses cepat dan sesi belajar.", startBookmarkQuiz: "Kuis Belajar", startBookmarkQuizCapital: "Kuis Ibu Kota",
         onboardingWelcomeTitle: "Selamat Datang di Flag-X!", onboardingWelcomeText: "Uji pengetahuan Anda tentang bendera dunia dari negara resmi, subdivisi, bendera bersejarah, dan banyak lagi.",
         onboardingXpTitle: "Kumpulkan XP & Naik Level", onboardingXpText: "Jawab dengan benar untuk mendapatkan XP. Capai 50 level dan bersaing di papan peringkat global!",
         onboardingStreakTitle: "Bangun Streak Anda", onboardingStreakText: "Main setiap hari untuk menjaga streak, bookmark bendera untuk belajar, dan bagikan skor terbaikmu!",
         skipBtn: "Lewati", nextBtn: "Lanjut", letsGoBtn: "AYO MULAI!", settingsTypeName: "Mode Input", typeNameLabel: "Ketik Jawaban", typeNamePlaceholder: "Ketik nama negara...",
         settingsSound: "Suara", soundLabel: "Efek Suara", submitBtn: "Kirim", resCorrect: "Benar", resWrong: "Salah", resAccuracy: "Akurasi", resTimeout: "Habis Waktu", resAvgTime: "Rata-rata",
-        historyTitle: "Riwayat Kuis", homeHistory: "Riwayat Kuis", shareCardTitle: "Bagikan Skor", downloadBtn: "Simpan", shareBtn: "Bagikan", tabAllTime: "Sepanjang Masa", tabThisWeek: "Minggu Ini",
+        historyTitle: "Riwayat Kuis", homeHistory: "Riwayat Kuis", shareCardTitle: "Bagikan Skor", downloadBtn: "Simpan", shareBtn: "Bagikan", tabAllTime: "Sepanjang Masa", tabThisWeek: "Minggu Ini", leaderboardWeeklyReset: "RESET MINGGUAN", leaderboardResetsIn: "Reset dalam", leaderboardYou: "Kamu", leaderboardSortXP: "XP", leaderboardSortStreak: "Streak",
+        profileTotalQuizzes: "Total Kuis", profileAccuracy: "Akurasi", profileRank: "Peringkat", profileGlobalRank: "Peringkat Global", profileLevelLabel: "Level", profileMemberSince: "Bergabung sejak {date}",
+        profileBestStreak: "Streak Terbaik", profileTotalQuizzesDesc: "Kuis dimainkan",
+        profileMotivationNew: "Ayo mulai belajar!", profileMotivationExcellent: "Luar biasa! Kamu master bendera!", profileMotivationGreat: "Kerja bagus! Terus pertahankan!", profileMotivationGood: "Usaha bagus! Terus berlatih!", profileMotivationPractice: "Terus berlatih!",
+        achievementSheetTitle: "Achievement", homeQuickExplore: "Jelajah Cepat",
         leaderboardStreak: "Streak", navHistory: "Riwayat", switchModalTitle: "Ganti Mode Kuis?", switchModalDesc: "Mengubah jenis input kuis di tengah permainan akan memuat ulang seluruh progres kuis berjalan Anda.",
         confirmSwitchBtn: "Ya, Reset", cancelSwitchBtn: "Batal", notifModalTitle: "Aktifkan Pengingat?", notifModalDesc: "Kami akan mengirimkan notifikasi harian agar Streak kamu tidak hangus dan terus berlanjut!",
         notifLaterBtn: "Nanti Saja", notifAllowBtn: "Izinkan", historyEmptyTitle: "Belum Ada Riwayat", historyEmptyDesc: "Mainkan kuis pertamamu dan jadilah master bendera!",
         streakLegendary: "Dedikasi luar biasa! 🏆", streakOnFire: "Kamu luar biasa! Terus pertahankan!", streakWeekly: "Satu minggu berturut-turut! Konsistensi yang menakjubkan!",
         streakBonusSub: "Berlaku untuk semua XP kuis selama streak aktif", leaderboardNoData: "Tidak ada data untuk periode ini.", leaderboardNoDataSub: "Jadilah yang pertama meraih posisi teratas di papan peringkat!",
-        notifGrantedTitle: "Pengingat Flag-X Aktif!", notifGrantedBody: "Bagus! Kami akan mengingatkanmu mempertahankan Streak.", switchDiffModalTitle: "Ganti Tingkat Kesulitan?",
+        notifGrantedTitle: "Pengingat Flag-X Aktif!", notifGrantedBody: "Bagus! Kami akan mengingatkanmu mempertahankan Streak.",
+        notifNotSupported: "Notifikasi tidak didukung di browser ini.", notifAlreadyActive: "🔔 Notifikasi streak sudah aktif!",
+        notifBlocked: "Notifikasi diblokir. Aktifkan lewat pengaturan browser.", switchDiffModalTitle: "Ganti Tingkat Kesulitan?",
         switchDiffModalDesc: "Mengubah tingkat kesulitan di tengah kuis akan me-reset progres kuis yang sedang berjalan.", filterModalTitle: "Filter berdasarkan Mode", sortModalTitle: "Urutkan",
         filterAll: "Semua Mode", sortNewest: "Terbaru", sortHighest: "XP Tertinggi", diffDisabledHint: "Difficulty dikunci saat Mode Input aktif", typeCapitalPlaceholder: "Ketik nama ibu kota...",
-        typeSubdivisionPlaceholder: "Ketik nama wilayah/negara bagian...", typeOrgPlaceholder: "Ketik nama organisasi...", yearInputDisabledHint: "Mode Input tidak tersedia untuk Year Guess",
-        inputModeLocked: "Raih Level 10 untuk membuka Mode Input", usernamePlaceholder: "Nama kamu...", guestName: "Penjelajah Tamu", flagOfTheDay: "Bendera Hari Ini", 
-        loadingLeaderboard: "Memuat Papan Peringkat...", generatingFunFact: "Menghasilkan Fakta Menarik..."
-    }
+        deleteModalTitle: "Hapus Riwayat", delete24h: "24 Jam Terakhir", delete7d: "7 Hari Terakhir", delete30d: "30 Hari Terakhir", deleteAll: "Semua Riwayat",
+        deleteConfirmTitle: "Hapus Riwayat?", confirmDeleteBtn: "Ya, Hapus", historyDeleted: "Riwayat dihapus!",
+        deleteConfirm24h: "Ini akan menghapus permanen semua riwayat kuis dalam 24 jam terakhir. Tindakan ini tidak dapat dibatalkan.",
+        deleteConfirm7d: "Ini akan menghapus permanen semua riwayat kuis dalam 7 hari terakhir. Tindakan ini tidak dapat dibatalkan.",
+        deleteConfirm30d: "Ini akan menghapus permanen semua riwayat kuis dalam 30 hari terakhir. Tindakan ini tidak dapat dibatalkan.",
+        deleteConfirmAll: "Ini akan menghapus permanen SEMUA riwayat kuis kamu. Tindakan ini tidak dapat dibatalkan.",
+        typeSubdivisionPlaceholder: "Ketik nama wilayah...", typeOrgPlaceholder: "Ketik nama organisasi...", yearInputDisabledHint: "Mode Input tidak tersedia untuk Year Guess",
+        inputModeLocked: "Raih Level 10 untuk membuka Mode Input", usernamePlaceholder: "Nama kamu...", guestName: "Penjelajah Tamu", flagOfTheDay: "Bendera Hari Ini",
+        loadingLeaderboard: "Memuat Papan Peringkat...", generatingFunFact: "Menghasilkan Fakta Menarik...", mode_daily_title: "Tantangan Harian",
+        mode_daily_desc: "10 soal yang sama untuk semua orang hari ini. Bisakah kamu mengalahkan temanmu?",
+        dailyCompleted: "✅ Sudah dimainkan hari ini! Kembali lagi besok.", dailyCompletedTitle: "Sampai Jumpa Besok!",
+        feedbackModalTitle: "Kirim Masukan", feedbackTypeLabel: "Ini soal apa?", feedbackTypeFlag: "Usulkan Bendera", feedbackTypeCorrection: "Laporkan Info Salah",
+        feedbackTypeFeature: "Usulkan Fitur", feedbackTypeBug: "Laporkan Bug", feedbackEntityLabel: "Negara/Wilayah Terkait (Opsional)", feedbackEntityPlaceholder: "cth. Kazakhstan, Tibet...",
+        feedbackMessageLabel: "Pesan Kamu", feedbackMessagePlaceholder: "Ceritakan lebih lanjut...", feedbackSubmitBtn: "Kirim Masukan", feedbackErrorEmpty: "Tulis pesan kamu terlebih dahulu.",
+        feedbackErrorType: "Pilih kategori terlebih dahulu.", feedbackCooldown: "Tunggu sebentar sebelum mengirim lagi.", feedbackSending: "Mengirim...",
+        feedbackSuccess: "✅ Terima kasih! Masukan terkirim.", feedbackFailed: "Gagal mengirim. Silakan coba lagi.",
+        homeHeroTagline: "Pelajari bendera. Taklukkan kuis. Naik ke puncak peringkat.", fotdTagline: "Satu bendera baru untuk dipelajari, setiap hari.",
+        streakKeepGoing: "Terus pertahankan!", leaderboardViewAll: "Lihat Semua",
+        reviewSub: "Lihat jawaban salah", shareScoreSub: "Tantang teman", backToQuizModesSub: "Pilih mode lain", backToBookmarksSub: "Kembali ke daftar",
+        legacyDataRestored: "🎉 Data lama kamu berhasil dipulihkan!"
+        }
 };
-
+// Bagian judul hero di-split manual (bukan lewat data-translate-key) karena kata yang di-highlight
+// ("Knowledge" / "Pengetahuan") posisinya beda urutan antar bahasa.
+const heroTitleParts = {
+    en: { pre: "Test Your Global", accent: "Knowledge", post: "" },
+    id: { pre: "Uji", accent: "Pengetahuan", post: " Global Anda" }
+};
 // ============================================================================
 // 5. DATA PROCESSING & UTILITIES
 // ============================================================================
@@ -279,33 +347,77 @@ const groupDataByCountry = (dataArray) => {
         return acc;
     }, {});
 };
-
 const subdivisionFlags = groupDataByCountry(subdivisions);
 const territoryFlags = groupDataByCountry(territories);
 const historicalFlagsByCountry = groupDataByCountry(historicalFlags);
-
 const formatXP = (xp) => {
     const num = parseInt(xp) || 0;
     if (num >= 1000000) return (Math.floor(num / 100000) / 10) + 'M';
     if (num >= 100000) return (Math.floor(num / 100) / 10) + 'K';
     return num;
 };
-
-// Toast Notification
-function showToast(message) {
-    let toast = document.querySelector('.toast-msg');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.className = 'toast-msg';
-        document.body.appendChild(toast);
+// Warna aksen untuk card Quiz Mode & Library Category.
+// Beberapa id sengaja berbagi warna yang sama (mis. "continent", "historical")
+// karena mewakili pool data yang sama antara Quiz Mode & Library.
+const accentColors = {
+    // Quiz Modes (quiz-modes-screen)
+    classic: '#7B47F5',
+    continent: '#28a745',
+    capital: '#15B4CC',
+    year: '#f59e0b',
+    time: '#3b82f6',
+    survival: '#84CC16',
+    combo: '#dc3545',
+    // Library Categories (library-categories-screen)
+    bookmarks: '#EC41B1',
+    official: '#7B47F5',
+    subdivisions: '#6366f1',
+    territories: '#14b8a6',
+    historical: '#f59e0b',
+    organizations: '#0ea5e9',
+    unofficial: '#dc3545'
+};
+// Durasi minimum skeleton loading ditampilkan (ms) — Leaderboard, Fun Fact, View Detail.
+// Dipakai lewat Promise.all/setTimeout supaya animasi shimmer sempat kelihatan penuh,
+// meski data asli (cache/network) sudah siap lebih cepat dari durasi ini.
+const SKELETON_MIN_DELAY = 2500;
+// Toast Notification — stacked, closable, slides in from the right
+const TOAST_MAX_STACK = 3;
+function showToast(message, duration = 2500) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        container.setAttribute('aria-live', 'polite');
+        document.body.appendChild(container);
     }
-    toast.innerText = message;
-    toast.classList.remove('show');
-    void toast.offsetWidth; 
+    const visible = container.querySelectorAll('.toast-msg:not(.hide)');
+    if (visible.length >= TOAST_MAX_STACK) dismissToast(visible[visible.length - 1]);
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `
+        <span class="toast-msg-text"></span>
+        <button class="toast-msg-close" type="button" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        <span class="toast-msg-progress"></span>`;
+    toast.querySelector('.toast-msg-text').textContent = message;
+    toast.querySelector('.toast-msg-progress').style.animationDuration = `${duration}ms`;
+    container.prepend(toast);
+    void toast.offsetWidth;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+    const timer = setTimeout(() => dismissToast(toast), duration);
+    toast.querySelector('.toast-msg-close').addEventListener('click', () => {
+        clearTimeout(timer);
+        dismissToast(toast);
+    });
 }
-
+function dismissToast(toast) {
+    if (!toast || !toast.isConnected || toast.classList.contains('hide')) return;
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    setTimeout(() => toast.remove(), 500);
+}
 // Fuzzy Matching
 function levenshtein(a, b) {
     const m = a.length, n = b.length;
@@ -318,7 +430,6 @@ function levenshtein(a, b) {
     }
     return dp[m][n];
 }
-
 function fuzzyMatch(input, target) {
     const normalize = (str) => str.trim().toLowerCase()
         .replace(/\bst\.?\b/g, 'saint')
@@ -335,7 +446,6 @@ function fuzzyMatch(input, target) {
     const threshold = b.length <= 5 ? 1 : 2;
     return levenshtein(a, b) <= threshold || levenshtein(a, bSimple) <= threshold;
 }
-
 // ============================================================================
 // 6. UI & NAVIGATION LOGIC
 // ============================================================================
@@ -346,6 +456,7 @@ function showScreen(screenId) {
     }
     const screens = document.querySelectorAll('.screen');
     screens.forEach(s => s.classList.remove('active'));
+    document.body.classList.toggle('quiz-mode-active', screenId === 'quiz-screen');
     
     const target = document.getElementById(screenId);
     if (target) {
@@ -358,10 +469,13 @@ function showScreen(screenId) {
             window.dispatchEvent(new Event('resize'));
         });
         localStorage.setItem('lastActiveScreen', screenId);
+        localStorage.setItem('lastActiveScreen', screenId);
+        if (screenId === 'home-screen') renderHomeQuickExplore();
+        else if (screenId === 'quiz-modes-screen') renderQuizModesCarousel();
         
         const bottomNav = document.querySelector('.bottom-nav');
         if (bottomNav) {
-            if (screenId === 'home-screen' || screenId === 'quiz-screen') {
+            if (screenId === 'quiz-screen') {
                 bottomNav.style.display = 'none';
                 document.body.classList.add('nav-hidden');
             } else {
@@ -370,70 +484,147 @@ function showScreen(screenId) {
             }
         }
         updateNavActiveState(screenId);
+        // Reset pencarian Country Selector setiap kali screen ini dibuka
+        const selectorSearchInput = target.querySelector('.country-selector-search');
+        if (selectorSearchInput) { selectorSearchInput.value = ''; filterCountrySelector(selectorSearchInput); }
     }
 }
-
+const NAV_ORDER = ['nav-library', 'nav-quiz', 'nav-home', 'nav-leaderboard', 'nav-history'];
 function updateNavActiveState(screenId) {
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    if (screenId === 'home-screen') document.getElementById('nav-home')?.classList.add('active');
-    else if (screenId === 'quiz-modes-screen' || screenId === 'quiz-screen') document.getElementById('nav-quiz')?.classList.add('active');
-    else if (screenId === 'library-categories-screen' || screenId === 'library-display-screen' || screenId.includes('library-screen')) document.getElementById('nav-library')?.classList.add('active');
-    else if (screenId === 'leaderboard-screen') document.getElementById('nav-leaderboard')?.classList.add('active');
-    else if (screenId === 'history-screen') document.getElementById('nav-history')?.classList.add('active');
+    document.querySelectorAll('.nav-item, .desktop-nav-item').forEach(item => item.classList.remove('active'));
+    let activeId = null;
+    if (screenId === 'home-screen') activeId = 'nav-home';
+    else if (screenId === 'quiz-modes-screen' || screenId === 'quiz-screen' || screenId === 'continent-clash-screen' || screenId === 'results-screen') activeId = 'nav-quiz';
+    else if (screenId === 'library-categories-screen' || screenId === 'library-display-screen' || screenId.includes('library-screen')) activeId = 'nav-library';
+    else if (screenId === 'leaderboard-screen') activeId = 'nav-leaderboard';
+    else if (screenId === 'history-screen') activeId = 'nav-history';
+    if (activeId) {
+        document.getElementById(activeId)?.classList.add('active');
+        document.getElementById(`desktop-${activeId}`)?.classList.add('active');
+        const pill = document.getElementById('nav-pill');
+        const idx = NAV_ORDER.indexOf(activeId);
+        if (pill && idx !== -1) {
+            pill.style.transform = `translateX(${idx * 100}%)`;
+            pill.style.opacity = activeId === 'nav-home' ? '0' : '1';
+        }
+    }
 }
-
+// --- DESKTOP SIDEBAR: keep settings-panel in the right host, and keep the
+// compact profile card (avatar/name/level/streak/achievements) in sync with
+// whatever already drives the mobile header + hamburger drawer. ---
+function relocateSettingsPanel() {
+    const settingsPanel = document.getElementById('settings-panel');
+    const desktopSlot = document.getElementById('desktop-settings-modal-slot');
+    const mobileHost = document.querySelector('#hamburger-drawer .side-drawer-panel');
+    const contactPanel = document.getElementById('contact-panel');
+    if (!settingsPanel || !desktopSlot || !mobileHost) return;
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (isDesktop && settingsPanel.parentElement !== desktopSlot) desktopSlot.appendChild(settingsPanel);
+    else if (!isDesktop && settingsPanel.parentElement !== mobileHost) mobileHost.insertBefore(settingsPanel, contactPanel || null);
+}
+function toggleDesktopSidebarCollapse() {
+    const collapsed = document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('flagx-sidebar-collapsed', collapsed ? 'true' : 'false');
+}
+function syncDesktopProfileCard() {
+    const nameEl = document.getElementById('desktop-header-profile-name');
+    if (!nameEl) return;
+    const imgEl = document.getElementById('desktop-header-profile-img');
+    const iconEl = document.getElementById('desktop-header-profile-icon');
+    const achvBadge = document.getElementById('desktop-header-profile-achv-badge');
+    if (isRealUser(auth.currentUser)) {
+        const shownName = document.getElementById('profile-name')?.textContent;
+        nameEl.textContent = (shownName && shownName !== 'User' && shownName !== 'Guest') ? shownName : (auth.currentUser.displayName || 'User');
+        const photo = auth.currentUser.photoURL || localStorage.getItem('cachedProfilePic');
+        if (photo) { if (imgEl) { imgEl.src = photo; imgEl.classList.remove('hidden'); } if (iconEl) iconEl.classList.add('hidden'); }
+    } else {
+        nameEl.textContent = (translations[settings.language] && translations[settings.language].guestName) || 'Guest Explorer';
+        if (imgEl) { imgEl.classList.add('hidden'); imgEl.src = ''; }
+        if (iconEl) iconEl.classList.remove('hidden');
+    }
+    if (achvBadge && typeof ACHIEVEMENTS !== 'undefined') {
+        const stats = getPlayerStatsSnapshot();
+        const unlocked = ACHIEVEMENTS.filter(a => a.test(stats)).length;
+        if (unlocked > 0) { achvBadge.textContent = unlocked; achvBadge.classList.remove('hidden'); }
+        else achvBadge.classList.add('hidden');
+    }
+    const xpValueEl = document.getElementById('desktop-header-xp-value');
+    const levelBadgeEl = document.getElementById('desktop-header-level-badge');
+    const desktopXpBar = document.getElementById('desktop-header-xp-progress-bar');
+    if (xpValueEl || levelBadgeEl || desktopXpBar) {
+        const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+        const { level, percentage } = getLevelProgress(xp);
+        if (xpValueEl) xpValueEl.textContent = formatXP(xp);
+        if (levelBadgeEl) levelBadgeEl.textContent = `Lv. ${level}`;
+        if (desktopXpBar) desktopXpBar.style.width = `${percentage}%`;
+    }
+}
 function closeAllPanels() {
-    const panels = ['settings-panel', 'profile-panel', 'disclaimer-panel', 'level-info-panel'];
+    const panels = ['hamburger-drawer', 'disclaimer-panel', 'level-info-panel'];
     panels.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.remove('active');
+        if (el) el.classList.remove('active', 'closing');
     });
 }
-
+function closeSheet(overlay) {
+    if (!overlay || !overlay.classList.contains('active') || overlay.classList.contains('closing')) return;
+    overlay.classList.add('closing');
+    const panel = overlay.querySelector('.side-drawer-panel, .bottom-sheet-panel');
+    const finish = () => {
+        overlay.classList.remove('active', 'closing');
+        document.body.classList.remove('modal-open');
+        if (['library-quick-sheet', 'detail-modal', 'gemini-modal'].includes(overlay.id)) {
+            releaseActiveLibCardIfAllClosed();
+        }
+    };
+    if (panel) panel.addEventListener('animationend', finish, { once: true });
+    else setTimeout(finish, 300);
+}
 function openLevelInfo(e) {
     if (e) e.stopPropagation(); 
     const levelPanel = document.getElementById('level-info-panel');
-    const isCurrentlyActive = levelPanel.classList.contains('active');
+    if (levelPanel.classList.contains('active')) { closeSheet(levelPanel); return; }
     closeAllPanels();
-    if (!isCurrentlyActive) levelPanel.classList.add('active');
+    levelPanel.classList.add('active');
+    document.body.classList.add('modal-open');
 }
-
-// Theme
-function toggleTheme() {
-    const html = document.documentElement;
-    const sunIcon = document.getElementById('sun-icon');
-    const moonIcon = document.getElementById('moon-icon');
-    html.classList.toggle('light');
-    const isLight = html.classList.contains('light');
-    localStorage.setItem('flagx-theme', isLight ? 'light' : 'dark');
-
-    if (isLight) {
-        if (sunIcon) sunIcon.classList.add('hidden');
-        if (moonIcon) moonIcon.classList.remove('hidden');
-    } else {
-        if (sunIcon) sunIcon.classList.remove('hidden');
-        if (moonIcon) moonIcon.classList.add('hidden');
+// Notification Bell
+function updateNotificationBellUI() {
+    const isGranted = 'Notification' in window && Notification.permission === 'granted';
+    const dot = document.getElementById('notif-bell-dot');
+    if (dot) dot.classList.toggle('hidden', isGranted);
+    const desktopDot = document.getElementById('desktop-header-notif-dot');
+    if (desktopDot) desktopDot.classList.toggle('hidden', isGranted);
+}
+function handleNotificationBellClick() {
+    const lang = settings.language;
+    if (!('Notification' in window)) {
+        showToast(translations[lang].notifNotSupported);
+        return;
     }
-}
-
-function loadTheme() {
-    const theme = localStorage.getItem('flagx-theme');
-    const sunIcon = document.getElementById('sun-icon');
-    const moonIcon = document.getElementById('moon-icon');
-    if (theme === 'light') {
-        document.documentElement.classList.add('light');
-        if (sunIcon) sunIcon.classList.add('hidden');
-        if (moonIcon) moonIcon.classList.remove('hidden');
-    } else {
-        document.documentElement.classList.remove('light');
-        if (sunIcon) sunIcon.classList.remove('hidden');
-        if (moonIcon) moonIcon.classList.add('hidden');
+    if (Notification.permission === 'granted') {
+        showToast(translations[lang].notifAlreadyActive);
+        return;
     }
+    if (Notification.permission === 'denied') {
+        showToast(translations[lang].notifBlocked);
+        return;
+    }
+    requestNotificationPermission();
 }
-
 // ============================================================================
 // 7. LEVELING & XP SYSTEM
 // ============================================================================
+function getLevelProgress(xp) {
+    let level = 1, currentXPInLevel = 0, nextLevelXPThreshold = 500;
+    if (xp < 5000) { level = Math.floor(xp / 500) + 1; currentXPInLevel = xp % 500; nextLevelXPThreshold = 500; }
+    else if (xp < 20000) { level = 10 + Math.floor((xp - 5000) / 1000); currentXPInLevel = (xp - 5000) % 1000; nextLevelXPThreshold = 1000; }
+    else if (xp < 57500) { level = 25 + Math.floor((xp - 20000) / 2500); currentXPInLevel = (xp - 20000) % 2500; nextLevelXPThreshold = 2500; }
+    else if (xp < 102500) { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; }
+    else { level = 50; currentXPInLevel = 1; nextLevelXPThreshold = 1; }
+    const percentage = level >= 50 ? 100 : (currentXPInLevel / nextLevelXPThreshold) * 100;
+    return { level, currentXPInLevel, nextLevelXPThreshold, percentage };
+}
 function calculateLevel(xp) {
     if (xp < 5000) return Math.floor(xp / 500) + 1;           
     if (xp < 20000) return 10 + Math.floor((xp - 5000) / 1000); 
@@ -441,55 +632,32 @@ function calculateLevel(xp) {
     if (xp < 102500) return 40 + Math.floor((xp - 57500) / 5000); 
     return 50; 
 }
-
 function updateLevelUI(xp) {
-    let level = 1, currentXPInLevel = 0, nextLevelXPThreshold = 500;
-    if (xp < 5000) { level = Math.floor(xp / 500) + 1; currentXPInLevel = xp % 500; nextLevelXPThreshold = 500; } 
-    else if (xp < 20000) { level = 10 + Math.floor((xp - 5000) / 1000); currentXPInLevel = (xp - 5000) % 1000; nextLevelXPThreshold = 1000; } 
-    else if (xp < 57500) { level = 25 + Math.floor((xp - 20000) / 2500); currentXPInLevel = (xp - 20000) % 2500; nextLevelXPThreshold = 2500; } 
-    else if (xp < 102500) { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; } 
-    else { level = 50; currentXPInLevel = 1; nextLevelXPThreshold = 1; }
-
-    const percentage = level >= 50 ? 100 : (currentXPInLevel / nextLevelXPThreshold) * 100;
-
+    const { level, currentXPInLevel, nextLevelXPThreshold, percentage } = getLevelProgress(xp);
     const progressBar = document.getElementById('level-progress-bar');
-    const progressText = document.getElementById('level-progress-text');
+    const progressCurrentEl = document.getElementById('level-progress-current');
+    const progressSuffixEl = document.getElementById('level-progress-suffix');
     const percentageText = document.getElementById('level-percentage');
     const levelBadge = document.getElementById('level-badge'); 
-
+    const headerXpBar = document.getElementById('header-xp-progress-bar');
     if (progressBar) progressBar.style.width = `${percentage}%`;
-    if (progressText) progressText.textContent = level >= 50 ? translations[settings.language].maxLevelReached : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
+    if (headerXpBar) headerXpBar.style.width = `${percentage}%`;
+    if (level >= 50) {
+        if (progressCurrentEl) progressCurrentEl.textContent = translations[settings.language].maxLevelReached;
+        if (progressSuffixEl) progressSuffixEl.textContent = '';
+    } else {
+        if (progressCurrentEl) progressCurrentEl.textContent = currentXPInLevel.toLocaleString();
+        if (progressSuffixEl) progressSuffixEl.textContent = ` / ${nextLevelXPThreshold.toLocaleString()} XP`;
+    }
     if (percentageText) percentageText.textContent = `${Math.floor(percentage)}%`;
-    if (levelBadge) levelBadge.textContent = `Lv. ${level}`;
-
-    updateHomeXPBar();
+    if (levelBadge) levelBadge.textContent = `Lv. ${level}`;    
 }
-
 function loadTotalScore() {
     const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     if (totalscoreValueEl) totalscoreValueEl.textContent = formatXP(xp);
     updateLevelUI(xp);
+    syncDesktopProfileCard();
 }
-
-function updateHomeXPBar() {
-    const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-    let level = 1, currentXPInLevel = 0, nextLevelXPThreshold = 500;
-    if (xp < 5000) { level = Math.floor(xp / 500) + 1; currentXPInLevel = xp % 500; nextLevelXPThreshold = 500; }
-    else if (xp < 20000) { level = 10 + Math.floor((xp - 5000) / 1000); currentXPInLevel = (xp - 5000) % 1000; nextLevelXPThreshold = 1000; }
-    else if (xp < 57500) { level = 25 + Math.floor((xp - 20000) / 2500); currentXPInLevel = (xp - 20000) % 2500; nextLevelXPThreshold = 2500; }
-    else if (xp < 102500) { level = 40 + Math.floor((xp - 57500) / 5000); currentXPInLevel = (xp - 57500) % 5000; nextLevelXPThreshold = 5000; }
-    else { level = 50; currentXPInLevel = 1; nextLevelXPThreshold = 1; }
-    const pct = Math.min(100, (currentXPInLevel / nextLevelXPThreshold) * 100);
-    
-    const lvLabel = document.getElementById('home-level-label');
-    const xpLabel = document.getElementById('home-xp-label');
-    const fill = document.getElementById('home-xp-fill');
-    
-    if (lvLabel) lvLabel.textContent = `Lv. ${level}`;
-    if (xpLabel) xpLabel.textContent = level >= 50 ? (translations[settings.language]?.maxLevelReached || 'MAX') : `${currentXPInLevel.toLocaleString()} / ${nextLevelXPThreshold.toLocaleString()} XP`;
-    if (fill) fill.style.width = `${pct}%`;
-}
-
 async function addToTotalScore(scoreFromQuiz) {
     const currentTotal = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     const newTotal = currentTotal + scoreFromQuiz;
@@ -497,8 +665,8 @@ async function addToTotalScore(scoreFromQuiz) {
     if (totalscoreValueEl) totalscoreValueEl.textContent = formatXP(newTotal);
     
     updateLevelUI(newTotal); 
-
-    if (auth && auth.currentUser) {
+    syncDesktopProfileCard();
+    if (isRealUser(auth.currentUser)) {
         try {
             const userRef = doc(db, "users", auth.currentUser.uid);
             const now = new Date();
@@ -506,32 +674,34 @@ async function addToTotalScore(scoreFromQuiz) {
             monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
             monday.setHours(0, 0, 0, 0);
             const weekStartISO = monday.toISOString();
-
             const userSnap = await getDoc(userRef);
             const userData = userSnap.exists() ? userSnap.data() : {};
-
             let weeklyScore = userData.weeklyScore || 0;
             if (!userData.weekStart || userData.weekStart !== weekStartISO) {
                 weeklyScore = 0;
             }
             weeklyScore += scoreFromQuiz;
-
             await setDoc(userRef, { 
                 totalScore: newTotal,
                 weeklyScore,
                 weekStart: weekStartISO,
                 lastActive: new Date()
             }, { merge: true });
-
         } catch (e) {
             console.error("Failed to sync score:", e);
         }
     }
 }
-
 // ============================================================================
 // 8. USER, AUTHENTICATION & PROFILE
 // ============================================================================
+// Guest (anonymous) dapat uid asli di background biar FCM token bisa disimpan,
+// TAPI gak boleh dianggap "logged in" untuk hal lain (sync skor/streak, tampilan
+// profil). isRealUser() jadi gerbang buat semua itu — cuma
+// requestNotificationPermission() yang sengaja tetap pakai auth.currentUser polos.
+function isRealUser(user) {
+    return !!(user && !user.isAnonymous);
+}
 const handleLogin = async (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (!auth) {
@@ -550,7 +720,6 @@ const handleLogin = async (e) => {
         }
     }
 };
-
 async function switchAccount() {
     try {
         const provider = new GoogleAuthProvider();
@@ -565,7 +734,6 @@ async function switchAccount() {
         }
     }
 }
-
 const handleLogout = async () => {
     try {
         await signOut(auth);
@@ -576,35 +744,60 @@ const handleLogout = async () => {
         alert("Logout failed, please try again.");
     }
 };
-
 const syncScoreToCloud = async (user) => {
+    const lastUid = localStorage.getItem('flagx-last-uid');
+    const isAccountSwitch = !!(lastUid && lastUid !== user.uid);
     const localScore = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const localStreakBefore = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const localTotalQuizzes = parseInt(localStorage.getItem('flagx-totalquizzes') || 0);
+    const localLifetimeCorrect = parseInt(localStorage.getItem('flagx-lifetimecorrect') || 0);
+    const localLifetimeAttempted = parseInt(localStorage.getItem('flagx-lifetimeattempted') || 0);
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-
-    let finalScore = localScore;
+    let finalScore, finalStreak, finalTotalQuizzes, finalLifetimeCorrect, finalLifetimeAttempted;
     let username = user.displayName;
-
     if (userSnap.exists()) {
         const data = userSnap.data();
-        finalScore = Math.max(localScore, data.totalScore || 0);
         username = data.username || user.displayName;
+        if (isAccountSwitch) {
+            finalScore = data.totalScore || 0;
+            finalStreak = data.streak || 0;
+            finalTotalQuizzes = data.totalQuizzes || 0;
+            finalLifetimeCorrect = data.lifetimeCorrect || 0;
+            finalLifetimeAttempted = data.lifetimeAttempted || 0;
+        } else {
+            finalScore = Math.max(localScore, data.totalScore || 0);
+            finalStreak = localStreakBefore;
+            finalTotalQuizzes = Math.max(localTotalQuizzes, data.totalQuizzes || 0);
+            finalLifetimeCorrect = Math.max(localLifetimeCorrect, data.lifetimeCorrect || 0);
+            finalLifetimeAttempted = Math.max(localLifetimeAttempted, data.lifetimeAttempted || 0);
+        }
+    } else {
+        finalScore = isAccountSwitch ? 0 : localScore;
+        finalStreak = isAccountSwitch ? 0 : localStreakBefore;
+        finalTotalQuizzes = isAccountSwitch ? 0 : localTotalQuizzes;
+        finalLifetimeCorrect = isAccountSwitch ? 0 : localLifetimeCorrect;
+        finalLifetimeAttempted = isAccountSwitch ? 0 : localLifetimeAttempted;
     }
-
     localStorage.setItem('flagx-totalscore', finalScore);
+    localStorage.setItem('flagx-streak', finalStreak);
+    localStorage.setItem('flagx-totalquizzes', finalTotalQuizzes);
+    localStorage.setItem('flagx-lifetimecorrect', finalLifetimeCorrect);
+    localStorage.setItem('flagx-lifetimeattempted', finalLifetimeAttempted);
+    localStorage.setItem('flagx-last-uid', user.uid);
     if (totalscoreValueEl) totalscoreValueEl.textContent = formatXP(finalScore);
     updateLevelUI(finalScore);
-
-    const localStreak = parseInt(localStorage.getItem('flagx-streak') || 0);
     await setDoc(userRef, {
         username: username,
         photoURL: user.photoURL,
         totalScore: finalScore,
         email: user.email,
         lastActive: new Date(),
-        streak: localStreak
+        streak: finalStreak,
+        totalQuizzes: finalTotalQuizzes,
+        lifetimeCorrect: finalLifetimeCorrect,
+        lifetimeAttempted: finalLifetimeAttempted
     }, { merge: true });
-
     return { username };
 };
 
@@ -615,18 +808,15 @@ function updateProfileUI(user, customName = null) {
     const userIconDefault  = document.getElementById('user-icon-default');
     const userPhotoPanel   = document.getElementById('user-panel-img');
     const profileNameDisplay = document.getElementById('profile-name');
-
     if (user) {
         if (loggedOutView) loggedOutView.classList.add('hidden');
         if (loggedInView)  loggedInView.classList.remove('hidden');
-
         const finalName = customName || user.displayName || 'User';
         if (usernameInput) {
             usernameInput.value = finalName;
             usernameInput.dispatchEvent(new Event('input')); 
         }
         if (profileNameDisplay) profileNameDisplay.textContent = finalName;
-
         if (user.photoURL) {
             if (userPhotoPojok) { userPhotoPojok.src = user.photoURL; userPhotoPojok.classList.remove('hidden'); }
             if (userIconDefault) userIconDefault.classList.add('hidden');
@@ -640,46 +830,98 @@ function updateProfileUI(user, customName = null) {
         if (usernameInput)   usernameInput.value = '';
         if (profileNameDisplay) profileNameDisplay.textContent = 'Guest';
     }
+    syncDesktopProfileCard();
 }
-
+function formatMemberSince(creationTime, lang) {
+    if (!creationTime) return '';
+    const date = new Date(creationTime);
+    if (isNaN(date.getTime())) return '';
+    const locale = lang === 'en' ? 'en-US' : 'id-ID';
+    const formatted = date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+    return (translations[lang].profileMemberSince || 'Member since {date}').replace('{date}', formatted);
+}
+function getProfileMotivationText(lifetimeAttempted, accuracy, lang) {
+    const t = translations[lang];
+    if (lifetimeAttempted <= 0) return t.profileMotivationNew || 'Keep learning!';
+    if (accuracy >= 90) return t.profileMotivationExcellent || "Excellent! You're a flag master!";
+    if (accuracy >= 70) return t.profileMotivationGreat || 'Great work! Keep it up!';
+    if (accuracy >= 50) return t.profileMotivationGood || 'Good effort! Practice more!';
+    return t.profileMotivationPractice || 'Keep practicing!';
+}
+async function fetchUserRank(userXP) {
+    if (!db) return null;
+    try {
+        const higherQuery = query(collection(db, "users"), where("totalScore", ">", userXP));
+        const snap = await getCountFromServer(higherQuery);
+        return snap.data().count + 1;
+    } catch (e) {
+        console.error("Rank fetch error:", e);
+        return null;
+    }
+}
 if (auth) {
     onAuthStateChanged(auth, async (user) => {
+        markAppLoadingStep('auth');
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const leaderboardScreen = document.getElementById('leaderboard-screen');
         const isLeaderboardActive = leaderboardScreen && leaderboardScreen.classList.contains('active');
-
-        if (user) {
-            let nameToDisplay = user.displayName;
-            if (user.photoURL) localStorage.setItem('cachedProfilePic', user.photoURL);
-            
-            try {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    if (userData.username) nameToDisplay = userData.username;
-                    const userXP = userData.totalScore || 0;
-                    updateLevelUI(userXP); 
-                }
-            } catch (err) { console.error(err); }
-
-            updateProfileUI(user, nameToDisplay);
-            await syncScoreToCloud(user);
-            
-            if (loginBtn) loginBtn.classList.add('hidden');
-            if (logoutBtn) logoutBtn.classList.remove('hidden');
-            if (isLeaderboardActive) loadLeaderboard(); 
-
-        } else {
+        const shouldLoadLeaderboard = isLeaderboardActive && !leaderboardBootHandled;
+        leaderboardBootHandled = false;
+        // Belum ada sesi sama sekali → sign-in anonim biar guest dapet uid stabil
+        // (dipakai CUMA buat simpan FCM token). Ini bakal trigger onAuthStateChanged
+        // lagi dengan user anonim barunya, jadi cukup berhenti di sini dulu.
+        if (!user) {
+            try { await signInAnonymously(auth); } catch (e) { console.error("Anonymous sign-in failed:", e); }
             localStorage.removeItem('cachedProfilePic');
             updateProfileUI(null);
             if (loginBtn) loginBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
-            if (isLeaderboardActive) loadLeaderboard();
+            if (shouldLoadLeaderboard) loadLeaderboard();
+            loadHomeLeaderboardPreview();
+            return;
         }
+        if (user.isAnonymous) {
+            // Guest dengan uid background — tampilan & perilaku persis kayak
+            // logged-out. Gak pernah sync skor/streak/quiz stats ke Firestore.
+            // Uid ini cuma kepake kalau/pas mereka enable notifikasi.
+            localStorage.removeItem('cachedProfilePic');
+            updateProfileUI(null);
+            if (loginBtn) loginBtn.classList.remove('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (shouldLoadLeaderboard) loadLeaderboard();
+            loadHomeLeaderboardPreview();
+            return;
+        }
+        // Admin-only Eruda dev console
+        const ADMIN_UID = 'wE4eP1X9iefGC6GnKIT101RqZk72';
+        if (user.uid === ADMIN_UID && !window.eruda) {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/eruda';
+            s.onload = () => eruda.init();
+            document.head.appendChild(s);
+        }
+        let nameToDisplay = user.displayName;
+        if (user.photoURL) localStorage.setItem('cachedProfilePic', user.photoURL);
+        
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.username) nameToDisplay = userData.username;
+                const userXP = userData.totalScore || 0;
+                updateLevelUI(userXP); 
+            }
+        } catch (err) { console.error(err); }
+        updateProfileUI(user, nameToDisplay);
+        await syncScoreToCloud(user);      
+        
+        if (loginBtn) loginBtn.classList.add('hidden');
+        if (logoutBtn) logoutBtn.classList.remove('hidden');
+        if (shouldLoadLeaderboard) loadLeaderboard(); 
+        loadHomeLeaderboardPreview();
     });
 }
-
 // ============================================================================
 // 9. SETTINGS & LANGUAGE
 // ============================================================================
@@ -699,7 +941,6 @@ function loadSettings() {
     document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`)?.setAttribute('checked', true);
     
     setLanguage(settings.language);
-
     const typeNameSettingDiv = document.getElementById('type-name-setting');
     const typeNameTrack = document.getElementById('type-name-toggle-track');
     const typeNameThumb = document.getElementById('type-name-toggle-thumb');
@@ -742,7 +983,6 @@ function loadSettings() {
             typeNameThumb.style.backgroundColor = '';              
         }            
     }
-
     const soundTrack = document.getElementById('sound-toggle-track');
     const soundThumb = document.getElementById('sound-toggle-thumb');
     if (soundTrack && soundThumb) {
@@ -762,22 +1002,30 @@ function loadSettings() {
     updateCustomRadioUI();
     _syncDifficultyAvailability();
 }
-
 function setLanguage(lang) {
+    if (!translations[lang]) lang = 'en';
     settings.language = lang;
     localStorage.setItem('flagx-settings', JSON.stringify(settings));
     document.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
         if (translations[lang][key]) {
-            if (el.tagName === 'INPUT' && el.placeholder) el.placeholder = translations[lang][key];
+            if ((el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.placeholder) el.placeholder = translations[lang][key];
+            else if (el.dataset.count !== undefined) el.textContent = `${translations[lang][key]} (${el.dataset.count})`;
             else el.textContent = translations[lang][key];
         }
     });
-
+    const heroParts = heroTitleParts[lang] || heroTitleParts.en;
+    const heroPreEl = document.getElementById('hero-title-pre');
+    const heroAccentEl = document.getElementById('hero-title-accent');
+    const heroPostEl = document.getElementById('hero-title-post');
+    if (heroPreEl) heroPreEl.textContent = heroParts.pre;
+    if (heroAccentEl) heroAccentEl.textContent = heroParts.accent;
+    if (heroPostEl) heroPostEl.textContent = heroParts.post;
     renderQuizModes();
     renderLibraryCategories();
+    renderHomeQuickExplore();
     renderQuizHistory();
-
+    initDailyChallengeBanner();
     renderSelectorScreen('continent-clash-screen', Object.keys(continentFlags).sort(), (continent) => startQuiz('continent', continent));
     renderSelectorScreen('continent-library-screen', Object.keys(continentFlags).sort(), (continent) => showLibrary('continent', continent));
     renderSelectorScreen('subdivision-library-screen', Object.keys(subdivisionFlags).sort(), (country) => showLibrary('subdivisions', country));
@@ -794,7 +1042,6 @@ function setLanguage(lang) {
         quizPromptEl.textContent = text;
     }
 }
-
 function updateCustomRadioUI() {
     ['en', 'id'].forEach(val => {
         const card = document.getElementById(`lang-card-${val}`);
@@ -805,23 +1052,21 @@ function updateCustomRadioUI() {
         if (card) card.classList.toggle('active', settings.difficulty === val);
     });
 }
-
 function toggleTypeNameMode() {
     const quizScreen = document.getElementById('quiz-screen');
     if (quizScreen && quizScreen.classList.contains('active')) {
+        closeAllPanels();
         const modal = document.getElementById('switch-mode-modal');
         if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); }
     } else {
         _applyTypeNameModeToggle();
     }
 }
-
 function _applyTypeNameModeToggle() {
     const typeNameTrack = document.getElementById('type-name-toggle-track');
     const typeNameThumb = document.getElementById('type-name-toggle-thumb');
     settings.typeNameMode = !settings.typeNameMode;
     localStorage.setItem('flagx-settings', JSON.stringify(settings));
-
     if (settings.typeNameMode) {
         typeNameTrack.classList.add('bg-[var(--primary-color)]');
         typeNameTrack.classList.remove('bg-[var(--secondary-color)]');
@@ -835,12 +1080,10 @@ function _applyTypeNameModeToggle() {
     }
     _syncDifficultyAvailability();
 }
-
-function _syncDifficultyAvailability() {
+function _syncDifficultyAvailability(forceUnlocked = false) {
     const diffRadios = document.querySelectorAll('input[name="difficulty"]');
     const diffCards = document.querySelectorAll('[id^="diff-card-"]');
-    const isTypeName = settings.typeNameMode;
-
+    const isTypeName = settings.typeNameMode && !forceUnlocked;
     diffRadios.forEach(r => { r.disabled = isTypeName; });
     diffCards.forEach(card => {
         if (isTypeName) {
@@ -849,7 +1092,6 @@ function _syncDifficultyAvailability() {
             card.style.opacity = ''; card.style.pointerEvents = ''; card.style.cursor = '';
         }
     });
-
     let hint = document.getElementById('diff-disabled-hint');
     if (isTypeName) {
         if (!hint) {
@@ -859,18 +1101,16 @@ function _syncDifficultyAvailability() {
             hint.style.color = 'var(--subtle-text-color)';
             hint.setAttribute('data-translate-key', 'diffDisabledHint');
             hint.textContent = settings.language === 'id' ? 'Difficulty dikunci saat Mode Input aktif' : 'Difficulty locked while Input Mode is active';
-            const diffBlock = document.querySelector('#settings-panel .mb-4:nth-child(2)');
+            const diffBlock = document.querySelector('#settings-panel .mb-4:nth-child(3)');
             if (diffBlock) diffBlock.appendChild(hint);
         }
     } else {
         if (hint) hint.remove();
     }
 }
-
 function _syncInputModeForMode(mode) {
     const toggleLabel = document.querySelector('label[onclick="toggleTypeNameMode()"]');
     let hint = document.getElementById('year-input-disabled-hint');
-
     if (mode === 'yearGuess') {
         if (toggleLabel) { toggleLabel.style.opacity = '0.4'; toggleLabel.style.pointerEvents = 'none'; toggleLabel.style.cursor = 'not-allowed'; }
         if (!hint) {
@@ -893,8 +1133,8 @@ function _syncInputModeForMode(mode) {
             if (toggleLabel) { toggleLabel.style.opacity = '0.4'; toggleLabel.style.pointerEvents = 'none'; toggleLabel.style.cursor = 'not-allowed'; }
         }
     }
+    _syncDifficultyAvailability(mode === 'yearGuess');
 }
-
 function toggleSound() {
     settings.soundEnabled = !settings.soundEnabled;
     localStorage.setItem('flagx-settings', JSON.stringify(settings));
@@ -908,36 +1148,150 @@ function toggleSound() {
         thumb.style.transform = 'translateX(0)'; thumb.style.backgroundColor = ''; 
     }
 }
-
-// ============================================================================
 // 10. LEADERBOARD SYSTEM
 // ============================================================================
+// SESUDAH
+function renderLeaderboardSkeleton(count = 7) {
+    const podiumEl = document.getElementById('leaderboard-podium');
+    if (podiumEl) {
+        podiumEl.innerHTML = `
+            <div class="flex items-end justify-center gap-3 sm:gap-5 px-2 mb-2">
+                <div class="flex flex-col items-center w-20 order-1"><div class="skeleton-block w-16 h-16 rounded-full mb-2"></div><div class="skeleton-block h-3 w-14 rounded-full mb-1"></div><div class="skeleton-block h-2.5 w-10 rounded-full mb-2"></div><div class="skeleton-block w-full h-16 rounded-t-lg"></div></div>
+                <div class="flex flex-col items-center w-24 order-2"><div class="skeleton-block w-20 h-20 rounded-full mb-2"></div><div class="skeleton-block h-3 w-16 rounded-full mb-1"></div><div class="skeleton-block h-2.5 w-12 rounded-full mb-2"></div><div class="skeleton-block w-full h-24 rounded-t-lg"></div></div>
+                <div class="flex flex-col items-center w-20 order-3"><div class="skeleton-block w-16 h-16 rounded-full mb-2"></div><div class="skeleton-block h-3 w-14 rounded-full mb-1"></div><div class="skeleton-block h-2.5 w-10 rounded-full mb-2"></div><div class="skeleton-block w-full h-11 rounded-t-lg"></div></div>
+            </div>`;
+    }
+    let rows = '';
+    for (let i = 0; i < count; i++) {
+        rows += `<div class="flex items-center gap-2.5 p-2.5 mb-2 rounded-xl bg-[var(--card-bg-color)] border border-[var(--card-border-color)]">
+            <div class="skeleton-block w-4 h-3.5 rounded flex-shrink-0"></div>
+            <div class="skeleton-block w-8 h-8 rounded-full flex-shrink-0"></div>
+            <div class="flex-1 min-w-0"><div class="skeleton-block h-3.5 w-24 rounded-full mb-1.5"></div><div class="skeleton-block h-2.5 w-16 rounded-full"></div></div>
+            <div class="skeleton-block h-4 w-12 rounded-full flex-shrink-0"></div>
+        </div>`;
+    }
+    return `<div class="p-1 pb-2">${rows}</div>`;
+}
+function renderLeaderboardPodium(topThree, tab) {
+    const podiumEl = document.getElementById('leaderboard-podium');
+    if (!topThree.length) { if (podiumEl) podiumEl.innerHTML = ''; return ''; }
+    const TIER = {
+        1: { order: 'order-2', avatar: 'w-20 h-20', standH: 'h-24', ring: 'ring-yellow-400', standBg: 'from-yellow-400 to-yellow-600', textColor: 'text-yellow-400', glow: 'shadow-[0_0_16px_rgba(250,204,21,0.45)]' },
+        2: { order: 'order-1', avatar: 'w-16 h-16', standH: 'h-16', ring: 'ring-gray-300', standBg: 'from-gray-300 to-gray-500', textColor: 'text-gray-300', glow: 'shadow-[0_0_10px_rgba(209,213,219,0.35)]' },
+        3: { order: 'order-3', avatar: 'w-16 h-16', standH: 'h-11', ring: 'ring-amber-600', standBg: 'from-amber-500 to-amber-700', textColor: 'text-amber-600', glow: 'shadow-[0_0_10px_rgba(217,119,6,0.35)]' }
+    };
+    const hiddenCls = 'opacity-0 translate-y-6 scale-90';
+    const isStreak = leaderboardSortMode === 'streak';
+    let html = '<div class="flex items-end justify-center gap-3 sm:gap-5 px-2">';
+    for (let i = 0; i < 3; i++) {
+    const rank = i + 1;
+    const t = TIER[rank];
+    const d = topThree[i];
+    if (!d) {
+        html += `
+            <div class="lb-podium-col flex flex-col items-center flex-shrink-0 w-20 sm:w-24 ${t.order} ${hiddenCls} transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:scale-100" data-rank="${rank}">
+                <div class="relative mb-2">
+                    <div class="${t.avatar} rounded-full flex items-center justify-center ring-4 ${t.ring} opacity-40" style="background: var(--secondary-color);">
+                        <i class="fa-solid fa-user text-subtle text-lg"></i>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--card-bg-color)] border-2 border-[var(--card-border-color)] flex items-center justify-center text-xs font-black ${t.textColor}">${rank}</div>
+                </div>
+                <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] min-h-[2.3em] px-0.5 text-subtle">—</p>
+                <p class="flex items-center justify-center gap-1 text-[11px] font-semibold mb-2 text-subtle">—</p>
+                <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner opacity-30"></div>
+            </div>`;
+        continue;
+    }
+    const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
+    const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
+        const valDisplay = isStreak
+            ? (d.streak || 0) + (settings.language === 'id' ? ' hari' : ' days')
+            : formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0));
+        const valGradient = isStreak ? 'from-orange-400 to-amber-500' : 'from-[var(--primary-color)] to-[#a78bfa]';
+        const ringClass = t.ring;
+        const glowClass = t.glow;
+        html += `
+            <div class="lb-podium-col flex flex-col items-center flex-shrink-0 w-20 sm:w-24 ${t.order} ${hiddenCls} transition-all duration-500 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:scale-100" data-rank="${rank}">
+                <div class="relative mb-2">
+                    ${rank === 1 ? `<i class="lb-podium-crown fa-solid fa-crown text-2xl text-yellow-400 absolute -top-6 left-1/2 -translate-x-1/2 drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] opacity-0 scale-50 transition-all duration-350 motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:scale-100"></i>` : ''}
+                    <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="${t.avatar} rounded-full object-cover ring-4 ${ringClass} ${glowClass}">
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--card-bg-color)] border-2 border-[var(--card-border-color)] flex items-center justify-center text-xs font-black ${t.textColor}">${rank}</div>
+                </div>                
+                <p class="font-bold text-xs sm:text-sm text-center leading-[1.15] line-clamp-2 min-h-[2.3em] px-0.5 text-[var(--text-color)]">${displayName}</p>
+                <p class="flex items-center justify-center gap-1 text-[11px] font-semibold mb-2">
+    <i class="fa-solid ${isStreak ? 'fa-fire text-orange-400' : 'fa-star text-yellow-400'} text-[10px]"></i>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r ${valGradient}">${valDisplay}</span>
+</p>
+                <div class="w-full ${t.standH} rounded-t-lg bg-gradient-to-t ${t.standBg} shadow-inner"></div>
+            </div>`;
+    }
+    html += '</div>';
+    if (podiumEl) podiumEl.innerHTML = html;
+    return html;
+}
+function playLeaderboardReveal() {
+    const cols = document.querySelectorAll('#leaderboard-podium .lb-podium-col');
+    if (!cols.length) return;
+    const revealCls = ['opacity-100', 'translate-y-0', 'scale-100'];
+    const hiddenCls = ['opacity-0', 'translate-y-6', 'scale-90'];
+    cols.forEach(el => { el.classList.remove(...revealCls); el.classList.add(...hiddenCls); });
+    const crown = document.querySelector('#leaderboard-podium .lb-podium-crown');
+    if (crown) { crown.classList.remove('opacity-100', 'scale-100'); crown.classList.add('opacity-0', 'scale-50'); }
+    void document.body.offsetWidth;
+    [3, 2, 1].forEach((rank, idx) => {
+        const el = document.querySelector(`#leaderboard-podium .lb-podium-col[data-rank="${rank}"]`);
+        if (el) setTimeout(() => { el.classList.remove(...hiddenCls); el.classList.add(...revealCls); }, idx * 160);
+    });
+    setTimeout(() => {
+        if (crown) { crown.classList.remove('opacity-0', 'scale-50'); crown.classList.add('opacity-100', 'scale-100'); }
+    }, 3 * 160 + 180);
+}
+function updateLeaderboardCountdown() {
+    const el = document.getElementById('leaderboard-countdown-text');
+    if (!el) return;
+    const now = new Date();
+    const day = now.getDay();
+    const daysUntil = ((8 - day) % 7) || 7;
+    const next = new Date(now);
+    next.setDate(now.getDate() + daysUntil);
+    next.setHours(0, 0, 0, 0);
+    const totalMin = Math.max(0, Math.floor((next - now) / 60000));
+    const d = Math.floor(totalMin / 1440);
+    const h = Math.floor((totalMin % 1440) / 60);
+    const m = totalMin % 60;
+    const prefix = translations[settings.language].leaderboardResetsIn;
+    const unit = settings.language === 'id' ? { d: 'h', h: 'j', m: 'm' } : { d: 'd', h: 'h', m: 'm' };
+    el.textContent = d > 0 ? `${prefix} ${d}${unit.d} ${h}${unit.h}` : `${prefix} ${h}${unit.h} ${m}${unit.m}`;
+}
+function startLeaderboardCountdown() {
+    updateLeaderboardCountdown();
+    stopLeaderboardCountdown();
+    lbCountdownInterval = setInterval(updateLeaderboardCountdown, 30000);
+}
+function stopLeaderboardCountdown() {
+    if (lbCountdownInterval) { clearInterval(lbCountdownInterval); lbCountdownInterval = null; }
+}
 const loadLeaderboard = async () => {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer || isLeaderboardLoading) return; 
-
     isLeaderboardLoading = true;
-    if (!listContainer.querySelector('.loader')) {
-        listContainer.innerHTML = `
-        <div class="p-8 flex flex-col items-center justify-center gap-3">
-            <div class="loader"></div>
-            <p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">
-                ${translations[settings.language].loadingLeaderboard || "Loading Leaderboard..."}
-            </p>
-        </div>`;
+    if (!listContainer.querySelector('.skeleton-block')) {
+        listContainer.innerHTML = renderLeaderboardSkeleton();
     }
-
     try {
-        await new Promise(resolve => setTimeout(resolve, 400));
+        if (!navigator.onLine) throw new Error('offline');
         const q = query(collection(db, "users"), orderBy("totalScore", "desc"), limit(50));
-        const querySnapshot = await getDocs(q);
-
+        const [querySnapshot] = await Promise.all([
+            getDocs(q),
+            new Promise(resolve => setTimeout(resolve, SKELETON_MIN_DELAY))
+        ]);
         leaderboardAllData = [];
         querySnapshot.forEach((docSnap) => { leaderboardAllData.push({ id: docSnap.id, ...docSnap.data() }); });
         renderLeaderboardRows(leaderboardAllData, leaderboardCurrentTab);
-
     } catch (error) {
         console.error("Leaderboard Error:", error);
+        const podiumErrEl = document.getElementById('leaderboard-podium');
+        if (podiumErrEl) podiumErrEl.innerHTML = '';
         listContainer.innerHTML = `
             <div class="p-10 text-center flex flex-col items-center gap-4 animate-fadeIn">
                 <div class="w-16 h-16 bg-[rgba(var(--error-color-rgb),0.1)] rounded-full flex items-center justify-center">
@@ -957,17 +1311,16 @@ const loadLeaderboard = async () => {
         isLeaderboardLoading = false; 
     }
 };
-
 function renderLeaderboardRows(allData, tab) {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer) return;
-
     listContainer.style.transition = 'none';
     listContainer.classList.remove('active-slide');
     listContainer.classList.add('leaderboard-slide');
-
     let data = allData;
-    if (tab === 'thisweek') {
+    if (leaderboardSortMode === 'streak') {
+        data = [...allData].sort((a, b) => (b.streak || 0) - (a.streak || 0));
+    } else if (tab === 'thisweek') {
         const now = new Date();
         const monday = new Date(now);
         monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
@@ -976,19 +1329,18 @@ function renderLeaderboardRows(allData, tab) {
         data = allData.filter(d => d.weekStart === currentWeekStart && (d.weeklyScore || 0) > 0)
                       .sort((a, b) => (b.weeklyScore || 0) - (a.weeklyScore || 0));
     }
-    
     let html = '';
     if (!auth || !auth.currentUser) {
         html += `
-            <div class="bg-[var(--secondary-color)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)] mb-4">
+            <div class="bg-[rgba(var(--primary-color-rgb),0.14)] p-4 m-2 rounded-lg border border-[var(--primary-color)] text-center flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(var(--primary-color-rgb),0.2)] mb-4">
                 <p class="text-sm font-semibold text-[var(--text-color)]">${translations[settings.language].leaderboardGuestCTA}</p>
-                <button id="leaderboard-login-btn" class="btn btn-primary px-6 py-2 shadow-md flex items-center gap-2">
+                <button id="leaderboard-login-btn" class="btn btn-primary btn-shimmer px-6 py-2 shadow-md flex items-center gap-2">
                     <i class="fa-brands fa-google"></i> <span>${translations[settings.language].loginBtn}</span>
                 </button>
             </div>`;
     }
-
     if (data.length === 0) {
+        renderLeaderboardPodium([], tab);
         html += `
             <div class="p-10 text-center flex flex-col items-center gap-4 animate-fadeIn">
                 <div class="w-16 h-16 bg-[rgba(var(--primary-color-rgb),0.1)] rounded-full flex items-center justify-center">
@@ -999,7 +1351,7 @@ function renderLeaderboardRows(allData, tab) {
                     <p class="text-[var(--subtle-text-color)] text-sm mt-1">${translations[settings.language].leaderboardNoDataSub || 'Be the first to score points and claim the top spot!'}</p>
                 </div>
             </div>`;
-        listContainer.innerHTML = `<div class="p-1 pb-4">${html}</div>`;
+        listContainer.innerHTML = `<div class="p-1 pb-2">${html}</div>`;
         requestAnimationFrame(() => {
             listContainer.style.transition = '';
             requestAnimationFrame(() => listContainer.classList.add('active-slide'));
@@ -1007,113 +1359,244 @@ function renderLeaderboardRows(allData, tab) {
         document.getElementById('leaderboard-login-btn')?.addEventListener('click', handleLogin);
         return;
     }
-
-    const MEDALS = ['🥇', '🥈', '🥉'];
-    const formatStreak = (days) => {
+    renderLeaderboardPodium(data.slice(0, 3), tab);
+    const formatLbStreak = (days) => {
         if (days <= 0) return `0d`;
         const years = Math.floor(days / 365);
         if (years >= 2) return `${years}yrs`;
         if (years === 1) return `1yr`;
         return `${days}d`;
     };
-
-    data.forEach((d, i) => {
-        const rank = i + 1;
+    const isStreakSort = leaderboardSortMode === 'streak';
+    const buildRow = (d, rank, sticky) => {
         const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
         const userLevel = calculateLevel(d.totalScore || 0);
         const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
-        const streakVal = d.streak || 0;
-        const rankDisplay = rank <= 3 ? MEDALS[rank - 1] : rank;
-        let rankColor = "text-[var(--subtle-text-color)]";
-        if (rank === 1) rankColor = "text-yellow-400";
-        else if (rank === 2) rankColor = "text-gray-300";
-        else if (rank === 3) rankColor = "text-amber-600";
-
-        const rowClass = `grid grid-cols-12 gap-2 p-3 mb-2.5 items-center bg-[var(--card-bg-color)] border rounded-xl text-sm shadow-[0_4px_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:border-[var(--primary-color)] hover:-translate-y-0.5 relative overflow-hidden group ${isMe ? 'border-2 border-[var(--primary-color)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.6)] bg-[rgba(var(--primary-color-rgb),0.15)] z-10' : 'border-[var(--card-border-color)]'}`;
-
-        html += `<div class="${rowClass}">
-            <div class="col-span-1 font-bold text-center ${rankColor}">${rankDisplay}</div>
-            <div class="col-span-4 flex items-center gap-2 pl-1 min-w-0">        
-                <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + displayName}" class="w-7 h-7 rounded-full border border-[var(--card-border-color)] object-cover flex-shrink-0">
-                <span class="font-semibold leading-tight break-words min-w-0 text-left ${isMe ? 'text-[var(--primary-color)]' : ''}">${displayName}</span>
-            </div>
-            <div class="col-span-3 flex justify-center items-center min-w-0">
-            ${streakVal > 0 
-                ? `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-[0_2px_8px_rgba(249,115,22,0.4)] border-0 ring-0 max-w-full">
-                        <i class="fa-solid fa-fire text-white text-xs animate-pulse drop-shadow-[0_0_6px_rgba(255,255,255,0.8)] flex-shrink-0"></i>
-                        <span class="text-white font-black text-xs leading-tight min-w-0 text-left">${formatStreak(streakVal)}</span>
-                   </div>`
-                : `<div class="flex justify-center items-center gap-1 px-2 py-1 bg-gray-500/20 rounded-full border-0 ring-0 max-w-full">
-                        <i class="fa-solid fa-fire text-gray-400 text-xs flex-shrink-0"></i>
-                        <span class="text-gray-400 font-black text-xs leading-tight min-w-0 text-left">${formatStreak(streakVal)}</span>
-                   </div>`
-            }
-            </div> 
-            <div class="col-span-2 flex justify-center items-center">
-                <div class="flex justify-center items-center px-2 py-1 bg-[rgba(var(--primary-color-rgb),0.2)] rounded-lg border border-[rgba(var(--primary-color-rgb),0.3)]">
-                    <span class="text-[var(--primary-color)] font-black text-xs leading-none">Lv.${userLevel}</span>
+        const streakLabel = formatLbStreak(d.streak || 0);
+        const xpVal = formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0));
+        const primaryVal = isStreakSort ? streakLabel : xpVal;
+        const primaryGradient = isStreakSort ? 'from-orange-400 to-amber-500' : 'from-[var(--primary-color)] to-[#a78bfa]';
+        const primaryIcon = isStreakSort ? 'fa-fire text-orange-400' : 'fa-star text-yellow-400';
+        const metaLine = isStreakSort
+            ? `<i class="fa-solid fa-star text-[var(--primary-color)] text-[10px]"></i>${xpVal} &middot; Lv.${userLevel}`
+            : `<i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}`;
+        const wrapClass = sticky
+    ? 'sticky bottom-0 mt-2 border-2 z-10 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]'
+    : `mb-2 ${isMe ? 'border-2 border-[var(--primary-color)] bg-[rgba(var(--primary-color-rgb),0.15)] shadow-[0_0_12px_rgba(var(--primary-color-rgb),0.5)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)]'}`;
+        const rankColor = sticky ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]';
+        const nameColor = sticky ? 'text-[var(--primary-color)]' : (isMe ? 'text-[var(--primary-color)]' : 'text-[var(--text-color)]');
+        const youTag = sticky ? ` <span class="font-normal opacity-70">(${translations[settings.language].leaderboardYou})</span>` : '';
+        return `
+            <div class="flex items-center gap-2.5 p-2.5 rounded-xl border ${wrapClass}">
+                <div class="w-5 flex-shrink-0 text-center font-bold text-xs ${rankColor}">${rank}</div>
+                <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="w-8 h-8 rounded-full object-cover border border-[var(--card-border-color)] flex-shrink-0">
+                <div class="flex-1 min-w-0 text-left">
+                    <p class="font-semibold text-sm truncate ${nameColor}">${displayName}${youTag}</p>
+                    <p class="text-[11px] text-[var(--subtle-text-color)] flex items-center gap-1 mt-0.5">
+                        ${metaLine}
+                    </p>
                 </div>
-            </div>
-            <div class="col-span-2 text-right font-semibold pr-1 text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">
-                ${formatXP(tab === 'thisweek' ? (d.weeklyScore || 0) : (d.totalScore || 0))}
-            </div>
-        </div>`;
-    });
-        
-    listContainer.innerHTML = `<div class="p-1 pb-4">${html}</div>`;
+                <div class="flex-shrink-0 flex items-center gap-1">
+                    <i class="fa-solid ${primaryIcon} text-xs"></i>
+                    <span class="font-bold text-sm bg-clip-text text-transparent bg-gradient-to-r ${primaryGradient}">${primaryVal}</span>
+                </div>
+            </div>`;
+    };
+    data.slice(3).forEach((d, i) => { html += buildRow(d, i + 4, false); });
+    listContainer.innerHTML = `<div class="p-1 pb-2">${html}</div>`;
+    if (auth && auth.currentUser) {
+        const myIndex = data.findIndex(d => d.id === auth.currentUser.uid);
+        if (myIndex !== -1) {
+            listContainer.insertAdjacentHTML('beforeend', buildRow(data[myIndex], myIndex + 1, true));
+        }
+    }
     requestAnimationFrame(() => {
         listContainer.style.transition = '';
         requestAnimationFrame(() => listContainer.classList.add('active-slide'));
     });
     if (!auth || !auth.currentUser) document.getElementById('leaderboard-login-btn')?.addEventListener('click', handleLogin);
+    playLeaderboardReveal();
 }
-
-function filterLeaderboard(tab) {
-    leaderboardCurrentTab = tab;
-    const allBtn = document.getElementById('tab-alltime');
-    const weekBtn = document.getElementById('tab-thisweek');
-    
-    if (allBtn && weekBtn) {
-        if (tab === 'alltime') {
-            allBtn.className = 'btn btn-primary flex-1 py-2 text-sm font-bold';
-            weekBtn.className = 'btn btn-secondary flex-1 py-2 text-sm font-bold';
+function setLeaderboardSort(mode) {
+    if (leaderboardSortMode === mode) return;
+    leaderboardSortMode = mode;
+    const xpBtn = document.getElementById('lb-sort-xp');
+    const streakBtn = document.getElementById('lb-sort-streak');
+    const periodTabs = document.getElementById('lb-period-tabs');
+    const banner = document.getElementById('leaderboard-week-banner');
+    if (xpBtn && streakBtn) {
+        if (mode === 'xp') {
+            xpBtn.style.background = 'rgba(var(--primary-color-rgb),0.18)';
+            xpBtn.style.color = 'var(--primary-color)';
+            xpBtn.style.borderColor = 'rgba(var(--primary-color-rgb),0.4)';
+            streakBtn.style.background = 'transparent';
+            streakBtn.style.color = 'var(--subtle-text-color)';
+            streakBtn.style.borderColor = 'var(--card-border-color)';
         } else {
-            weekBtn.className = 'btn btn-primary flex-1 py-2 text-sm font-bold';
-            allBtn.className = 'btn btn-secondary flex-1 py-2 text-sm font-bold';
+            streakBtn.style.background = 'rgba(249,115,22,0.18)';
+            streakBtn.style.color = '#fb923c';
+            streakBtn.style.borderColor = 'rgba(249,115,22,0.4)';
+            xpBtn.style.background = 'transparent';
+            xpBtn.style.color = 'var(--subtle-text-color)';
+            xpBtn.style.borderColor = 'var(--card-border-color)';
         }
     }
+    if (periodTabs) periodTabs.style.display = mode === 'streak' ? 'none' : 'flex';
+    if (mode === 'streak') {
+        if (banner) banner.style.display = 'none';
+        stopLeaderboardCountdown();
+    } else if (leaderboardCurrentTab === 'thisweek') {
+        if (banner) banner.style.display = 'flex';
+        startLeaderboardCountdown();
+    }
+    if (leaderboardAllData.length > 0) renderLeaderboardRows(leaderboardAllData, leaderboardCurrentTab);
+}
+function filterLeaderboard(tab) {
+    leaderboardCurrentTab = tab;
+    const indicator = document.getElementById('lb-tab-indicator');
+    const allBtn = document.getElementById('tab-alltime');
+    const weekBtn = document.getElementById('tab-thisweek');
+    const banner = document.getElementById('leaderboard-week-banner');
+    if (indicator) indicator.style.transform = tab === 'thisweek' ? 'translateX(100%)' : 'translateX(0)';
+    if (allBtn && weekBtn) {
+        allBtn.classList.remove('text-[#241b03]', 'text-[var(--subtle-text-color)]');
+        weekBtn.classList.remove('text-[#241b03]', 'text-[var(--subtle-text-color)]');
+        allBtn.classList.add(tab === 'alltime' ? 'text-[#241b03]' : 'text-[var(--subtle-text-color)]');
+        weekBtn.classList.add(tab === 'thisweek' ? 'text-[#241b03]' : 'text-[var(--subtle-text-color)]');
+    }
+    if (banner) banner.style.display = tab === 'thisweek' ? 'flex' : 'none';
+    if (tab === 'thisweek') startLeaderboardCountdown();
+    else stopLeaderboardCountdown();
     if (leaderboardAllData.length > 0) renderLeaderboardRows(leaderboardAllData, tab);
 }
-
+// --- Home Screen Leaderboard Preview (top 3, lightweight — separate from the full leaderboard screen) ---
+async function loadHomeLeaderboardPreview() {
+    const wrap = document.getElementById('home-leaderboard-preview');
+    if (!wrap) return;
+    wrap.innerHTML = renderHomeLeaderboardSkeleton();
+    try {
+        if (!navigator.onLine) throw new Error('offline');
+        const q = query(collection(db, "users"), orderBy("totalScore", "desc"), limit(3));
+        const querySnapshot = await getDocs(q);
+        const data = [];
+        querySnapshot.forEach((docSnap) => data.push({ id: docSnap.id, ...docSnap.data() }));
+        renderHomeLeaderboardPreview(data);
+    } catch (error) {
+        console.error("Home leaderboard preview error:", error);
+        wrap.innerHTML = `<p class="text-center text-xs py-3" style="color:var(--subtle-text-color);">${translations[settings.language].leaderboardError || 'Error loading leaderboard.'}</p>`;
+    }
+}
+function renderHomeLeaderboardSkeleton(count = 3) {
+    let rows = '';
+    for (let i = 0; i < count; i++) {
+        rows += `<div class="flex items-center gap-2.5 p-2.5 rounded-xl mb-1.5">
+            <div class="skeleton-block w-5 h-5 rounded-full flex-shrink-0"></div>
+            <div class="skeleton-block w-8 h-8 rounded-full flex-shrink-0"></div>
+            <div class="flex-1 min-w-0"><div class="skeleton-block h-3 w-20 rounded-full mb-1.5"></div><div class="skeleton-block h-2.5 w-14 rounded-full"></div></div>
+            <div class="skeleton-block h-3.5 w-10 rounded-full flex-shrink-0"></div>
+        </div>`;
+    }
+    return rows;
+}
+function renderHomeLeaderboardPreview(data) {
+    const wrap = document.getElementById('home-leaderboard-preview');
+    if (!wrap) return;
+    if (!data || data.length === 0) {
+        wrap.innerHTML = `<p class="text-center text-xs py-3" style="color:var(--subtle-text-color);">${translations[settings.language].leaderboardNoData || 'No data for this period.'}</p>`;
+        return;
+    }
+    const formatPreviewStreak = (days) => {
+        if (days <= 0) return '0d';
+        const years = Math.floor(days / 365);
+        if (years >= 2) return `${years}yrs`;
+        if (years === 1) return `1yr`;
+        return `${days}d`;
+    };
+    const rankTextColors = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
+    wrap.innerHTML = data.map((d, i) => {
+        const isMe = auth && auth.currentUser && auth.currentUser.uid === d.id;
+        const displayName = d.username || 'User' + Math.floor(1000 + Math.random() * 9000);
+        const userLevel = calculateLevel(d.totalScore || 0);
+        const xpVal = formatXP(d.totalScore || 0);
+        const streakLabel = formatPreviewStreak(d.streak || 0);
+        const wrapStyle = isMe
+            ? 'border:2px solid var(--primary-color); background:rgba(var(--primary-color-rgb),0.15); box-shadow:0 0 12px rgba(var(--primary-color-rgb),0.5);'
+            : 'border:1px solid var(--card-border-color); background:var(--card-bg-color);';
+        return `
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl mb-1.5 last:mb-0" style="${wrapStyle}">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 bg-[var(--card-bg-color)] border border-[var(--card-border-color)] ${rankTextColors[i] || 'text-subtle'}">${i + 1}</div>
+            <img src="${d.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName)}" class="w-8 h-8 rounded-full object-cover border border-[var(--card-border-color)] flex-shrink-0">
+            <div class="flex-1 min-w-0 text-left">
+                <p class="font-semibold text-sm truncate" style="color:${isMe ? 'var(--primary-color)' : 'var(--text-color)'};">${displayName}</p>
+                <p class="text-[11px] text-[var(--subtle-text-color)] flex items-center gap-1 mt-0.5">
+                    <i class="fa-solid fa-fire text-orange-500 text-[10px]"></i>${streakLabel} &middot; Lv.${userLevel}
+                </p>
+            </div>
+            <div class="flex-shrink-0 flex items-center gap-1">
+                <i class="fa-solid fa-star text-yellow-400 text-xs"></i>
+                <span class="font-bold text-sm bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary-color)] to-[#a78bfa]">${xpVal}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+// ============================================================================
+// 10B. CAROUSEL HISTORY (Quick Explore & Quiz Modes carousel)
+// ============================================================================
+const CAROUSEL_MIN_DISTINCT = 4; // minimal id berbeda sebelum carousel muncul
+const CAROUSEL_MAX_ITEMS = 4;    // jumlah chip yang ditampilkan
+function _loadHistoryMap(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { return {}; }
+}
+function recordCategoryVisit(id) {
+    if (!id) return;
+    const history = _loadHistoryMap('flagx-category-history');
+    history[id] = Date.now();
+    localStorage.setItem('flagx-category-history', JSON.stringify(history));
+}
+function recordModeVisit(id) {
+    if (!id) return;
+    const history = _loadHistoryMap('flagx-mode-history');
+    history[id] = Date.now();
+    localStorage.setItem('flagx-mode-history', JSON.stringify(history));
+}
+function getCarouselIds(historyKey, validIds) {
+    const history = _loadHistoryMap(historyKey);
+    const visited = validIds.filter(id => history[id]);
+    if (visited.length < CAROUSEL_MIN_DISTINCT) return [];
+    const sorted = visited.sort((a, b) => history[b] - history[a]); // terbaru dulu, urutan ini langsung dipakai (kiri = paling baru)
+    return sorted.slice(0, CAROUSEL_MAX_ITEMS);
+}
 // ============================================================================
 // 11. LIBRARY, BOOKMARKS & FOTD
 // ============================================================================
+const LIBRARY_CATEGORY_DEFS = [
+    { id: 'bookmarks', icon: 'fa-bookmark', action: () => showBookmarksLibrary(), span: 'md:col-span-2' },
+    { id: 'official', icon: 'fa-flag', action: () => showLibrary('official') },
+    { id: 'continent', icon: 'fa-earth-americas', action: () => showScreen('continent-library-screen') },
+    { id: 'subdivisions', icon: 'fa-building-flag', action: () => showScreen('subdivision-library-screen') },
+    { id: 'territories', icon: 'fa-signs-post', action: () => showScreen('territory-library-screen') },
+    { id: 'historical', icon: 'fa-scroll', action: () => showScreen('historical-library-screen') },
+    { id: 'organizations', icon: 'fa-handshake', action: () => showLibrary('organizations') },
+    { id: 'unofficial', icon: 'fa-gavel', action: () => showLibrary('unofficial'), span: 'md:col-span-2' }
+];
 function renderLibraryCategories() {
     const container = document.querySelector('#library-categories-screen .grid');
-    if(!container) return;
+    if (!container) return;
     container.innerHTML = '';
-    const categories = [
-        { id: 'bookmarks', icon: 'fa-bookmark', action: () => showBookmarksLibrary(), span: 'md:col-span-2' },
-        { id: 'official', icon: 'fa-flag', action: () => showLibrary('official') },
-        { id: 'continent', icon: 'fa-earth-americas', action: () => showScreen('continent-library-screen') },
-        { id: 'subdivisions', icon: 'fa-building-flag', action: () => showScreen('subdivision-library-screen') },
-        { id: 'territories', icon: 'fa-signs-post', action: () => showScreen('territory-library-screen') },
-        { id: 'historical', icon: 'fa-scroll', action: () => showScreen('historical-library-screen') },
-        { id: 'organizations', icon: 'fa-handshake', action: () => showLibrary('organizations') },
-        { id: 'unofficial', icon: 'fa-gavel', action: () => showLibrary('unofficial'), span: 'md:col-span-2' } 
-    ];
-    
-    categories.forEach(cat => {
+    LIBRARY_CATEGORY_DEFS.forEach(cat => {
         const card = document.createElement('div');
-        card.className = `card p-4 rounded-lg text-left flex flex-col justify-between ${cat.span || ''}`;
+        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${cat.span || ''}`;
+        card.style.setProperty('--card-accent', accentColors[cat.id] || '');        
         card.innerHTML = `
-            <div><h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${cat.icon} fa-fw mr-3"></i>${translations[settings.language]['lib_'+cat.id+'_title']}</h3></div>
-            <div class="mt-4"><button class="btn btn-secondary w-full py-2" data-translate-key="viewBtn">${translations[settings.language].viewBtn}</button></div>`;
+            <div>
+                <h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${cat.icon} fa-fw mr-3 accent-icon"></i>${translations[settings.language]['lib_'+cat.id+'_title']}</h3>
+                <p class="text-sm text-subtle pl-9">${translations[settings.language]['lib_'+cat.id+'_desc'] || ''}</p>
+            </div>
+            <div class="mt-4"><button class="btn btn-view-outline w-full py-2 flex items-center justify-center gap-2"><span data-translate-key="viewBtn">${translations[settings.language].viewBtn}</span><i class="fa-solid fa-chevron-right text-xs"></i></button></div>`;
         card.querySelector('button').onclick = cat.action;
         container.appendChild(card);
     });
 }
-
 function renderSelectorScreen(screenId, items, action) {
     const container = document.querySelector(`#${screenId} .grid`);
     if (!container) return;
@@ -1126,11 +1609,38 @@ function renderSelectorScreen(screenId, items, action) {
         container.appendChild(button);
     });
 }
-
+// Filter tombol negara di screen Subdivisions/Territories/Historical
+function filterCountrySelector(inputEl) {
+    const screen = inputEl.closest('.screen');
+    if (!screen) return;
+    const searchTerm = inputEl.value.toLowerCase().trim();
+    const grid = screen.querySelector('.grid');
+    if (!grid) return;
+    const buttons = grid.querySelectorAll('button');
+    let visibleCount = 0;
+    buttons.forEach(btn => {
+        const match = btn.textContent.toLowerCase().includes(searchTerm);
+        btn.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+    });
+    let emptyState = grid.querySelector('.selector-empty-state');
+    if (visibleCount === 0 && buttons.length > 0) {
+        if (!emptyState) {
+            emptyState = document.createElement('p');
+            emptyState.className = 'selector-empty-state col-span-full py-10 text-center text-subtle text-sm';
+            emptyState.textContent = translations[settings.language].searchNoFlags || 'No results found.';
+            grid.appendChild(emptyState);
+        } else {
+            emptyState.style.display = 'block';
+        }
+    } else if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+}
 function showLibrary(category, subCategory = null) {
+    recordCategoryVisit(category);
     localStorage.setItem('libraryState', JSON.stringify({ category, subCategory }));
     let data = [], titleKey = '', title = '', backScreen = 'library-categories-screen';
-
     switch(category) {
         case 'official': data = [...officialCountries]; titleKey = 'lib_official_title'; break;
         case 'subdivisions': data = subdivisions.filter(s => s.country === subCategory); title = `${subCategory} Subdivisions`; backScreen = 'subdivision-library-screen'; break;
@@ -1149,7 +1659,6 @@ function showLibrary(category, subCategory = null) {
             }
             title = `${subCategory} Flags`; backScreen = 'continent-library-screen'; break;
     }
-
     const titleEl = document.getElementById('library-title-display');
     if (titleEl) {
         if (titleKey) {
@@ -1159,10 +1668,8 @@ function showLibrary(category, subCategory = null) {
             delete titleEl.dataset.translateKey; titleEl.textContent = title;
         }
     }
-
     const backBtn = document.getElementById('back-from-library-btn');
     if (backBtn) backBtn.onclick = () => { localStorage.removeItem('libraryState'); showScreen(backScreen); };
-
     const grid = document.getElementById('library-grid');
     if (!grid) return;
     
@@ -1175,17 +1682,18 @@ function showLibrary(category, subCategory = null) {
         showScreen('library-display-screen');
         return;
     }
-
     let currentType = null; 
+    let isFirstHeading = true;
     data.forEach(item => {
         if (item.type && item.type !== currentType) {
             currentType = item.type;
             const subHeading = document.createElement('div');
-            subHeading.className = "col-span-full mt-10 mb-4 border-b-2 border-[var(--card-border-color)] pb-3";
-            subHeading.innerHTML = `<h3 class="text-xl font-bold text-[var(--primary-color)] flex items-center gap-3"><i class="fa-solid fa-layer-group opacity-70"></i>${currentType}</h3>`;
+            const topSpacing = isFirstHeading ? 'mt-1.5' : 'mt-10';
+            subHeading.className = `col-span-full ${topSpacing} mb-4 border-b-2 border-[var(--card-border-color)] pb-3`;
+            subHeading.innerHTML = `<h3 class="text-xl font-bold text-[var(--primary-color)] flex items-center justify-start gap-3 text-left"><i class="fa-solid fa-layer-group opacity-70"></i>${currentType}</h3>`;
             fragment.appendChild(subHeading);
+            isFirstHeading = false;
         }
-
         let displayName = item.name;
         let infoInParentheses = "";
         const match = displayName.match(/\(([^)]+)\)/);
@@ -1193,62 +1701,52 @@ function showLibrary(category, subCategory = null) {
             infoInParentheses = match[1];
             displayName = displayName.replace(/\s*\([^)]*\)/g, "").trim();
         }
-
         let badgeHTML = '';
         if (item.status) {
-            const statusLower = item.status.toLowerCase();
-            if (statusLower === 'proposed' || statusLower === 'reconstruction') {
-                let badgeClass = statusLower === 'proposed' ? 'badge-info' : 'badge-warning';
-                let iconClass = statusLower === 'proposed' ? 'fa-file-pen' : 'fa-hammer';
-                badgeHTML = `<span class="status-badge ${badgeClass}"><i class="fa-solid ${iconClass} mr-1"></i>${item.status}</span>`;
-            }
+            const unofficialLabel = (translations[settings.language] && translations[settings.language].unofficialModalTitle) || 'Unofficial';
+            badgeHTML = `<span class="status-badge badge-unofficial" onclick="event.stopPropagation(); openUnofficialInfoModal();"><i class="fa-solid fa-circle-info mr-1"></i>${unofficialLabel}</span>`;
         }
-
-        let subText = item.capital || item.years || item.year || infoInParentheses || item.country || "";
-
+        let subText = item.capital || item.years || item.year || infoInParentheses || "";
+        const sourceBadgeHTML = item.source ? `<span class="flag-source-badge">${item.source}</span>` : '';
         const card = document.createElement('div');
-        card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
+        card.className = 'card lib-flag-card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
         card.dataset.name = item.name.toLowerCase();
         const bmarkSet = loadBookmarks();
         const isStarred = bmarkSet.has(item.name);
-               
+        const flagVisual = hasFlagImage(item)
+            ? `<img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover transition-opacity duration-300" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Dead+Link'; this.style.opacity=1;" onload="this.style.opacity=1" />`
+            : `<span class="text-subtle text-[10px] font-semibold leading-tight px-2 text-center" data-translate-key="noDesignAvailable">${translations[settings.language].noDesignAvailable || 'No design available.'}</span>`;
         card.innerHTML = `
             ${badgeHTML}
             <button class="bookmark-btn absolute top-1 left-1 p-1 z-20 ${isStarred ? 'text-yellow-400' : 'text-gray-500 hover:text-yellow-300'}" onclick="event.stopPropagation(); toggleBookmarkUI(this, '${item.name.replace(/'/g, "\\'")}')">
                 <i class="fa-${isStarred ? 'solid' : 'regular'} fa-star text-sm"></i>
             </button>    
             <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
-                <img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover transition-opacity duration-300" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Link+Mati'; this.style.opacity=1;" onload="this.style.opacity=1" />
-            </div>
+    <div class="flag-img-frame">
+        ${flagVisual}
+        ${sourceBadgeHTML}
+    </div>
+</div>
             <div class="flex-grow flex flex-col justify-center py-1 w-full">
                 <div class="flex flex-col w-full px-1">
                     <p class="font-semibold text-[13px] leading-tight break-words line-clamp-2">${displayName}</p>
                     <p class="text-subtle text-[10px] font-medium mt-1 break-words">${subText || '&nbsp;'}</p>
                 </div>
             </div>
-            <div class="flex flex-col gap-1 mt-2 w-full">
-                <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 shadow-md flex items-center justify-center" onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
-                    <i class="fa-solid fa-book-open mr-1"></i><span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
-                </button>
-                <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 shadow-md flex items-center justify-center" onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i><span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
-                </button>
             </div>`;
+        card.onclick = () => openLibraryQuickSheet(item, card);
         fragment.appendChild(card); 
     });
-
     grid.appendChild(fragment);
     const searchInput = document.getElementById('library-search-input');
     if (searchInput) searchInput.value = '';
     showScreen('library-display-screen');
 }
-
 function filterLibrary(event) {
     const searchTerm = event.target.value.toLowerCase();
     const grid = document.getElementById('library-grid');
     const cards = grid.querySelectorAll('.card');
     let visibleCount = 0;
-
     cards.forEach(card => {
         if ((card.dataset.name || '').includes(searchTerm)) {
             card.style.display = 'flex'; visibleCount++;
@@ -1256,7 +1754,6 @@ function filterLibrary(event) {
             card.style.display = 'none';
         }
     });
-
     let emptyState = document.getElementById('library-empty-state');
     if (visibleCount === 0 && cards.length > 0) {
         if (!emptyState) {
@@ -1275,21 +1772,17 @@ function filterLibrary(event) {
         emptyState.style.display = 'none';
     }
 }
-
 // Bookmarks Logic
 function loadBookmarks() {
     try { return new Set(JSON.parse(localStorage.getItem('flagx-bookmarks') || '[]')); }
     catch(e) { return new Set(); }
 }
-
 function saveBookmarks(bookmarks) {
     localStorage.setItem('flagx-bookmarks', JSON.stringify([...bookmarks]));
 }
-
 function toggleBookmarkUI(btn, flagName) {
     const bookmarks = loadBookmarks();
     let isStarred = false;
-
     if (bookmarks.has(flagName)) {
         bookmarks.delete(flagName);
         btn.classList.remove('text-yellow-400');
@@ -1307,8 +1800,8 @@ function toggleBookmarkUI(btn, flagName) {
     btn.classList.remove('right-1');
     btn.classList.add('left-1', 'absolute', 'top-1');
 }
-
 function showBookmarksLibrary() {
+    recordCategoryVisit('bookmarks'); // ← baru
     const b = loadBookmarks();
     const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
     const data = allFlags.filter(f => b.has(f.name));
@@ -1334,7 +1827,7 @@ function showBookmarksLibrary() {
             <i class="fa-regular fa-star text-5xl mb-4 opacity-40"></i>
             <p class="font-bold text-xl mb-1" data-translate-key="noBookmarksMsg">${translations[settings.language].noBookmarksMsg || "You haven't bookmarked any flags."}</p>
             <p class="text-sm mb-12" data-translate-key="noBookmarksSub">${translations[settings.language].noBookmarksSub || "Explore the library and click the star icon on any flag to save it here for a quick study session!"}</p>
-            <button onclick="startBookmarkQuiz()" class="btn btn-primary w-[80%] max-w-[300px] py-3 text-white font-bold flex items-center justify-center gap-2 mx-auto shadow-lg">
+            <button onclick="openBookmarkQuizTypeModal()" class="btn btn-primary w-[80%] max-w-[300px] py-3 text-white font-bold flex items-center justify-center gap-2 mx-auto shadow-lg">
                 <i class="fa-solid fa-graduation-cap"></i> <span data-translate-key="startBookmarkQuiz">${translations[settings.language].startBookmarkQuiz || 'Study Quiz'}</span>
             </button>
         `;
@@ -1342,48 +1835,86 @@ function showBookmarksLibrary() {
         showScreen('library-display-screen');
         return;
     }
-
     const studyBtn = document.createElement('div');
     studyBtn.className = 'col-span-full mb-2';
-    studyBtn.innerHTML = `<button onclick="startBookmarkQuiz()" class="btn btn-primary w-full py-3 text-white font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-graduation-cap"></i> <span data-translate-key="startBookmarkQuiz">${translations[settings.language].startBookmarkQuiz || 'Study Quiz'}</span></button>`;
+    studyBtn.innerHTML = `<button onclick="openBookmarkQuizTypeModal()" class="btn btn-primary w-full py-3 text-white font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-graduation-cap"></i> <span data-translate-key="startBookmarkQuiz">${translations[settings.language].startBookmarkQuiz || 'Study Quiz'}</span></button>`;
     grid.appendChild(studyBtn);
-
     const fragment = document.createDocumentFragment();
     data.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
+        card.className = 'card lib-flag-card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
         card.dataset.name = item.name.toLowerCase();
+        const flagVisual = hasFlagImage(item)
+            ? `<img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';">`
+            : `<span class="text-subtle text-[10px] font-semibold leading-tight px-2 text-center" data-translate-key="noDesignAvailable">${translations[settings.language].noDesignAvailable || 'No design available.'}</span>`;
+        const sourceBadgeHTML = item.source ? `<span class="flag-source-badge">${item.source}</span>` : '';
         
         card.innerHTML = `
             <button class="bookmark-btn absolute top-1 left-1 p-1 z-20 text-yellow-400" onclick="event.stopPropagation(); toggleBookmarkUI(this, '${item.name.replace(/'/g, "\\'")}')">
                 <i class="fa-solid fa-star text-sm"></i>
             </button>
             <div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center">
-                <img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';">
+                ${flagVisual}
+                ${sourceBadgeHTML}
             </div>
             <div class="flex-grow flex flex-col justify-center py-1 w-full">
                  <div class="flex flex-col w-full px-1">
                     <p class="font-semibold text-[13px] leading-tight break-words line-clamp-2">${item.name}</p>
                  </div>
             </div>
-            <div class="flex flex-col gap-1 mt-2 w-full">
-                <button class="btn bg-[var(--primary-color)] text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 shadow-md flex items-center justify-center" onclick="getFlagDetail('${item.name.replace(/'/g, "\\'")}', '${item.flag}')">
-                    <i class="fa-solid fa-book-open mr-1"></i> <span data-translate-key="viewDetailBtn">${(translations[settings.language] && translations[settings.language].viewDetailBtn) || 'View Detail'}</span>
-                </button>
-                <button class="fun-fact-btn btn text-white rounded-md text-[10px] py-1.5 px-2 w-full hover:scale-105 active:scale-95 shadow-md flex items-center justify-center" onclick="getFunFact('${item.name.replace(/'/g, "\\'")}')">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i><span data-translate-key="funFact">${(translations[settings.language] && translations[settings.language].funFact) || 'Fun Fact'}</span>
-                </button>
             </div>`;
+        card.onclick = () => openLibraryQuickSheet(item, card);
         fragment.appendChild(card);
     });
     grid.appendChild(fragment);
     showScreen('library-display-screen');
 }
-
+function openLibraryQuickSheet(item, cardEl) {
+    const sheet = document.getElementById('library-quick-sheet');
+    if (!sheet) return;
+    if (activeLibCard && activeLibCard !== cardEl) activeLibCard.classList.remove('card-active');
+    activeLibCard = cardEl || null;
+    if (cardEl) cardEl.classList.add('card-active');
+    const imgEl = document.getElementById('quick-sheet-img');
+    const placeholderEl = document.getElementById('quick-sheet-img-placeholder');
+    const nameEl = document.getElementById('quick-sheet-name');
+    const subEl = document.getElementById('quick-sheet-sub');
+    const detailBtn = document.getElementById('quick-sheet-detail-btn');
+    const funFactBtn = document.getElementById('quick-sheet-funfact-btn');
+    if (hasFlagImage(item)) {
+        imgEl.src = item.flag;
+        imgEl.classList.remove('hidden');
+        if (placeholderEl) placeholderEl.classList.add('hidden');
+    } else {
+        imgEl.classList.add('hidden');
+        if (placeholderEl) placeholderEl.classList.remove('hidden');
+    }
+    const parenMatch = item.name.match(/\(([^)]+)\)/);
+    nameEl.textContent = parenMatch ? item.name.replace(/\s*\([^)]*\)/g, '').trim() : item.name;
+    const subText = item.capital || item.years || item.year || (parenMatch ? parenMatch[1] : '') || item.country || '';
+    subEl.textContent = subText;
+    subEl.classList.toggle('hidden', !subText);
+    detailBtn.onclick = () => { closeLibraryQuickSheet(); getFlagDetail(item.name, item.flag); };
+    funFactBtn.onclick = () => { closeLibraryQuickSheet(); getFunFact(item.name); };
+    sheet.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+function closeLibraryQuickSheet() {
+    closeSheet(document.getElementById('library-quick-sheet'));
+}
+function releaseActiveLibCardIfAllClosed() {
+    const quickSheet = document.getElementById('library-quick-sheet');
+    const detailModal = document.getElementById('detail-modal');
+    const funFactModal = document.getElementById('gemini-modal');
+    const stillOpen = [quickSheet, detailModal, funFactModal].some(el => el && el.classList.contains('active'));
+    if (!stillOpen && activeLibCard) {
+        activeLibCard.classList.remove('card-active');
+        activeLibCard = null;
+    }
+}
 function initFlagOfTheDay() {
-    const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
+    const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations].filter(hasFlagImage);
     if (allFlags.length === 0) return;
-
     const today = new Date();
     const dateSeed = today.getFullYear().toString() + (today.getMonth() + 1).toString() + today.getDate().toString();
     
@@ -1394,12 +1925,10 @@ function initFlagOfTheDay() {
     }
     const index = Math.abs(hash) % allFlags.length;
     const dailyFlag = allFlags[index];
-
     const imgEl = document.getElementById('fotd-img');
     const nameEl = document.getElementById('fotd-name');
     const btnEl = document.getElementById('fotd-fun-fact-btn');
     const containerEl = document.getElementById('fotd-container');
-
     if (dailyFlag) {
         if (nameEl) nameEl.textContent = dailyFlag.name;
         if (imgEl) {
@@ -1412,116 +1941,277 @@ function initFlagOfTheDay() {
         if (btnEl) btnEl.onclick = (e) => { e.preventDefault(); getFunFact(dailyFlag.name); };
     }
 }
-
+function initDailyChallengeBanner() {
+    const badge = document.getElementById('daily-done-badge');
+    const sub   = document.getElementById('daily-banner-sub');
+    const isDone = localStorage.getItem('flagx-daily-date') === new Date().toDateString();
+    const lang = settings.language;
+    if (badge) badge.classList.toggle('hidden', !isDone);
+    if (sub) sub.textContent = isDone
+        ? (lang === 'id' ? 'Sudah dimainkan hari ini! Besok ada soal baru.' : 'Completed! Come back tomorrow for new flags.')
+        : (lang === 'id' ? '10 soal · Sama untuk semua orang hari ini' : '10 flags · Same for everyone today');
+}
 // ============================================================================
 // 12. QUIZ ENGINE
 // ============================================================================
+function renderHomeQuickExplore() {
+    const wrap = document.getElementById('home-quick-explore');
+    const section = document.getElementById('home-quick-explore-section');
+    if (!wrap) return;
+    const ids = getCarouselIds('flagx-category-history', LIBRARY_CATEGORY_DEFS.map(c => c.id));
+    wrap.innerHTML = '';
+    if (section) section.style.display = ids.length === 0 ? 'none' : '';
+    if (ids.length === 0) return;
+    ids.forEach(id => {
+        const item = LIBRARY_CATEGORY_DEFS.find(c => c.id === id);
+        if (!item) return;
+        const chip = document.createElement('button');
+        chip.className = 'carousel-chip w-full aspect-square flex flex-col items-center justify-center gap-1.5 rounded-2xl py-2';
+        chip.style.background = 'var(--card-bg-color)';
+        chip.style.border = '1px solid var(--card-border-color)';
+        chip.innerHTML = `
+            <i class="fa-solid ${item.icon} text-lg" style="color:${accentColors[item.id] || 'var(--home-library-accent)'};"></i>
+            <span class="text-[10px] font-bold leading-tight text-center px-1">${translations[settings.language]['lib_'+item.id+'_title']}</span>`;
+        chip.onclick = item.action;
+        wrap.appendChild(chip);
+    });
+}
+const QUIZ_MODE_DEFS = [
+    { id: 'classic', icon: 'fa-globe', action: () => startQuiz('classic') },
+    { id: 'continent', icon: 'fa-map', action: () => showScreen('continent-clash-screen') },
+    { id: 'capital', icon: 'fa-building-columns', action: () => startQuiz('capitalGuess') },
+    { id: 'year', icon: 'fa-calendar-days', action: () => startQuiz('yearGuess') },
+    { id: 'time', icon: 'fa-stopwatch', action: () => startQuiz('timeAttack') },
+    { id: 'survival', icon: 'fa-heart-pulse', action: () => startQuiz('survival') },
+    { id: 'combo', icon: 'fa-bomb', action: () => startQuiz('combo'), span: 'md:col-span-2' }
+];
+// mode param di startQuiz() → id pendek yang dipakai carousel/translation key
+const QUIZ_MODE_PARAM_TO_ID = { classic: 'classic', continent: 'continent', capitalGuess: 'capital', yearGuess: 'year', timeAttack: 'time', survival: 'survival', combo: 'combo' };
+function renderQuizModesCarousel() {
+    const carousel = document.getElementById('quiz-modes-carousel');
+    if (!carousel) return;
+    carousel.innerHTML = '';
+    const ids = getCarouselIds('flagx-mode-history', QUIZ_MODE_DEFS.map(m => m.id));
+    carousel.style.display = ids.length === 0 ? 'none' : 'flex';
+    ids.forEach(id => {
+        const mode = QUIZ_MODE_DEFS.find(m => m.id === id);
+        if (!mode) return;
+        const chip = document.createElement('button');
+        chip.className = 'carousel-chip flex-shrink-0 flex flex-col items-center justify-center gap-1.5 w-24 h-24 rounded-2xl';
+        chip.style.background = 'var(--card-bg-color)';
+        chip.style.border = '1px solid var(--card-border-color)';
+        chip.innerHTML = `
+            <i class="fa-solid ${mode.icon} text-xl" style="color:${accentColors[mode.id] || 'var(--primary-color)'};"></i>
+            <span class="text-[11px] font-bold leading-tight text-center px-1">${translations[settings.language]['mode_'+mode.id+'_title']}</span>`;
+        chip.onclick = mode.action;
+        carousel.appendChild(chip);
+    });
+}
 function renderQuizModes() {
     const container = document.querySelector('#quiz-modes-screen .grid');
-    if(!container) return;
+    if (!container) return;
     container.innerHTML = '';
-    const modes = [
-        { id: 'classic', icon: 'fa-globe', action: () => startQuiz('classic') },
-        { id: 'continent', icon: 'fa-map', action: () => showScreen('continent-clash-screen') },
-        { id: 'capital', icon: 'fa-building-columns', action: () => startQuiz('capitalGuess') },
-        { id: 'year', icon: 'fa-calendar-days', action: () => startQuiz('yearGuess') },
-        { id: 'time', icon: 'fa-stopwatch', action: () => startQuiz('timeAttack') },
-        { id: 'survival', icon: 'fa-heart-pulse', action: () => startQuiz('survival') },
-        { id: 'combo', icon: 'fa-bomb', action: () => startQuiz('combo'), span: 'md:col-span-2' }
-    ];
-    modes.forEach(mode => {
+    renderQuizModesCarousel();
+    QUIZ_MODE_DEFS.forEach(mode => {
         const card = document.createElement('div');
-        card.className = `card p-4 rounded-lg text-left flex flex-col justify-between ${mode.span || ''}`;
+        card.className = `card accent-card p-4 rounded-lg text-left flex flex-col justify-between ${mode.span || ''}`;
+        card.style.setProperty('--card-accent', accentColors[mode.id] || '');        
         card.innerHTML = `
             <div>
-                <h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${mode.icon} fa-fw mr-3"></i>${translations[settings.language]['mode_'+mode.id+'_title']}</h3>
+                <h3 class="font-bold text-lg flex items-center"><i class="fa-solid ${mode.icon} fa-fw mr-3 accent-icon"></i>${translations[settings.language]['mode_'+mode.id+'_title']}</h3>
                 <p class="text-sm text-subtle pl-9">${translations[settings.language]['mode_'+mode.id+'_desc']}</p>
             </div>
-            <div class="mt-4"><button class="btn btn-primary w-full py-2" data-translate-key="playQuizBtn">${translations[settings.language].playQuizBtn}</button></div>`;
+            <div class="mt-4"><button class="btn btn-primary w-full py-2 flex items-center justify-center gap-2"><i class="fa-solid fa-play text-xs"></i><span data-translate-key="playQuizBtn">${translations[settings.language].playQuizBtn}</span></button></div>`;
         card.querySelector('button').onclick = mode.action;
         container.appendChild(card);
     });
 }
-
 function startQuiz(mode, subMode = null) {
-    currentQuiz = { 
+    if (mode === 'daily') { startDailyChallenge(); return; }
+    if (QUIZ_MODE_PARAM_TO_ID[mode]) recordModeVisit(QUIZ_MODE_PARAM_TO_ID[mode]);
+    currentQuiz = {
         ...currentQuiz, mode: mode, lastMode: mode, lastSubMode: subMode, score: 0, questionNumber: 0, 
-        timeLeft: 0, lives: (mode === 'survival' || mode === 'combo') ? 1 : 999, correctCount: 0, wrongCount: 0, 
-        timeoutCount: 0, responseTimes: [], questionStartTime: null, missedFlags: []
+        timeLeft: 0, lives: mode === 'survival' ? 3 : (mode === 'combo' ? 1 : 999), correctCount: 0, wrongCount: 0, 
+        timeoutCount: 0, responseTimes: [], questionStartTime: null, missedFlags: [], comboStreak: 0
     };
-
     const shuffle = (array) => [...array].sort(() => 0.5 - Math.random());
-
     switch (mode) {
-        case 'classic': currentQuiz.dataset = shuffle(officialCountries); currentQuiz.totalQuestions = 20; break;
-        case 'continent': currentQuiz.dataset = shuffle(continentFlags[subMode] || []); currentQuiz.totalQuestions = 20; break;
-        case 'capitalGuess': currentQuiz.dataset = shuffle(officialCountries.filter(f => f.capital)); currentQuiz.totalQuestions = 20; break;
-        case 'yearGuess': currentQuiz.dataset = shuffle(historicalFlags); currentQuiz.totalQuestions = 20; break;
-        case 'timeAttack': currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions, ...territories]); currentQuiz.totalQuestions = Infinity; currentQuiz.timeLeft = 60; break;
-        case 'survival': currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions]); currentQuiz.totalQuestions = 30; break;
+        case 'classic': currentQuiz.dataset = shuffle(officialCountries.filter(hasFlagImage)); currentQuiz.totalQuestions = 20; break;
+        case 'continent': currentQuiz.dataset = shuffle((continentFlags[subMode] || []).filter(hasFlagImage)); currentQuiz.totalQuestions = 20; break;
+        case 'capitalGuess': currentQuiz.dataset = shuffle(capitalGuessData.filter(hasFlagImage)); currentQuiz.totalQuestions = 20; break;
+        case 'yearGuess': currentQuiz.dataset = shuffle(historicalFlags.filter(hasFlagImage)); currentQuiz.totalQuestions = 20; break;
+        case 'timeAttack': currentQuiz.dataset = shuffle(generalFlagPool); currentQuiz.totalQuestions = Infinity; currentQuiz.timeLeft = 60; break;
+        case 'survival': currentQuiz.dataset = shuffle(generalFlagPool); currentQuiz.totalQuestions = 30; break;
         case 'combo': currentQuiz.dataset = shuffle([...officialCountries, ...subdivisions]); currentQuiz.totalQuestions = Infinity; currentQuiz.timeLeft = 90; break;
     }
-
     const scoreEl = document.getElementById('score');
     if (scoreEl) scoreEl.textContent = "0";
-
     const timerEl = document.getElementById('timer');
     const hasTimer = currentQuiz.timeLeft > 0;
-    if (timerEl) { timerEl.style.display = hasTimer ? 'block' : 'none'; timerEl.textContent = currentQuiz.timeLeft; }
-
-    if (hasTimer) startTimer(); 
+    if (timerEl) { timerEl.textContent = currentQuiz.timeLeft; }
+    // Timer bar reset
+    const timerBarWrapper = document.getElementById('timer-bar-wrapper');
+    const timerBarFill = document.getElementById('timer-bar-fill');
+    const timerCountdownRow = document.getElementById('timer-countdown-row');
+    if (timerBarWrapper) timerBarWrapper.classList.toggle('hidden', !hasTimer);
+    if (timerCountdownRow) timerCountdownRow.classList.toggle('hidden', !hasTimer);
+    if (timerBarFill && hasTimer) {
+        timerBarFill.style.transition = 'none';
+        timerBarFill.style.width = '100%';
+        timerBarFill.style.background = 'var(--success-color)';
+    }
+    if (hasTimer) startTimer();
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
     _syncInputModeForMode(mode); 
     showScreen('quiz-screen');
     loadQuestion();
 }
-
-function startBookmarkQuiz() {
+// --- DAILY CHALLENGE ---
+function seededRandom(seed) {
+    let s = seed;
+    return function() {
+        s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+        return (s >>> 0) / 0xFFFFFFFF;
+    };
+}
+function getDailyQuestions() {
+    const t = new Date();
+    const seed = t.getFullYear() * 10000 + (t.getMonth() + 1) * 100 + t.getDate();
+    const rand = seededRandom(seed);
+    const pool = officialCountries.filter(hasFlagImage);
+    const selected = []; const used = new Set();
+    while (selected.length < 10) {
+        const idx = Math.floor(rand() * pool.length);
+        if (!used.has(idx)) { used.add(idx); selected.push(pool[idx]); }
+    }
+    return selected;
+}
+function startDailyChallenge() {
+    const todayStr = new Date().toDateString();
+    if (localStorage.getItem('flagx-daily-date') === todayStr) {
+        showToast(translations[settings.language].dailyCompleted || '✅ Already completed today!');
+        return;
+    }
+    currentQuiz = {
+        ...currentQuiz, mode: 'classic', lastMode: 'daily', lastSubMode: null,
+        score: 0, questionNumber: 0, timeLeft: 0, lives: 999,
+        missedFlags: [], comboStreak: 0,
+        dataset: getDailyQuestions(), totalQuestions: 10,
+        correctCount: 0, wrongCount: 0, timeoutCount: 0,
+        responseTimes: [], questionStartTime: null
+    };
+    const scoreEl = document.getElementById('score');
+    if (scoreEl) scoreEl.textContent = '0';
+    const timerBarWrapper = document.getElementById('timer-bar-wrapper');
+    if (timerBarWrapper) timerBarWrapper.classList.add('hidden');
+    document.getElementById('timer-countdown-row')?.classList.add('hidden');
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
+    _syncInputModeForMode('daily');
+    showScreen('quiz-screen');
+    loadQuestion();
+}
+function startBookmarkQuiz(quizType = 'flag') {
     const b = loadBookmarks();
     if (b.size === 0) { showToast(translations[settings.language].noBookmarksMsg || 'No bookmarks yet!'); return; }
     const allFlags = [...officialCountries, ...subdivisions, ...territories, ...unofficial, ...historicalFlags, ...worldOrganizations];
     const bookmarkedData = allFlags.filter(f => b.has(f.name));
-    if (bookmarkedData.length < 4) { showToast(translations[settings.language].notEnoughBookmarks || 'Add at least 4 bookmarks!'); return; }
-    
+    // distractorSource: dipakai sebagai opsi teks ibu kota (tidak butuh gambar)
+    // pool: subset yang benar-benar punya gambar — hanya ini yang boleh jadi soal
+    const distractorSource = quizType === 'capital' ? bookmarkedData.filter(f => f.capital) : bookmarkedData;
+    const pool = distractorSource.filter(hasFlagImage);
+    if (pool.length < 4) {
+        const msg = quizType === 'capital' ? translations[settings.language].notEnoughBookmarksCapital : translations[settings.language].notEnoughBookmarks;
+        showToast(msg || 'Add at least 4 bookmarked flags to start a quiz.');
+        return;
+    }
     currentQuiz = { 
-        ...currentQuiz, mode: 'classic', lastMode: 'bookmarks', lastSubMode: null, score: 0, questionNumber: 0, 
-        timeLeft: 0, lives: 999, missedFlags: [], dataset: [...bookmarkedData].sort(() => 0.5 - Math.random()), 
-        bookmarkedPool: [...bookmarkedData], totalQuestions: Math.min(bookmarkedData.length, 20),
+        ...currentQuiz, mode: quizType === 'capital' ? 'capitalGuess' : 'classic', lastMode: 'bookmarks', lastSubMode: null,
+        bookmarkQuizType: quizType, score: 0, questionNumber: 0, 
+        timeLeft: 0, lives: 999, missedFlags: [], comboStreak: 0, dataset: [...pool].sort(() => 0.5 - Math.random()), 
+        bookmarkedPool: [...distractorSource], totalQuestions: Math.min(pool.length, 20),
         correctCount: 0, wrongCount: 0, timeoutCount: 0, responseTimes: [], questionStartTime: null 
     };
     
     const scoreEl = document.getElementById('score');
     if (scoreEl) scoreEl.textContent = '0';
-    const timerEl = document.getElementById('timer');
-    if (timerEl) { timerEl.style.display = 'none'; timerEl.textContent = ''; }
+    const timerBarWrapper = document.getElementById('timer-bar-wrapper');
+    if (timerBarWrapper) timerBarWrapper.classList.add('hidden');
+    document.getElementById('timer-countdown-row')?.classList.add('hidden');
+    renderQuizStreak();
+    renderQuizLives();
+    powerUp5050Remaining = POWERUP_5050_MAX_USES;
     _syncInputModeForMode('bookmarks');
     showScreen('quiz-screen');
     loadQuestion();
 }
-
+function openBookmarkQuizTypeModal() {
+    const modal = document.getElementById('bookmark-quiz-type-modal');
+    if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); }
+}
+function closeBookmarkQuizTypeModal() {
+    closeSheet(document.getElementById('bookmark-quiz-type-modal'));
+}
+function selectBookmarkQuizType(quizType) {
+    closeBookmarkQuizTypeModal();
+    startBookmarkQuiz(quizType);
+}
+function openUnofficialInfoModal() {
+    const modal = document.getElementById('unofficial-info-modal');
+    if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); }
+}
+function closeUnofficialInfoModal() {
+    document.getElementById('unofficial-info-modal')?.classList.remove('active');
+    document.body.classList.remove('modal-open');
+}
 function updateQuestionCounter() { 
     const el = document.getElementById('question-counter'); 
     if(el) el.textContent = currentQuiz.totalQuestions !== Infinity ? `${currentQuiz.questionNumber} / ${currentQuiz.totalQuestions}` : `Q: ${currentQuiz.questionNumber}`; 
 }
-
-function startTimer() { 
-    clearInterval(currentQuiz.timerId); 
-    const timerEl = document.getElementById('timer'); 
+function startTimer() {
+    clearInterval(currentQuiz.timerId);
+    const timerEl = document.getElementById('timer');
+    const timerBarFill = document.getElementById('timer-bar-fill');
+    const maxTime = currentQuiz.timeLeft;
     if (timerEl) {
-        timerEl.textContent = currentQuiz.timeLeft; 
-        currentQuiz.timerId = setInterval(() => { 
-            currentQuiz.timeLeft--; 
-            timerEl.textContent = currentQuiz.timeLeft; 
-            if (currentQuiz.timeLeft <= 0) endQuiz(); 
-        }, 1000); 
+        timerEl.textContent = currentQuiz.timeLeft;
+        currentQuiz.timerId = setInterval(() => {
+            currentQuiz.timeLeft--;
+            timerEl.textContent = currentQuiz.timeLeft;
+            // Update visual bar
+            if (timerBarFill) {
+                const pct = (currentQuiz.timeLeft / maxTime) * 100;
+                timerBarFill.style.transition = 'width 1s linear, background 0.5s ease';
+                timerBarFill.style.width = `${pct}%`;
+                if (pct > 60) timerBarFill.style.background = 'var(--success-color)';
+                else if (pct > 25) timerBarFill.style.background = '#f59e0b';
+                else timerBarFill.style.background = 'var(--error-color)';
+            }
+            if (currentQuiz.timeLeft <= 0) endQuiz();
+        }, 1000);
     }
 }
-
+function getTypeNamePlaceholderKey(mode, item) {
+    if (mode === 'capitalGuess') return 'typeCapitalPlaceholder';
+    if (item && item.type === 'International Organization') return 'typeOrgPlaceholder';
+    if (item && item.country && !item.years) return 'typeSubdivisionPlaceholder';
+    return 'typeNamePlaceholder';
+}
 function loadQuestion() {
     if (currentQuiz.questionNumber >= currentQuiz.totalQuestions || currentQuiz.dataset.length === 0) { endQuiz(); return; }
     currentQuiz.questionNumber++;
     currentQuiz.questionStartTime = Date.now();
     updateQuestionCounter();
-
+    powerUp5050Used = false;
+    const powerupRow = document.getElementById('powerup-row');
+    const fiftyBtn = document.getElementById('powerup-5050-btn');
+    const eligible5050 = settings.difficulty >= 4 && !(settings.typeNameMode && currentQuiz.mode !== 'yearGuess') && powerUp5050Remaining > 0;
+    const isLifeModeForRow = currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo';
+    if (powerupRow) powerupRow.classList.toggle('hidden', !(eligible5050 || isLifeModeForRow));
+    if (fiftyBtn) { fiftyBtn.classList.toggle('hidden', !eligible5050); fiftyBtn.disabled = false; fiftyBtn.style.opacity = '1'; fiftyBtn.style.pointerEvents = 'auto'; updatePowerup5050Label(); }
     const progressWrapper = document.getElementById('quiz-progress-wrapper');
     const progressFill = document.getElementById('quiz-progress-fill');
     if (progressWrapper && progressFill) {
@@ -1532,7 +2222,6 @@ function loadQuestion() {
             progressFill.style.width = `${percentage}%`;
         }
     }
-
     const optionsContainer = document.getElementById('options-container');
     const typeNameContainer = document.getElementById('type-name-input-container');
     const typeNameInput = document.getElementById('type-name-input');
@@ -1551,16 +2240,10 @@ function loadQuestion() {
             typeNameInput.value = ''; typeNameInput.disabled = false;
             const mode = currentQuiz.mode;
             const dataset = currentQuiz.dataset;
-            let placeholderKey = 'typeNamePlaceholder'; 
-
-            if (mode === 'capitalGuess') { placeholderKey = 'typeCapitalPlaceholder'; } 
-            else if (dataset && dataset.length > 0) {
-                const nextItem = dataset[0];
-                if (nextItem) {
-                    if (nextItem.country && !nextItem.capital && !nextItem.years) placeholderKey = 'typeSubdivisionPlaceholder';
-                    else if (nextItem.acronym || (nextItem.type && nextItem.type === 'organization')) placeholderKey = 'typeOrgPlaceholder';
-                }
-            }
+            // Untuk mode combo, dataset ini statis/tidak pernah di-shift, jadi tidak relevan
+            // untuk ditebak di sini — placeholder-nya diatur ulang secara akurat di loadComboQuestion().
+            const nextItem = (mode !== 'combo' && dataset && dataset.length > 0) ? dataset[0] : null;
+            const placeholderKey = getTypeNamePlaceholderKey(mode, nextItem);
             typeNameInput.placeholder = translations[settings.language][placeholderKey] || translations['en'][placeholderKey] || 'Type the answer...';
             typeNameInput.setAttribute('data-translate-key', placeholderKey);
             setTimeout(() => typeNameInput.focus(), 100); 
@@ -1571,7 +2254,6 @@ function loadQuestion() {
         optionsContainer.innerHTML = '';
         if (typeNameContainer) typeNameContainer.classList.add('hidden');
     }
-
     flagDisplayQuiz.innerHTML = '';
     if (currentQuiz.mode === 'combo') { loadComboQuestion(); return; }
     
@@ -1579,18 +2261,15 @@ function loadQuestion() {
     if (currentQuiz.mode === 'capitalGuess') generateCapitalQuestion(nextQuestion);
     else generateFlagQuestion(nextQuestion, currentQuiz.mode === 'yearGuess');
 }
-
 function loadComboQuestion() {
     const questionTypes = ['flag', 'capital', 'year'];
     const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-
     if (settings.typeNameMode && randomType === 'year') {
         const optionsContainer = document.getElementById('options-container');
         const typeNameContainer = document.getElementById('type-name-input-container');
         if (optionsContainer) { optionsContainer.className = `grid gap-4 grid-cols-2`; optionsContainer.innerHTML = ''; optionsContainer.style.display = ''; }
         if (typeNameContainer) typeNameContainer.classList.add('hidden');
     }
-
     if (settings.typeNameMode && randomType === 'capital') {
         const optionsContainer = document.getElementById('options-container');
         const typeNameContainer = document.getElementById('type-name-input-container');
@@ -1607,37 +2286,42 @@ function loadComboQuestion() {
         const typeNameFeedback = document.getElementById('type-name-feedback');
         if (typeNameFeedback) typeNameFeedback.classList.add('hidden');
     }
-
     switch(randomType) {
-        case 'capital': generateCapitalQuestion([...capitalGuessData].sort(() => 0.5 - Math.random())[0]); break;
-        case 'year': generateFlagQuestion([...historicalFlags].sort(() => 0.5 - Math.random())[0], true); break;
-        default: generateFlagQuestion([...masterFlagPool].sort(() => 0.5 - Math.random())[0]); break;
+        case 'capital': generateCapitalQuestion(comboCapitalPool.filter(hasFlagImage).sort(() => 0.5 - Math.random())[0]); break;
+        case 'year': generateFlagQuestion(historicalFlags.filter(hasFlagImage).sort(() => 0.5 - Math.random())[0], true); break;
+        default: {
+            const item = [...masterFlagPool].sort(() => 0.5 - Math.random())[0];
+            if (settings.typeNameMode) {
+                const typeNameInput = document.getElementById('type-name-input');
+                const placeholderKey = getTypeNamePlaceholderKey('combo', item);
+                if (typeNameInput) typeNameInput.placeholder = translations[settings.language][placeholderKey] || translations['en'][placeholderKey] || 'Type the answer...';
+            }
+            generateFlagQuestion(item);
+            break;
+        }
     }
 }
-
 function generateCapitalQuestion(targetData) {
     const quizPromptEl = document.getElementById('quiz-prompt');
     const flagDisplayQuiz = document.getElementById('flag-display-quiz');
     const optionsContainer = document.getElementById('options-container');
-
     currentQuiz.correctAnswer = targetData;
     quizPromptEl.dataset.translateKey = 'quizPromptGuessCapital';
     quizPromptEl.dataset.countryName = currentQuiz.correctAnswer.name;
     quizPromptEl.textContent = translations[settings.language].quizPromptGuessCapital.replace('{countryName}', currentQuiz.correctAnswer.name);
     flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag" class="flag-img mx-auto" loading="lazy" />`;
-
     if (settings.typeNameMode) return;
-
     let options = [currentQuiz.correctAnswer.capital];
     let capitalSourcePool;
     if (currentQuiz.lastMode === 'bookmarks' && currentQuiz.bookmarkedPool) {
         const bkCaps = currentQuiz.bookmarkedPool.filter(c => c.capital && c.capital !== currentQuiz.correctAnswer.capital);
-        capitalSourcePool = bkCaps.length >= settings.difficulty - 1 ? bkCaps : officialCountries.filter(c => c.capital && c.capital !== currentQuiz.correctAnswer.capital);
+        capitalSourcePool = bkCaps.length >= settings.difficulty - 1 ? bkCaps : capitalGuessData.filter(c => c.capital !== currentQuiz.correctAnswer.capital);
+    } else if (currentQuiz.mode === 'combo') {
+        capitalSourcePool = comboCapitalPool.filter(c => c.capital !== currentQuiz.correctAnswer.capital);
     } else {
-        capitalSourcePool = officialCountries.filter(c => c.capital && c.capital !== currentQuiz.correctAnswer.capital);
+        capitalSourcePool = capitalGuessData.filter(c => c.capital !== currentQuiz.correctAnswer.capital);
     }
     const distractorCapitals = capitalSourcePool.map(c => c.capital).sort(() => 0.5 - Math.random());
-
     while(options.length < settings.difficulty && distractorCapitals.length > 0) options.push(distractorCapitals.shift());
     
     options.sort(() => 0.5 - Math.random()).forEach(capitalName => {
@@ -1648,7 +2332,6 @@ function generateCapitalQuestion(targetData) {
         optionsContainer.appendChild(button);
     });
 }
-
 function generateFlagQuestion(targetData, isYear = false) {
     const quizPromptEl = document.getElementById('quiz-prompt');
     const flagDisplayQuiz = document.getElementById('flag-display-quiz');
@@ -1661,19 +2344,36 @@ function generateFlagQuestion(targetData, isYear = false) {
     flagDisplayQuiz.innerHTML = `<img src="${currentQuiz.correctAnswer.flag}" alt="Flag" class="flag-img mx-auto" loading="lazy" />`;
     
     let options = [currentQuiz.correctAnswer];
+// SESUDAH
     let globalPool;
-    if (isYear) globalPool = historicalFlags;
-    else if (currentQuiz.lastMode === 'bookmarks' && currentQuiz.bookmarkedPool) globalPool = currentQuiz.bookmarkedPool;
-    else if (worldOrganizations.some(o => o.name === targetData.name)) globalPool = worldOrganizations;
-    else if (historicalFlags.some(h => h.name === targetData.name)) globalPool = historicalFlags;
-    else if (subdivisions.some(s => s.name === targetData.name) || territories.some(t => t.name === targetData.name)) globalPool = [...subdivisions, ...territories];
-    else if (unofficial.some(u => u.name === targetData.name)) globalPool = unofficial;
-    else globalPool = officialCountries;
-
+    if (isYear) {
+        // Year Guess: selalu dari historical
+        globalPool = historicalFlags;
+    } else if (currentQuiz.lastMode === 'bookmarks' && currentQuiz.bookmarkedPool) {
+        globalPool = currentQuiz.bookmarkedPool;
+    } else if (currentQuiz.mode === 'continent') {
+        // Opsi jawaban dibatasi ke benua yang sedang dipilih, bukan seluruh dunia
+        globalPool = continentFlags[currentQuiz.lastSubMode] || officialCountries;
+    } else if (currentQuiz.mode === 'classic' || currentQuiz.lastMode === 'daily') {
+        // Mode ini HANYA boleh official countries
+        globalPool = officialCountries;
+    } else {
+        // Survival, Combo, dll → deteksi via PROPERTI targetData (bukan nama)
+        // Tiap sumber data punya properti unik sehingga tidak bisa collision:
+        // - officialCountries: punya .region/.subRegion, TIDAK punya .type
+        // - subdivisions/territories: punya .type (misal "States", "Provinces")
+        // - unofficial: punya .type = "Unofficial"
+        // - historicalFlags: SATU-SATUNYA yang punya .years
+        // - worldOrganizations: punya .type = "International Organization"
+        if (targetData.type === 'International Organization') globalPool = worldOrganizations;
+        else if (targetData.years)                            globalPool = historicalFlags;
+        else if (targetData.type === 'Unofficial')           globalPool = unofficial;
+        else if (targetData.type)                            globalPool = [...subdivisions, ...territories];
+        else                                                 globalPool = officialCountries;
+    }
     const distractorPool = globalPool.filter(item => item.name !== currentQuiz.correctAnswer.name).sort(() => 0.5 - Math.random());
     while (options.length < settings.difficulty && distractorPool.length > 0) options.push(distractorPool.shift());
     options = options.filter(opt => opt && typeof opt[answerKey] === 'string' && opt[answerKey].trim() !== '');
-
     if (settings.typeNameMode && !isYear) return;
     
     options.sort(() => 0.5 - Math.random()).forEach(option => {
@@ -1684,23 +2384,19 @@ function generateFlagQuestion(targetData, isYear = false) {
         optionsContainer.appendChild(button);
     });
 }
-
 function checkAnswer(selectedOption) { 
     if (currentQuiz.questionStartTime) {
         const responseTime = (Date.now() - currentQuiz.questionStartTime) / 1000;
         currentQuiz.responseTimes.push(responseTime);
         currentQuiz.questionStartTime = null;
     }
-
     Array.from(document.getElementById('options-container').children).forEach(btn => btn.disabled = true); 
     const typeNameSubmit = document.getElementById('type-name-submit');
     if (typeNameSubmit) typeNameSubmit.disabled = true;
-
     const promptKey = document.getElementById('quiz-prompt').dataset.translateKey;
     const isCapitalGuess = promptKey === 'quizPromptGuessCapital';
     const isYearGuess = promptKey === 'quizPromptYear';
     const correctId = isCapitalGuess ? currentQuiz.correctAnswer.capital : (isYearGuess ? currentQuiz.correctAnswer.years : currentQuiz.correctAnswer.name);
-
     let selectedId;
     if (settings.typeNameMode && !isYearGuess && typeof selectedOption === 'string') {
         selectedId = correctId;
@@ -1710,14 +2406,16 @@ function checkAnswer(selectedOption) {
     } else {
         selectedId = typeof selectedOption === 'object' ? (isYearGuess ? selectedOption.years : selectedOption.name) : selectedOption;
     }
-
     const selectedButton = Array.from(document.getElementById('options-container').children).find(b => b.textContent == selectedId); 
     const correctButton = Array.from(document.getElementById('options-container').children).find(b => b.textContent == correctId); 
     const flagImg = document.querySelector("#flag-display-quiz img");
-
     if (selectedId === correctId) { 
         if (settings.soundEnabled !== false) sfxCorrect.play().catch(e => {});
+        if ("vibrate" in navigator) navigator.vibrate([40, 20, 40]); // Haptic: 2 ketukan pendek
         currentQuiz.correctCount++;
+        currentQuiz.comboStreak = (currentQuiz.comboStreak || 0) + 1;
+        renderQuizStreak();
+        if (currentQuiz.comboStreak >= 2) showComboNotification(currentQuiz.comboStreak);
         
         let xpReward = 10; 
         switch (currentQuiz.mode) {
@@ -1747,10 +2445,11 @@ function checkAnswer(selectedOption) {
     } else { 
         if ("vibrate" in navigator) navigator.vibrate(100);
         currentQuiz.wrongCount++;
-        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') currentQuiz.lives--;
+        currentQuiz.comboStreak = 0; // Reset combo
+        renderQuizStreak();
+        if (currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo') { currentQuiz.lives--; renderQuizLives(); }
         if (!currentQuiz.missedFlags) currentQuiz.missedFlags = [];
         if (currentQuiz.correctAnswer && !currentQuiz.missedFlags.some(f => f.name === currentQuiz.correctAnswer.name)) currentQuiz.missedFlags.push(currentQuiz.correctAnswer);
-
         const typeNameFeedback = document.getElementById('type-name-feedback');
         if (settings.typeNameMode && !isYearGuess && typeNameFeedback) {
             const wrongLabel = isCapitalGuess ? (translations[settings.language].wrongCapital || 'Capital:') : (translations[settings.language].wrongAnswer || 'Answer:');
@@ -1772,7 +2471,69 @@ function checkAnswer(selectedOption) {
         setTimeout(() => { if(flagImg) flagImg.classList.remove("correct-flag", "incorrect-flag"); loadQuestion(); }, 1500);
     }
 }
-
+function showComboNotification(count) {
+    document.getElementById('combo-notification')?.remove();
+    const badge = document.createElement('div');
+    badge.id = 'combo-notification';
+    badge.style.cssText = 'position:fixed; top:110px; left:50%; z-index:9999; pointer-events:none; animation: comboIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;';
+    badge.innerHTML = `
+        <div style="background:linear-gradient(90deg,#f97316,#f59e0b); padding:7px 18px; border-radius:999px; font-weight:900; color:#fff; font-size:0.85rem; box-shadow:0 4px 15px rgba(249,115,22,0.4); white-space:nowrap; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.2);">
+            <i class="fa-solid fa-fire" style="filter:drop-shadow(0 0 8px rgba(255,255,255,0.8));"></i>
+            ${count}x COMBO!
+        </div>`;
+    document.body.appendChild(badge);
+    setTimeout(() => badge.remove(), 1500);
+}
+function renderQuizStreak() {
+    const iconEl = document.getElementById('quiz-streak-icon');
+    const valEl = document.getElementById('quiz-streak-value');
+    if (!iconEl || !valEl) return;
+    const streak = currentQuiz.comboStreak || 0;
+    valEl.textContent = streak;
+    const active = streak >= 2;
+    iconEl.style.color = active ? '#f97316' : 'var(--subtle-text-color)';
+    valEl.style.color = active ? '#f97316' : 'var(--subtle-text-color)';
+}
+function renderQuizLives() {
+    const wrap = document.getElementById('quiz-lives-wrap');
+    const heartsEl = document.getElementById('quiz-lives-hearts');
+    if (!wrap || !heartsEl) return;
+    const isLifeMode = currentQuiz.mode === 'survival' || currentQuiz.mode === 'combo';
+    wrap.classList.toggle('hidden', !isLifeMode);
+    if (!isLifeMode) return;
+    const maxLives = currentQuiz.mode === 'survival' ? 3 : 1;
+    let html = '';
+    for (let i = 0; i < maxLives; i++) {
+        const filled = i < currentQuiz.lives;
+        html += `<i class="fa-solid fa-heart text-xs" style="color:${filled ? 'var(--error-color)' : 'var(--card-border-color)'};"></i>`;
+    }
+    heartsEl.innerHTML = html;
+}
+function updatePowerup5050Label() {
+    const labelEl = document.getElementById('powerup-5050-count');
+    if (labelEl) labelEl.textContent = `50:50 (${powerUp5050Remaining})`;
+}
+function use5050Powerup() {
+    if (powerUp5050Used || powerUp5050Remaining <= 0 || (settings.typeNameMode && currentQuiz.mode !== 'yearGuess') || settings.difficulty < 4) return;
+    const optionsContainer = document.getElementById('options-container');
+    if (!optionsContainer) return;
+    const buttons = Array.from(optionsContainer.children).filter(b => !b.disabled);
+    if (buttons.length < settings.difficulty) return;
+    const promptEl = document.getElementById('quiz-prompt');
+    const promptKey = promptEl ? promptEl.dataset.translateKey : null;
+    const isCapitalGuess = promptKey === 'quizPromptGuessCapital';
+    const isYearGuess = promptKey === 'quizPromptYear';
+    const correctId = isCapitalGuess ? currentQuiz.correctAnswer.capital : (isYearGuess ? currentQuiz.correctAnswer.years : currentQuiz.correctAnswer.name);
+    const wrongButtons = buttons.filter(b => b.textContent != correctId);
+    const shuffled = [...wrongButtons].sort(() => 0.5 - Math.random());
+    const eliminateCount = Math.floor(settings.difficulty / 2);
+    shuffled.slice(0, eliminateCount).forEach(b => { b.disabled = true; b.classList.add('fifty-fifty-out'); });
+    powerUp5050Used = true;
+    powerUp5050Remaining--;
+    updatePowerup5050Label();
+    const fiftyBtn = document.getElementById('powerup-5050-btn');
+    if (fiftyBtn) { fiftyBtn.disabled = true; fiftyBtn.style.opacity = '0.4'; fiftyBtn.style.pointerEvents = 'none'; }
+}
 function showFloatingXP(amount, targetElement) {
     const xpPopup = document.createElement('div');
     xpPopup.className = 'xp-floating-text';
@@ -1783,20 +2544,114 @@ function showFloatingXP(amount, targetElement) {
     document.body.appendChild(xpPopup);
     setTimeout(() => { xpPopup.remove(); }, 1000);
 }
-
+const ACHIEVEMENTS = [
+    { id: 'first_quiz', icon: 'fa-flag', name: { en: 'First Quiz', id: 'Kuis Pertama' }, desc: { en: 'Complete your first quiz', id: 'Selesaikan kuis pertamamu' }, test: s => s.totalQuizzes >= 1 },
+    { id: 'on_fire', icon: 'fa-fire', name: { en: 'On Fire', id: 'Lagi Panas' }, desc: { en: '10-day streak', id: 'Streak 10 hari' }, test: s => s.streak >= 10 },
+    { id: 'legend_streak', icon: 'fa-bolt', name: { en: 'Streak Legend', id: 'Legenda Streak' }, desc: { en: '30-day streak', id: 'Streak 30 hari' }, test: s => s.streak >= 30 },
+    { id: 'quiz_nerd', icon: 'fa-book', name: { en: 'Quiz Nerd', id: 'Kutu Kuis' }, desc: { en: '25 quizzes played', id: '25 kuis dimainkan' }, test: s => s.totalQuizzes >= 25 },
+    { id: 'veteran', icon: 'fa-medal', name: { en: 'Veteran', id: 'Veteran' }, desc: { en: '100 quizzes played', id: '100 kuis dimainkan' }, test: s => s.totalQuizzes >= 100 },
+    { id: 'accurate', icon: 'fa-bullseye', name: { en: 'Sharp Shooter', id: 'Akurat' }, desc: { en: '90%+ accuracy (min. 5 quizzes)', id: 'Akurasi 90%+ (min. 5 kuis)' }, test: s => s.totalQuizzes >= 5 && s.accuracy >= 90 },
+    { id: 'perfectionist', icon: 'fa-star', name: { en: 'Perfectionist', id: 'Perfeksionis' }, desc: { en: '5 perfect quizzes', id: '5 kuis sempurna' }, test: s => s.perfectQuizzes >= 5 },
+    { id: 'xp_master', icon: 'fa-crown', name: { en: 'XP Master', id: 'Master XP' }, desc: { en: 'Reach Level 10', id: 'Capai Level 10' }, test: s => s.level >= 10 }
+];
+function getPlayerStatsSnapshot() {
+    const totalQuizzes = parseInt(localStorage.getItem('flagx-totalquizzes') || 0);
+    const lifetimeCorrect = parseInt(localStorage.getItem('flagx-lifetimecorrect') || 0);
+    const lifetimeAttempted = parseInt(localStorage.getItem('flagx-lifetimeattempted') || 0);
+    const perfectQuizzes = parseInt(localStorage.getItem('flagx-perfectquizzes') || 0);
+    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    return {
+        totalQuizzes, perfectQuizzes, streak,
+        accuracy: lifetimeAttempted > 0 ? Math.round((lifetimeCorrect / lifetimeAttempted) * 100) : 0,
+        level: calculateLevel(xp)
+    };
+}
+function renderAchievementSheet() {
+    const stats = getPlayerStatsSnapshot();
+    const lang = settings.language;
+    let unlockedCount = 0;
+    const grid = document.getElementById('achievement-grid');
+    const cardsHtml = ACHIEVEMENTS.map(a => {
+        const unlocked = a.test(stats);
+        if (unlocked) unlockedCount++;
+        return `
+            <div class="flex flex-col items-center text-center p-3 rounded-xl border ${unlocked ? 'border-yellow-400 bg-[rgba(250,204,21,0.1)]' : 'border-[var(--card-border-color)] bg-[var(--card-bg-color)] opacity-40 grayscale'}">
+                <i class="fa-solid ${a.icon} text-2xl mb-2 ${unlocked ? 'text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.6)]' : 'text-[var(--subtle-text-color)]'}"></i>
+                <p class="text-xs font-bold m-0 ${unlocked ? 'text-[var(--text-color)]' : 'text-[var(--subtle-text-color)]'}">${a.name[lang] || a.name.en}</p>
+                <p class="text-[10px] text-[var(--subtle-text-color)] m-0 mt-0.5">${a.desc[lang] || a.desc.en}</p>
+            </div>`;
+    }).join('');
+    if (grid) grid.innerHTML = cardsHtml;
+    const countText = `${unlockedCount}/${ACHIEVEMENTS.length}`;
+    const sheetCount = document.getElementById('achievement-unlock-count');
+    const profileCount = document.getElementById('profile-achievement-count');
+    if (sheetCount) sheetCount.textContent = countText;
+    if (profileCount) profileCount.textContent = countText;
+}
+function renderAchievementPreviewRow() {
+    const row = document.getElementById('profile-achievement-preview-row');
+    if (!row) return;
+    const stats = getPlayerStatsSnapshot();
+    const lang = settings.language;
+    let unlockedCount = 0;
+    row.innerHTML = ACHIEVEMENTS.map(a => {
+        const unlocked = a.test(stats);
+        if (unlocked) unlockedCount++;
+        const label = (a.name[lang] || a.name.en).replace(/"/g, '&quot;');
+        const hexPoints = '15,2 28,9.5 28,24.5 15,32 2,24.5 2,9.5';
+        return `<div class="achv-hex-badge ${unlocked ? 'unlocked' : ''}" title="${label}"><svg class="achv-hex-bg" viewBox="0 0 30 34"><polygon points="${hexPoints}"/></svg><i class="fa-solid ${unlocked ? a.icon : 'fa-lock'}"></i></div>`;
+    }).join('');
+    const progressBar = document.getElementById('profile-achievement-progress-bar');
+    if (progressBar) progressBar.style.width = `${Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}%`;
+}
+function fireConfetti() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#7B47F5', '#EC41B1', '#facc15', '#a78bfa', '#22c55e'];
+    const burst = document.createElement('div');
+    burst.className = 'confetti-burst';
+    for (let i = 0; i < 42; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = (Math.random() * 0.35) + 's';
+        piece.style.animationDuration = (2 + Math.random() * 1.3) + 's';
+        piece.style.setProperty('--confetti-drift', (Math.random() * 160 - 80) + 'px');
+        burst.appendChild(piece);
+    }
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 3600);
+}
 async function endQuiz() {
     clearInterval(currentQuiz.timerId);
     _syncInputModeForMode(null); 
-
     const correct = currentQuiz.correctCount || 0;
     const wrong = currentQuiz.wrongCount || 0;
     const timeouts = currentQuiz.timeoutCount || 0;
     const totalAttempted = correct + wrong + timeouts;
     const accuracy = totalAttempted > 0 ? Math.round((correct / totalAttempted) * 100) : 0;
     const avgTime = currentQuiz.responseTimes && currentQuiz.responseTimes.length > 0 ? (currentQuiz.responseTimes.reduce((a, b) => a + b, 0) / currentQuiz.responseTimes.length).toFixed(1) + 's' : '-';
-
     const elMap = { 'res-correct': correct, 'res-wrong': wrong, 'res-accuracy': accuracy + '%', 'res-avg-time': avgTime };
     Object.entries(elMap).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
+    const newTotalQuizzes = parseInt(localStorage.getItem('flagx-totalquizzes') || 0) + 1;
+    const newLifetimeCorrect = parseInt(localStorage.getItem('flagx-lifetimecorrect') || 0) + correct;
+    const newLifetimeAttempted = parseInt(localStorage.getItem('flagx-lifetimeattempted') || 0) + totalAttempted;
+    localStorage.setItem('flagx-totalquizzes', newTotalQuizzes);
+    localStorage.setItem('flagx-lifetimecorrect', newLifetimeCorrect);
+    localStorage.setItem('flagx-lifetimeattempted', newLifetimeAttempted);
+    if (isRealUser(auth.currentUser)) {
+        try {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await setDoc(userRef, {
+                totalQuizzes: newTotalQuizzes,
+                lifetimeCorrect: newLifetimeCorrect,
+                lifetimeAttempted: newLifetimeAttempted
+            }, { merge: true });
+        } catch (e) {
+            console.error("Failed to sync lifetime stats:", e);
+        }
+    }
    
     saveQuizToHistory({
         mode: currentQuiz.lastMode || currentQuiz.mode,
@@ -1804,7 +2659,6 @@ async function endQuiz() {
         avgTime: currentQuiz.responseTimes && currentQuiz.responseTimes.length > 0 ? parseFloat((currentQuiz.responseTimes.reduce((a, b) => a + b, 0) / currentQuiz.responseTimes.length).toFixed(1)) : null,
         date: new Date().toISOString()
     });
-
     const oldTotalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
     const oldLevel = calculateLevel(oldTotalXP);
     
@@ -1820,7 +2674,6 @@ async function endQuiz() {
     let msgText = "";
     const lang = settings.language;
     const mode = currentQuiz.lastMode || currentQuiz.mode;
-
     if ((mode === 'survival' || mode === 'combo') && currentQuiz.lives <= 0) {
         const key = mode === 'combo' ? 'comboResultMessage' : 'survivalResultMessage';
         msgText = translations[lang][key].replace('{questions}', currentQuiz.questionNumber - 1).replace('{score}', currentQuiz.score);
@@ -1830,30 +2683,37 @@ async function endQuiz() {
         msgText = translations[lang].resultsMessage.replace('{score}', currentQuiz.score);
     }
     resultsMessageEl.textContent = msgText;
-
-    const resultData = { score: currentQuiz.score, msg: msgText, lastMode: currentQuiz.lastMode, lastSubMode: currentQuiz.lastSubMode, missedFlags: currentQuiz.missedFlags, correct: correct, wrong: wrong, accuracy: accuracy, avgTime: avgTime };
+    const resultData = { score: currentQuiz.score, msg: msgText, lastMode: currentQuiz.lastMode, lastSubMode: currentQuiz.lastSubMode, bookmarkQuizType: currentQuiz.bookmarkQuizType, missedFlags: currentQuiz.missedFlags, correct: correct, wrong: wrong, accuracy: accuracy, avgTime: avgTime };
     localStorage.setItem('lastQuizResult', JSON.stringify(resultData));
-
-    document.getElementById('play-again-btn').onclick = () => { if (currentQuiz.lastMode === 'bookmarks') startBookmarkQuiz(); else startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode); };
-
+    document.getElementById('play-again-btn').onclick = () => { if (currentQuiz.lastMode === 'bookmarks') startBookmarkQuiz(currentQuiz.bookmarkQuizType); else startQuiz(currentQuiz.lastMode, currentQuiz.lastSubMode); };
     const shareBtn = document.getElementById('share-score-btn');
     if (shareBtn) shareBtn.onclick = shareScore;
-        
-    const backToMenuBtn = document.getElementById('back-to-menu-btn');
-    if (backToMenuBtn) {
-        if (currentQuiz.lastMode === 'bookmarks') {
-            backToMenuBtn.setAttribute('data-translate-key', 'backToBookmarks');
-            backToMenuBtn.textContent = translations[settings.language].backToBookmarks;
-            backToMenuBtn.onclick = () => showBookmarksLibrary();
-        } else {
-            backToMenuBtn.setAttribute('data-translate-key', 'backToQuizModes');
-            backToMenuBtn.textContent = translations[settings.language].backToQuizModes;
-            backToMenuBtn.onclick = () => showScreen('quiz-modes-screen');
-        }
+            
+const backToMenuBtn = document.getElementById('back-to-menu-btn');
+const backToMenuLabel = document.getElementById('back-to-menu-label');
+if (backToMenuBtn && backToMenuLabel) {
+    if (currentQuiz.lastMode === 'bookmarks') {
+        backToMenuLabel.setAttribute('data-translate-key', 'backToBookmarks');
+        backToMenuLabel.textContent = translations[settings.language].backToBookmarks;
+        backToMenuBtn.onclick = () => showBookmarksLibrary();
+    } else {
+        backToMenuLabel.setAttribute('data-translate-key', 'backToQuizModes');
+        backToMenuLabel.textContent = translations[settings.language].backToQuizModes;
+        backToMenuBtn.onclick = () => showScreen('quiz-modes-screen');
     }
-
+}
     renderMissedFlags(currentQuiz.missedFlags);
     if (currentQuiz.score > 0) updateStreak();
+    // Simpan completion Daily Challenge
+    if ((currentQuiz.lastMode || currentQuiz.mode) === 'daily') {
+        localStorage.setItem('flagx-daily-date', new Date().toDateString());
+        initDailyChallengeBanner(); // Update tampilan banner di home
+    }
+    if (accuracy === 100 && correct > 0) {
+        const newPerfectCount = parseInt(localStorage.getItem('flagx-perfectquizzes') || 0) + 1;
+        localStorage.setItem('flagx-perfectquizzes', newPerfectCount);
+        setTimeout(() => fireConfetti(), 250);
+    }
     showScreen('results-screen');
         
     if (newLevel > oldLevel && currentQuiz.score > 0) {
@@ -1865,7 +2725,6 @@ async function endQuiz() {
         }, 600);
     }
 }
-
 function animateCounter(element, targetValue, duration = 1200) {
     const startTime = performance.now();
     const easeOut = t => 1 - Math.pow(1 - t, 3);
@@ -1879,7 +2738,6 @@ function animateCounter(element, targetValue, duration = 1200) {
     }
     requestAnimationFrame(update);
 }
-
 // ============================================================================
 // 13. STREAK & NOTIFICATIONS
 // ============================================================================
@@ -1890,7 +2748,6 @@ function getStreakMultiplier() {
     if (streak >= 7) return 1.25;
     return 1.0;
 }
-
 function updateStreak() {
     const today = new Date().toDateString();
     const lastPlayed = localStorage.getItem('flagx-last-played');
@@ -1903,20 +2760,18 @@ function updateStreak() {
         
         localStorage.setItem('flagx-last-played', today);
         localStorage.setItem('flagx-streak', streak);
-
-        if (auth && auth.currentUser && db) {
+        const bestStreakSoFar = Math.max(streak, parseInt(localStorage.getItem('flagx-beststreak') || 0));
+        localStorage.setItem('flagx-beststreak', bestStreakSoFar);
+        if (isRealUser(auth.currentUser) && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
             setDoc(userRef, { streak: streak, lastActive: new Date() }, { merge: true }).catch(e => console.error("Streak sync error:", e));
         }
-
         const milestones = [7, 14, 30];
         if (milestones.includes(streak)) setTimeout(() => showStreakMilestoneModal(streak), 1200);
-
-        if (streak === 1 && localStorage.getItem('flagx-notif-asked') !== 'true') setTimeout(() => requestNotificationPermission(), 2500); 
+        if (streak === 1 && 'Notification' in window && Notification.permission !== 'granted') setTimeout(() => requestNotificationPermission(), 2500);
     }
     displayStreak();
 }
-
 function showStreakMilestoneModal(streak) {
     const modal = document.getElementById('streak-milestone-modal');
     const titleEl = document.getElementById('streak-milestone-title');
@@ -1924,28 +2779,26 @@ function showStreakMilestoneModal(streak) {
     const bonusEl = document.getElementById('streak-milestone-bonus');
     const bonusSubEl = document.getElementById('streak-milestone-bonus-sub');
     if (!modal) return;
-
     let multiplierText = ''; let subText = ''; const lang = settings.language;
     if (streak >= 30) { multiplierText = '+100% XP Bonus!'; subText = translations[lang].streakLegendary || 'Legendary dedication! 🏆'; } 
     else if (streak >= 14) { multiplierText = '+50% XP Bonus!'; subText = translations[lang].streakOnFire || "You're on fire! Keep it going!"; } 
     else { multiplierText = '+25% XP Bonus!'; subText = translations[lang].streakWeekly || 'One week streak! Amazing consistency!'; }
-
     if (titleEl) titleEl.textContent = `🔥 ${streak}-Day Streak!`;
     if (subEl) subEl.textContent = subText;
     if (bonusEl) bonusEl.textContent = multiplierText;
     if (bonusSubEl) bonusSubEl.textContent = translations[lang].streakBonusSub || 'Applied to all quiz XP while streak lasts';
-
     modal.classList.add('active'); document.body.classList.add('modal-open');
 }
-
 function displayStreak() {
     const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const labelEl = document.querySelector('[data-translate-key="dayStreak"]');
+    if (labelEl && settings.language === 'en') labelEl.textContent = streak === 1 ? 'day streak' : 'days streak';
     const el = document.getElementById('streak-display');
     const countEl = document.getElementById('streak-count');
     if (countEl) countEl.textContent = streak;
     if (el) { if (streak >= 1) el.classList.remove('hidden'); else el.classList.add('hidden'); }
+    syncDesktopProfileCard();
 }
-
 function checkDailyStreakReset() {
     const lastPlayedStr = localStorage.getItem('flagx-last-played');
     if (!lastPlayedStr) return;
@@ -1953,39 +2806,56 @@ function checkDailyStreakReset() {
     const today = new Date(); today.setHours(0,0,0,0);
     const diffTime = today - lastDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
     if (diffDays > 1) { 
         localStorage.setItem('flagx-streak', '0');
-        if (auth && auth.currentUser && db) {
+        if (isRealUser(auth.currentUser) && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
             setDoc(userRef, { streak: 0 }, { merge: true }).catch(console.error);
         }
     }
 }
-
-function requestNotificationPermission() {
+async function requestNotificationPermission() {
     const notifModal = document.getElementById('notification-modal');
     if (notifModal) notifModal.classList.add('active');
-
-    document.getElementById('accept-notif-btn').onclick = () => {
-        if ("Notification" in window) {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    const lang = settings.language;
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.ready.then(reg => {
-                            reg.showNotification(translations[lang].notifGrantedTitle || "Flag-X Reminder Active!", { body: translations[lang].notifGrantedBody || "Great! We'll remind you to keep your Streak alive.", icon: "logo.png" });
-                        });
-                    }
-                }
-                localStorage.setItem('flagx-notif-asked', 'true');
-                notifModal.classList.remove('active');
-            }); 
-        } 
-    }; 
-    document.getElementById('decline-notif-btn').onclick = () => { localStorage.setItem('flagx-notif-asked', 'true'); notifModal.classList.remove('active'); };
+    document.getElementById('accept-notif-btn').onclick = async () => {        
+        if (notifModal) notifModal.classList.remove('active');
+        if (!('Notification' in window)) return;
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') return;
+            // Update dot & toast SEGERA setelah izin diberikan — jangan digantungkan pada
+            // keberhasilan registrasi FCM token, karena itu bisa gagal karena banyak faktor
+            // di luar kendali (dukungan browser, jaringan, dll).
+            const lang = settings.language;
+            updateNotificationBellUI();
+            showToast(translations[lang].notifGrantedTitle || '🔔 Notifications enabled!');
+            if (!messaging) return;
+            // Daftarkan service worker FCM
+            const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            // Ambil FCM token
+            const fcmToken = await getToken(messaging, {
+                vapidKey: 'BLSoXuuYw_9rW_93NZYX6V88a370iSwzkDhAJBlgzeluiR640_q2IqxGrE4-CS9Nl4tLUA0jY3iAhPfrb4rrkhU',
+                serviceWorkerRegistration: swReg
+            });
+            if (fcmToken && auth.currentUser) {
+                // Simpan token ke Firestore agar Worker bisa baca nanti
+                await setDoc(doc(db, "users", auth.currentUser.uid), {
+                    fcmToken      : fcmToken,
+                    fcmUpdatedAt  : new Date()
+                }, { merge: true });
+            }
+            // Handle notifikasi saat app FOREGROUND
+            onMessage(messaging, (payload) => {
+                showToast(`🔥 ${payload.notification?.title}: ${payload.notification?.body}`);
+            });
+        } catch (error) {
+            console.error('FCM registration error:', error);
+        }
+    };
+    document.getElementById('decline-notif-btn').onclick = () => {       
+        if (notifModal) notifModal.classList.remove('active');
+    };
 }
-
 // ============================================================================
 // 14. HISTORY & SHARE CARD
 // ============================================================================
@@ -1996,18 +2866,14 @@ function saveQuizToHistory(data) {
     if (history.length > 100) history = history.slice(0, 100);
     localStorage.setItem(KEY, JSON.stringify(history));
 }
-
 function showQuizHistory() { renderQuizHistory(); showScreen('history-screen'); }
-
 function renderQuizHistory() {
     const list = document.getElementById('history-list');
     if (!list) return;
     const KEY = 'flagx-quiz-history'; let history = [];
     try { history = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
-
     const filterMode = historyActiveFilter || 'all';
     const sortMode = historyActiveSort || 'newest';
-
     if (filterMode !== 'all') history = history.filter(h => (h.mode || 'classic') === filterMode);
     if (sortMode === 'highest') history = [...history].sort((a, b) => (b.score || 0) - (a.score || 0));
     
@@ -2020,13 +2886,12 @@ function renderQuizHistory() {
             </div>`;
         return;
     }
-
     const modeInfo = { 
-        classic: { color: '#7B47F5', icon: 'fa-globe' }, continent: { color: '#14b8a6', icon: 'fa-map' }, capitalGuess: { color: '#f59e0b', icon: 'fa-building-columns' },
-        yearGuess: { color: '#f97316', icon: 'fa-calendar-days' }, timeAttack: { color: '#3b82f6', icon: 'fa-stopwatch' }, survival: { color: '#28a745', icon: 'fa-heart-pulse' },
-        combo: { color: '#dc3545', icon: 'fa-bomb' }, bookmarks: { color: '#EC41B1', icon: 'fa-bookmark' } 
+        classic: { color: '#7B47F5', icon: 'fa-globe' }, continent: { color: '#28a745', icon: 'fa-map' }, capitalGuess: { color: '#15B4CC', icon: 'fa-building-columns' },
+        yearGuess: { color: '#f59e0b', icon: 'fa-calendar-days' }, timeAttack: { color: '#3b82f6', icon: 'fa-stopwatch' }, survival: { color: '#84CC16', icon: 'fa-heart-pulse' },
+        combo: { color: '#dc3545', icon: 'fa-bomb' }, bookmarks: { color: '#EC41B1', icon: 'fa-bookmark' },
+        daily: { color: '#eab308', icon: 'fa-calendar-check' }
     };
-
     list.innerHTML = history.map((h, i) => {
         const dt = new Date(h.date);
         const locale = settings.language === 'en' ? 'en-US' : 'id-ID';
@@ -2037,9 +2902,8 @@ function renderQuizHistory() {
         let modeName = h.mode ? h.mode.replace(/([A-Z])/g, ' $1').trim() : 'Classic'; modeName = modeName.charAt(0).toUpperCase() + modeName.slice(1);
         const acc = parseFloat(h.accuracy) || 0;
         let badge = acc >= 90 ? '<i class="fa-solid fa-star text-yellow-400 text-xs drop-shadow-md"></i>' : acc >= 70 ? '<i class="fa-solid fa-fire text-orange-500 text-xs drop-shadow-md"></i>' : '';
-
         return `
-        <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-4 text-left animate-fadeIn shadow-[0_4px_15px_rgba(0,0,0,0.1)] relative overflow-hidden group hover:border-[var(--primary-color)] hover:-translate-y-0.5 transition-all duration-300">
+        <div class="bg-[var(--card-bg-color)] border border-[var(--card-border-color)] rounded-xl p-4 text-left animate-fadeIn shadow-[0_4px_15px_rgba(0,0,0,0.1)] relative overflow-hidden group hover:border-[var(--primary-color)] active:border-[var(--primary-color)] hover:-translate-y-0.5 active:-translate-y-0.5 transition-all duration-300">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 opacity-90" style="background-color: ${info.color};"></div>
             <div class="pl-2">
                 <div class="flex justify-between items-center mb-3">
@@ -2059,103 +2923,548 @@ function renderQuizHistory() {
         </div>`;
     }).join('');
 }
-
+// SESUDAH
 function renderMissedFlags(missed) {
-    const section = document.getElementById('missed-flags-section');
     const grid = document.getElementById('missed-flags-grid');
-    const toggleBtn = document.getElementById('toggle-missed-btn');
-    const toggleIcon = document.getElementById('missed-toggle-icon');
-    const label = document.getElementById('missed-flags-label');
-    if (!section || !grid) return;
-    if (!missed || missed.length === 0) { section.classList.add('hidden'); return; }
-    
-    section.classList.remove('hidden');
-    if (label) label.textContent = `${translations[settings.language].missedFlagsTitle || 'Flags to Review'} (${missed.length})`;
+    const emptyState = document.getElementById('missed-flags-empty');
+    const countBadge = document.getElementById('missed-flags-count-badge');
+    if (!grid) return;
+    const hasMissed = !!(missed && missed.length > 0);
+    if (countBadge) {
+        countBadge.textContent = hasMissed ? missed.length : '';
+        countBadge.classList.toggle('hidden', !hasMissed);
+    }
     grid.innerHTML = '';
-    missed.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
-        card.innerHTML = `<div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center"><img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';"></div><p class="font-semibold text-[12px] leading-tight break-words line-clamp-2 w-full px-1">${item.name}</p>`;
-        grid.appendChild(card);
-    });
+    if (hasMissed) {
+        if (emptyState) emptyState.classList.add('hidden');
+        grid.classList.remove('hidden');
+        missed.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
+            card.innerHTML = `<div class="flag-wrapper mb-2 bg-[var(--secondary-color)] rounded overflow-hidden w-full aspect-[3/2] flex items-center justify-center"><img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';"></div><p class="font-semibold text-[12px] leading-tight break-words line-clamp-2 w-full px-1">${item.name}</p>`;
+            grid.appendChild(card);
+        });
+    } else {
+        grid.classList.add('hidden');
+        if (emptyState) emptyState.classList.remove('hidden');
+    }
+}
+// ============================================================================
+// FITUR SHARE CARD (HYBRID CANVAS API)
+// ============================================================================
+// Helper untuk membuat kotak dengan sudut melengkung
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) {
+        ctx.roundRect(x, y, w, h, r);
+    } else {
+        ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+}
+/**
+ * Fungsi Utama: Menggambar Data ke atas Template.
+ */
+async function generateShareCard(returnDataUrl = false) {
+    let canvas = document.getElementById('share-canvas');
+    if (returnDataUrl || !canvas) {
+        canvas = document.createElement('canvas');
+    }
     
-    let isOpen = false;
-    toggleBtn.onclick = () => { isOpen = !isOpen; grid.classList.toggle('hidden', !isOpen); if (toggleIcon) toggleIcon.style.transform = isOpen ? 'rotate(180deg)' : ''; };
-}
-
-function shareScore() {
-    generateShareCard();
-    const modal = document.getElementById('share-card-modal');
-    if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); }
-}
-
-function generateShareCard() {
-    const canvas = document.getElementById('share-canvas');
-    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const W = 400, H = 480;
-    canvas.width = W; canvas.height = H;
-
-    const isLight = document.documentElement.classList.contains('light');
-    const rootStyle = getComputedStyle(document.documentElement);
-    const primaryHex = rootStyle.getPropertyValue('--primary-color').trim() || '#7B47F5';
-    const bgTop = isLight ? '#eef2f9' : '#0f0f23';
-    const bgBottom = isLight ? '#ffffff' : '#1a1a3e';
-    const textColor = isLight ? '#1f2937' : 'rgba(255,255,255,0.6)';
-    const textBold = isLight ? '#000000' : '#ffffff';
-    const cardBg = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)';
-
-    const score = document.getElementById('final-score') ? document.getElementById('final-score').textContent : '0';
-    const totalXP = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-    const lvl = calculateLevel(totalXP);
-    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
-    const correct = currentQuiz.correctCount || 0;
-    const wrong = currentQuiz.wrongCount || 0;
-    const total = correct + wrong + (currentQuiz.timeoutCount || 0);
-    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-
-    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-    bgGrad.addColorStop(0, bgTop); bgGrad.addColorStop(1, bgBottom);
-    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, W, H);
-
-    ctx.beginPath(); ctx.arc(350, 80, 120, 0, Math.PI * 2); ctx.fillStyle = `rgba(${isLight ? '99,102,241' : '123,71,245'}, 0.08)`; ctx.fill();
-    ctx.beginPath(); ctx.arc(50, 400, 90, 0, Math.PI * 2); ctx.fillStyle = `rgba(${isLight ? '99,102,241' : '123,71,245'}, 0.06)`; ctx.fill();
-
-    ctx.fillStyle = primaryHex; ctx.font = 'bold 28px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('FLAG-X', W / 2, 54);
-    ctx.fillStyle = textColor; ctx.font = '13px Arial, sans-serif'; ctx.fillText('Global Flag Quiz', W / 2, 76);
-
-    ctx.fillStyle = textColor; ctx.font = '14px Arial, sans-serif'; ctx.fillText('QUIZ SCORE', W / 2, 120);
-    const scoreGrad = ctx.createLinearGradient(0, 130, 0, 190);
-    scoreGrad.addColorStop(0, primaryHex); scoreGrad.addColorStop(1, isLight ? '#4338ca' : '#a78bfa');
-    ctx.fillStyle = scoreGrad; ctx.font = 'bold 72px Arial, sans-serif'; ctx.fillText(score, W / 2, 195);
-
-    const stats = [{ label: 'Level', value: `Lv.${lvl}` }, { label: 'Accuracy', value: accuracy + '%' }, { label: 'Streak', value: streak > 0 ? `🔥${streak}` : '-' }];
-    const colW = W / 3;
-    stats.forEach((s, i) => {
-        const cx = colW * i + colW / 2;
-        ctx.fillStyle = cardBg; roundRect(ctx, colW * i + 10, 248, colW - 20, 60, 8, cardBg, null);
-        ctx.fillStyle = primaryHex; ctx.font = 'bold 22px Arial, sans-serif'; ctx.fillText(s.value, cx, 278);
-        ctx.fillStyle = textColor; ctx.font = '11px Arial, sans-serif'; ctx.fillText(s.label, cx, 296);
-    });
-
-    ctx.fillStyle = cardBg; roundRect(ctx, 20, 325, W - 40, 50, 8, cardBg, null);
-    ctx.fillStyle = '#4ade80'; ctx.font = 'bold 18px Arial, sans-serif'; ctx.fillText(`✓ ${correct}`, W / 4, 355);
-    ctx.fillStyle = '#f87171'; ctx.fillText(`✗ ${wrong}`, (3 * W) / 4, 355);
-    ctx.fillStyle = textColor; ctx.font = '11px Arial, sans-serif'; ctx.fillText('Correct', W / 4, 370); ctx.fillText('Wrong', (3 * W) / 4, 370);
-
-    ctx.fillStyle = textColor; ctx.font = '12px Arial, sans-serif'; ctx.fillText('flag-x-project.pages.dev', W / 2, 430);
-    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    ctx.fillText(today, W / 2, 448);
+    // Setup Resolusi (1080x1440 standar portrait)
+    const W = 1080;
+    const H = 1440; 
+    canvas.width = W; 
+    canvas.height = H;
+    // PASTIKAN FONT POPPINS TER-LOAD
+    await document.fonts.ready;
+    // === 1. AMBIL DATA STATISTIK ===
+    const saved = (() => { try { const r = localStorage.getItem('lastQuizResult'); return r ? JSON.parse(r) : null; } catch { return null; } })();
+    const score = parseInt(document.getElementById('final-score')?.textContent || saved?.score || 0);
+    const correct = (typeof currentQuiz !== 'undefined' ? currentQuiz.correctCount : null) || saved?.correct || 0;
+    const wrong = (typeof currentQuiz !== 'undefined' ? currentQuiz.wrongCount : null) || saved?.wrong || 0;
+    const timeoutCount = typeof currentQuiz !== 'undefined' && currentQuiz.timeoutCount ? currentQuiz.timeoutCount : 0;
+    
+    const accuracy = saved?.accuracy ?? (() => { const t = correct + wrong + timeoutCount; return t > 0 ? Math.round((correct / t) * 100) : 0; })();
+    const avgTime = saved?.avgTime || '0.0s';
+    try {
+        // === 2. LOAD TEMPLATE GAMBAR LOKAL (KOSONG) ===
+        const templateImg = new Image();
+        templateImg.crossOrigin = "Anonymous"; 
+        templateImg.src = 'card-template.png'; 
+        await new Promise((resolve, reject) => {
+            templateImg.onload = resolve;
+            templateImg.onerror = () => reject(new Error("Gagal load template gambar."));
+        });
+        // === 3. GAMBAR LAYER BACKGROUND ===
+        ctx.drawImage(templateImg, 0, 0, W, H);
+        // === 4. GAMBAR ELEMEN DINAMIS OVERLAY ===
+        const cx = W / 2; // Sumbu Tengah Horizontal (540)
+        
+        // KUNCI PRESISI: Rata tengah secara absolut
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle'; 
+                // -- Teks Title --
+        ctx.font = 'bold 76px "Poppins", sans-serif';        
+        // Buat gradasi untuk "Your Result"
+        const titleGrd = ctx.createLinearGradient(cx, 190, cx, 260);
+        titleGrd.addColorStop(0, '#ffffff');      // Atas: Putih
+        titleGrd.addColorStop(0.4, '#ffffff');    // Mulai transisi warna dari 40% area atas
+        titleGrd.addColorStop(1, '#e8a5f8');      // Bawah: Pink-ungu pastel yang lebih nyata
+        ctx.fillStyle = titleGrd;
+        ctx.fillText('Your Result', cx, 230); 
+                // -- Circular Progress Arc (Speedometer Style) --
+const cy = 570;  
+const R = 240;   
+const startAngle = Math.PI * 0.65; 
+const endAngleBase = Math.PI * 2.35; 
+const totalAngleSpread = endAngleBase - startAngle;
+const totalFraction = totalAngleSpread / (Math.PI * 2);
+// ======== A. Garis Tipis (Inner & Outer Ring) ========
+ctx.save();
+ctx.lineCap = 'round';
+// 1. Outer Thin Ring (Dibuat lebih tebal & ada aksen Cyan Blue di awal)
+const outerGrd = ctx.createConicGradient(startAngle - 0.1, cx, cy);
+// Cyan → Blue → Indigo → Purple → Pink
+outerGrd.addColorStop(0.00, 'rgba(18, 168, 224, 0.85)');              // Sedikit lebih blue
+outerGrd.addColorStop(0.015, 'rgba(18, 168, 224, 0.85)');
+outerGrd.addColorStop(totalFraction * 0.32, 'rgba(59, 130, 246, 0.82)'); // Blue muncul lebih cepat
+outerGrd.addColorStop(totalFraction * 0.68, 'rgba(139, 92, 246, 0.76)'); // Indigo/Purple
+outerGrd.addColorStop(totalFraction, 'rgba(236, 72, 153, 0.85)');        // Pink
+outerGrd.addColorStop(1, 'rgba(236, 72, 153, 0)');
+ctx.lineWidth = 3.5; // Lebih tebal dari sebelumnya (2)
+ctx.strokeStyle = outerGrd;
+ctx.shadowBlur  = 15;
+ctx.shadowColor = 'rgba(6, 182, 212, 0.6)'; // Glow biru dingin
+ctx.beginPath(); ctx.arc(cx, cy, R + 35, startAngle, endAngleBase); ctx.stroke();
+// 2. Inner Thin Ring (Dibuat lebih tebal & tegas)
+const innerGrd = ctx.createConicGradient(startAngle - 0.1, cx, cy);
+// Cyan → Blue → Indigo → Purple → Pink (lebih lembut)
+innerGrd.addColorStop(0.00, 'rgba(14, 165, 233, 0.82)');               // Cyan tipis
+innerGrd.addColorStop(0.04, 'rgba(14, 165, 233, 0.82)');
+innerGrd.addColorStop(totalFraction * 0.18, 'rgba(30, 64, 175, 0.88)'); // Deep Blue
+innerGrd.addColorStop(totalFraction * 0.38, 'rgba(79, 70, 229, 0.84)'); // Indigo
+innerGrd.addColorStop(totalFraction * 0.68, 'rgba(168, 85, 247, 0.76)'); // Purple
+innerGrd.addColorStop(totalFraction, 'rgba(236, 72, 153, 0.85)');        // Pink
+innerGrd.addColorStop(1, 'rgba(236, 72, 153, 0)');
+ctx.lineWidth = 3.5; // Lebih tebal dari sebelumnya (2)
+ctx.strokeStyle = innerGrd;
+ctx.shadowBlur  = 15;
+ctx.shadowColor = 'rgba(168, 85, 247, 0.6)'; // Glow ungu hangat
+ctx.beginPath(); ctx.arc(cx, cy, R - 35, startAngle, endAngleBase); ctx.stroke();
+ctx.restore();
+// ======== B. Kalkulasi Progress ========
+const progressRatio = Math.min(Math.max(accuracy / 100, 0), 1);
+const arcEnd = startAngle + (totalAngleSpread * progressRatio);
+// ======== C. Track Kosong (Sudah Akurat) ========
+if (progressRatio < 1) {
+    ctx.save();
+    const trackGrd = ctx.createConicGradient(startAngle, cx, cy);
+    trackGrd.addColorStop(0, 'rgba(160, 150, 190, 0.12)'); 
+    trackGrd.addColorStop(totalFraction, 'rgba(220, 160, 210, 0.08)'); 
+    trackGrd.addColorStop(1, 'rgba(220, 160, 210, 0)');
+    ctx.beginPath(); ctx.arc(cx, cy, R, arcEnd, endAngleBase);
+    ctx.strokeStyle = trackGrd;
+    ctx.lineWidth = 28;
+    ctx.shadowBlur  = 6;
+    ctx.shadowColor = 'rgba(160, 150, 190, 0.15)';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(cx, cy, R, arcEnd, endAngleBase);
+    ctx.strokeStyle = 'rgba(180, 170, 210, 0.35)'; 
+    ctx.lineWidth = 28;
+    ctx.setLineDash([4, 8]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore(); 
 }
-
-function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
-    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-    if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+// ======== D. Main Progress Arc & Dynamic Glow ========
+if (progressRatio > 0) {
+    ctx.save(); 
+    // Menggeser start gradient mundur sebesar 0.2 radian agar lineCap tidak bocor warna pink
+    const gradientOffset = 0.2;
+    const arcGrd = ctx.createConicGradient(startAngle - gradientOffset, cx, cy);
+    
+    const totalCircle = Math.PI * 2;
+    const stopStart = gradientOffset / totalCircle; 
+    const stopEnd = (gradientOffset + totalAngleSpread * progressRatio) / totalCircle; 
+    const stopMax = Math.max(stopEnd, 0.0001);
+    // Distribusi spektrum warna dinamis yang aman dari kebocoran
+arcGrd.addColorStop(0, '#0891b2'); // Cyan sedikit (padding)
+arcGrd.addColorStop(stopStart, '#0891b2'); // Start aktual (cyan)
+arcGrd.addColorStop(stopStart + (stopMax - stopStart) * 0.10, '#2563eb'); // Blue
+arcGrd.addColorStop(stopStart + (stopMax - stopStart) * 0.32, '#4f46e5'); // Indigo
+arcGrd.addColorStop(stopStart + (stopMax - stopStart) * 0.58, '#9333ea'); // Purple
+arcGrd.addColorStop(stopStart + (stopMax - stopStart) * 0.82, '#d946ef'); // Magenta
+arcGrd.addColorStop(stopMax, '#ec4899'); // Pink
+arcGrd.addColorStop(1, '#ec4899'); // Lock pink
+    ctx.beginPath(); 
+    ctx.arc(cx, cy, R, startAngle, arcEnd);
+    ctx.lineCap = 'round';
+    // --- Efek Gradient Glow Alami (Menggunakan ketebalan bertingkat + opacity) ---
+    // Pass 1: Glow terluar yang sangat halus dan super lebar
+    ctx.save();
+    ctx.lineWidth = 65;
+    ctx.globalAlpha = 0.20;
+    ctx.strokeStyle = arcGrd;
+    ctx.stroke();
+    ctx.restore();
+    // Pass 2: Glow medium yang memperkuat intensitas warna neon
+    ctx.save();
+    ctx.lineWidth = 42;
+    ctx.globalAlpha = 0.40;
+    ctx.strokeStyle = arcGrd;
+    ctx.stroke();
+    ctx.restore();
+    // Pass 3: Batang Arc Utama (Solid)
+    ctx.save();
+    ctx.lineWidth = 28;
+    ctx.strokeStyle = arcGrd;
+    ctx.stroke();
+    // Pass 4: Inti cahaya putih/terang di bagian tengah arc (Neon Core Highlight)
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255, 235, 255, 0.65)';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ffffff';
+    ctx.stroke();
+    ctx.restore();
+    // ======== E. Flare (Overexposure Bloom Physics) ========
+    const dotX = cx + Math.cos(arcEnd) * R;
+    const dotY = cy + Math.sin(arcEnd) * R;
+    ctx.save(); 
+    // 1. Aura Ungu Terluar (Ambient Bloom)
+    const amb = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 150);
+    amb.addColorStop(0,    'rgba(236, 72, 153, 0.25)');
+    amb.addColorStop(0.35, 'rgba(147, 51, 234, 0.12)');
+    amb.addColorStop(1,    'rgba(147, 51, 234, 0)');
+    ctx.fillStyle = amb;
+    ctx.beginPath(); ctx.arc(dotX, dotY, 150, 0, Math.PI * 2); ctx.fill();
+    // 2. Aura Pink Pekat (Medium Bloom)
+    const bloom = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 65);
+    bloom.addColorStop(0,    'rgba(255, 105, 180, 0.75)'); 
+    bloom.addColorStop(0.50, 'rgba(236, 72, 153, 0.25)');
+    bloom.addColorStop(1,    'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = bloom;
+    ctx.beginPath(); ctx.arc(dotX, dotY, 65, 0, Math.PI * 2); ctx.fill();
+    // 3. Inti Gradasi Overexposure (Membaurkan putih ke pink tanpa garis tegas)
+    const inner = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 26);
+    inner.addColorStop(0,   'rgba(255, 255, 255, 1.0)');  // Putih murni di pusat absolut
+    inner.addColorStop(0.2, 'rgba(255, 215, 240, 0.95)'); // Putih semburat pink hangat
+    inner.addColorStop(0.5, 'rgba(236, 72, 153, 0.55)');  // Melembut menjadi pink pudar
+    inner.addColorStop(1,   'rgba(236, 72, 153, 0)');
+    ctx.fillStyle = inner;
+    ctx.beginPath(); ctx.arc(dotX, dotY, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.restore(); 
+    ctx.restore(); 
 }
-
+ctx.save();
+// -- Ambient Light yang Lebih Halus (Soft Bloom) --
+ctx.save();
+ctx.globalCompositeOperation = 'screen'; 
+// Radius pas di area ring
+const ambCenter = ctx.createRadialGradient(cx, cy, 0, cx, cy, R + 20);
+// Turunkan alpha ke 0.05 - 0.20 agar lebih subtle
+ambCenter.addColorStop(0,    'rgba(168, 85, 247, 0.05)'); // Hampir transparan di tengah
+ambCenter.addColorStop(0.5,  'rgba(139, 92, 246, 0.12)'); // Transisi tipis
+ambCenter.addColorStop(0.9,  'rgba(120, 50, 220, 0.20)'); // Peak intensitas hanya 0.20
+ambCenter.addColorStop(1,    'rgba(120, 50, 220, 0)');
+ctx.fillStyle = ambCenter;
+ctx.fillRect(cx - (R + 20), cy - (R + 20), (R + 20) * 2, (R + 20) * 2); 
+ctx.restore();
+                // -- Teks "SCORE" --
+const scoreY = cy - 120;
+ctx.font = '600 28px "Poppins", sans-serif';
+ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+ctx.textBaseline = 'middle'; // ← FIX centering: visual center teks = scoreY
+const scoreText = 'SCORE';
+if(ctx.letterSpacing !== undefined) ctx.letterSpacing = "6px";
+ctx.fillText(scoreText, cx, scoreY);
+const scoreTextWidth = ctx.measureText(scoreText).width;
+if(ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+ctx.textBaseline = 'alphabetic'; // reset
+// -- Garis Kanan Kiri --
+const lineMargin = 25;
+const lineLength = 50;
+const lineThickness = 1.5;
+const tipH = 1; // ← FIX pointy: ujung flat kecil, bukan satu titik
+// Garis Kiri
+const leftStartX = cx - (scoreTextWidth / 2) - lineMargin;
+const leftEndX = leftStartX - lineLength;
+const leftGrd = ctx.createLinearGradient(leftStartX, scoreY, leftEndX, scoreY);
+leftGrd.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+leftGrd.addColorStop(1, 'rgba(255, 255, 255, 0)');
+ctx.fillStyle = leftGrd;
+ctx.beginPath();
+ctx.moveTo(leftStartX, scoreY - lineThickness);
+ctx.lineTo(leftEndX,   scoreY - tipH); // ← ujung atas, tidak lancip sempurna
+ctx.lineTo(leftEndX,   scoreY + tipH); // ← ujung bawah, flat kecil
+ctx.lineTo(leftStartX, scoreY + lineThickness);
+ctx.fill();
+// Garis Kanan
+const rightStartX = cx + (scoreTextWidth / 2) + lineMargin;
+const rightEndX = rightStartX + lineLength;
+const rightGrd = ctx.createLinearGradient(rightStartX, scoreY, rightEndX, scoreY);
+rightGrd.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+rightGrd.addColorStop(1, 'rgba(255, 255, 255, 0)');
+ctx.fillStyle = rightGrd;
+ctx.beginPath();
+ctx.moveTo(rightStartX, scoreY - lineThickness);
+ctx.lineTo(rightEndX,   scoreY - tipH); // ← ujung atas
+ctx.lineTo(rightEndX,   scoreY + tipH); // ← ujung bawah
+ctx.lineTo(rightStartX, scoreY + lineThickness);
+ctx.fill();
+ctx.restore();
+        // -- Teks Skor Angka Besar dengan Gradasi Putih-Ungu-Pink --
+        ctx.font = 'bold 180px "Poppins", sans-serif';        
+        // Sesuaikan titik Y gradasi agar menyelimuti tinggi font angka
+        const scoreGradient = ctx.createLinearGradient(cx, cy - 80, cx, cy + 90);
+        scoreGradient.addColorStop(0, '#ffffff');      
+        scoreGradient.addColorStop(0.4, '#ffffff');   // Putih sampai ke agak tengah
+        scoreGradient.addColorStop(1, '#e8a5f8');     // Bawah: Pink-ungu pastel
+        ctx.fillStyle = scoreGradient;
+        ctx.fillText(score, cx, cy + 44); 
+        
+        // Teks "/ 100%"
+        ctx.font = '600 40px "Poppins", sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillText('/ 100%', cx, cy + 180);              
+        
+                // -- Pill Box Glassmorphism --
+const isExcellent = accuracy >= 90;
+const perfMsg = isExcellent ? 'Excellent! You did an amazing job!' :
+                accuracy >= 70 ? 'Great work! Keep it up!' :
+                accuracy >= 50 ? 'Good effort! Practice more!' :
+                                  'Keep practicing!';
+ctx.font = 'italic 600 32px "Poppins", sans-serif';
+const textWidth = ctx.measureText(perfMsg).width;
+const iconAreaW = 90;   // area crown di kiri
+const textPadX  = 45;   // padding kiri & kanan teks (equal → teks seimbang)
+const pillW = isExcellent
+    ? iconAreaW + textWidth + (textPadX * 2)  // crown + teks centered di sisa area
+    : textWidth + (textPadX * 2);             // tanpa crown, full center
+const pillH = 84;
+const pillR = pillH / 2;
+const pillX  = cx - (pillW / 2);
+const pillY  = cy + R + 65;
+const pillCY = pillY + pillH / 2;
+ctx.save();
+// ======================================================
+// A. Glass Background
+// ======================================================
+ctx.beginPath();
+roundRect(ctx, pillX, pillY, pillW, pillH, pillR);
+const pillFill = ctx.createLinearGradient(
+    pillX,
+    pillY,
+    pillX,
+    pillY + pillH
+);
+pillFill.addColorStop(0.00, 'rgba(100,60,205,.42)');
+pillFill.addColorStop(0.55, 'rgba(78,36,170,.44)');
+pillFill.addColorStop(1.00, 'rgba(48,20,115,.46)');
+ctx.fillStyle = pillFill;
+// Soft outer glow
+ctx.shadowBlur = 36;
+ctx.shadowColor = 'rgba(125,90,255,.28)';
+ctx.fill();
+ctx.shadowBlur = 0;
+// ======================================================
+// B. Glass Highlight + Border
+// ======================================================
+// Top glass highlight
+ctx.save();
+ctx.beginPath();
+roundRect(ctx, pillX, pillY, pillW, pillH, pillR);
+ctx.clip();
+const gloss = ctx.createLinearGradient(
+    pillX,
+    pillY,
+    pillX,
+    pillY + pillH * 0.55
+);
+gloss.addColorStop(0.00, 'rgba(255,255,255,.20)');
+gloss.addColorStop(0.35, 'rgba(255,255,255,.08)');
+gloss.addColorStop(1.00, 'rgba(255,255,255,0)');
+ctx.fillStyle = gloss;
+ctx.fillRect(
+    pillX,
+    pillY,
+    pillW,
+    pillH * 0.55
+);
+ctx.restore();
+// Bottom reflection
+ctx.save();
+ctx.beginPath();
+roundRect(ctx, pillX, pillY, pillW, pillH, pillR);
+ctx.clip();
+const bottomGlow = ctx.createLinearGradient(
+    pillX,
+    pillY + pillH * .65,
+    pillX,
+    pillY + pillH
+);
+bottomGlow.addColorStop(0, 'rgba(255,255,255,0)');
+bottomGlow.addColorStop(1, 'rgba(255,255,255,.05)');
+ctx.fillStyle = bottomGlow;
+ctx.fillRect(
+    pillX,
+    pillY,
+    pillW,
+    pillH
+);
+ctx.restore();
+// ======================================================
+// Gradient Glass Border
+// ======================================================
+// ---------- Layer 1 : Gradient Border + Gradient Glow ----------
+ctx.beginPath();
+roundRect(ctx, pillX, pillY, pillW, pillH, pillR);
+const borderGrad = ctx.createLinearGradient(
+    pillX,
+    pillY,
+    pillX + pillW,
+    pillY + pillH
+);
+borderGrad.addColorStop(0.00, 'rgba(45,105,255,.95)');   // Deep Electric Blue
+borderGrad.addColorStop(0.18, 'rgba(75,110,255,.95)');   // Blue
+borderGrad.addColorStop(0.40, 'rgba(108,74,255,.96)');   // Indigo
+borderGrad.addColorStop(0.60, 'rgba(145,62,255,.96)');   // Purple
+borderGrad.addColorStop(0.82, 'rgba(225,78,245,.95)');   // Pink Purple
+borderGrad.addColorStop(1.00, 'rgba(255,90,205,.95)');   // Pink
+ctx.strokeStyle = borderGrad;
+ctx.lineWidth = 2.4;
+ctx.shadowBlur = 16;
+ctx.shadowColor = 'rgba(180,120,255,.28)';
+ctx.stroke();
+ctx.shadowBlur = 0;
+// ---------- Layer 2 : White Glass Edge ----------
+ctx.beginPath();
+roundRect(ctx, pillX, pillY, pillW, pillH, pillR);
+ctx.strokeStyle = 'rgba(255,255,255,.18)';
+ctx.lineWidth = 1;
+ctx.stroke();
+// ---------- Layer 3 : Soft Top Highlight ----------
+ctx.save();
+ctx.beginPath();
+roundRect(ctx, pillX + 1, pillY + 1, pillW - 2, pillH - 2, pillR - 1);
+ctx.clip();
+const edgeHighlight = ctx.createLinearGradient(
+    pillX,
+    pillY,
+    pillX,
+    pillY + pillH * 0.35
+);
+edgeHighlight.addColorStop(0.00, 'rgba(255,255,255,.18)');
+edgeHighlight.addColorStop(1.00, 'rgba(255,255,255,0)');
+ctx.fillStyle = edgeHighlight;
+ctx.fillRect(
+    pillX,
+    pillY,
+    pillW,
+    pillH * 0.35
+);
+ctx.restore();
+// C. Crown icon (vertikal lebih presisi)
+if (isExcellent) {
+    const crownPath = new Path2D("M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z");
+    ctx.save();
+    const sc = 2.5;
+    // SVG crown: center visual ≈ x=12, y=12 → sejajarkan ke pillCY
+    ctx.translate(pillX + (iconAreaW / 2) - (12 * sc) + 32, pillCY - (12 * sc) - 3);
+    ctx.scale(sc, sc);
+    const crownGrd = ctx.createLinearGradient(0, 0, 0, 21);
+    crownGrd.addColorStop(0,   '#f5d0fe'); // purple muda / fuchsia light
+    crownGrd.addColorStop(0.4, '#e879f9'); // fuchsia terang
+    crownGrd.addColorStop(1,   '#a855f7'); // purple
+    ctx.fillStyle   = crownGrd;
+    ctx.shadowBlur  = 22;
+    ctx.shadowColor = '#d946ef'; // fuchsia glow
+    ctx.fill(crownPath);
+    ctx.restore();
+}
+// D. Teks pesan (textBaseline = 'middle' → benar-benar center vertikal)
+ctx.fillStyle    = '#ffffff';
+ctx.font         = 'italic 600 32px "Poppins", sans-serif';
+ctx.textAlign    = 'center';
+ctx.textBaseline = 'middle';
+ctx.shadowBlur   = 5;
+ctx.shadowColor  = 'rgba(255,255,255,0.20)';
+const textCenterX = isExcellent
+    ? pillX + iconAreaW + textPadX + (textWidth / 2)  // center di area kanan setelah crown
+    : pillX + (pillW / 2);                            // center penuh (non-excellent)
+ctx.fillText(perfMsg, textCenterX - 10, pillCY);
+ctx.shadowBlur   = 0;
+ctx.textBaseline = 'alphabetic'; // reset
+ctx.restore();
+        // -- Teks 4 Kotak Statistik --
+        ctx.textAlign = 'center'; 
+        const statY = 1130;  // Y Label
+        const valueY = 1185; // Y Angka
+        const lineY = 1218;  // Y Garis ditarik naik agar 'inside box'
+        // Sumbu X dengan adjustment spesifik hasil ujicoba
+        const statItems = [
+            { x: 194, label: 'CORRECT', val: correct, color: '#4ade80' },     
+            { x: 421, label: 'WRONG', val: wrong, color: '#f87171' },         
+            { x: 649, label: 'ACCURACY', val: `${accuracy}%`, color: '#fbbf24' }, 
+            { x: 879, label: 'AVG. TIME', val: avgTime, color: '#60a5fa' }    
+        ];
+        statItems.forEach(item => {
+            // Gambar Label
+            ctx.font = 'bold 22px "Poppins", sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fillText(item.label, item.x, statY);
+            // Gambar Angka Result
+            ctx.font = 'bold 50px "Poppins", sans-serif';
+            ctx.fillStyle = '#ffffff';
+            const textVal = item.val.toString();
+            ctx.fillText(textVal, item.x, valueY);
+            // Ukur lebar teks angka secara dinamis untuk lebar garis (underline)
+            const valWidth = ctx.measureText(textVal).width;
+            // Gambar Garis Bawah
+            ctx.save();
+            const lineW = valWidth; // Lebar garis sekarang otomatis mengikuti teks angka
+            const lineH = 8;
+            // Gambar rounded rectangle, posisinya berpusat pada item.x
+            roundRect(ctx, item.x - lineW/2, lineY, lineW, lineH, lineH/2);
+            ctx.fillStyle = item.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = item.color;
+            ctx.fill();
+            ctx.restore();
+        });
+        // -- Teks Website / URL (di atas ikon trofi di bawah template) --
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '600 26px "Poppins", sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+        const urlY = 1300; // <-- ubah angka ini buat geser posisi teks naik/turun
+        ctx.fillText('flag-x-project.pages.dev', cx, urlY);
+        // === 5. RETURN ===
+        if (returnDataUrl) {
+            return canvas.toDataURL('image/png');
+        }
+    } catch (error) {
+        console.error("Gagal menggambar Share Card:", error);
+        return null;
+    }
+}
+// ============================================================================
+// FUNGSI TRIGGER TOMBOL (UI)
+// ============================================================================
+// Panggil ini saat Modal UI terbuka
+function shareScore() {
+    generateShareCard(false); // Render visualnya ke DOM <canvas>
+    
+    const modal = document.getElementById('share-card-modal');
+    if (modal) { 
+        modal.classList.add('active'); 
+        document.body.classList.add('modal-open'); 
+    }
+}
 function copyScoreToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => { showToast(translations[settings.language].scoredCopied || 'Copied to clipboard!'); })
     .catch(() => {
@@ -2164,42 +3473,79 @@ function copyScoreToClipboard(text) {
         showToast(translations[settings.language].scoredCopied || 'Copied to clipboard!');
     });
 }
-
 function openHistoryFilterModal(type) {
     const isMode = type === 'mode';
     const modal = document.getElementById(isMode ? 'history-filter-modal' : 'history-sort-modal');
     const container = document.getElementById(isMode ? 'history-filter-options' : 'history-sort-options');
     
-    const historyFilterOptions = [
-        { value: 'all', labelKey: 'filterAll', icon: 'fa-border-all' }, { value: 'bookmarks', label: 'Bookmarks', icon: 'fa-bookmark' },
-        { value: 'classic', label: 'Classic', icon: 'fa-globe' }, { value: 'continent', label: 'Continent', icon: 'fa-map' },
-        { value: 'capitalGuess', label: 'Capital Guess', icon: 'fa-building-columns' }, { value: 'yearGuess', label: 'Year Guess', icon: 'fa-calendar-days' },
-        { value: 'timeAttack', label: 'Time Attack', icon: 'fa-stopwatch' }, { value: 'survival', label: 'Survival', icon: 'fa-heart-pulse' },
-        { value: 'combo', label: 'Combo', icon: 'fa-bomb' }
-    ];
-    const historySortOptions = [{ value: 'newest', labelKey: 'sortNewest', icon: 'fa-clock-rotate-left' }, { value: 'highest', labelKey: 'sortHighest', icon: 'fa-arrow-up-wide-short' }];
-
     const options = isMode ? historyFilterOptions : historySortOptions;
     const activeVal = isMode ? historyActiveFilter : historyActiveSort;
     const lang = settings.language;
-
     if (!modal || !container) return;
-
     container.innerHTML = options.map(opt => {
         const label = opt.labelKey ? (translations[lang][opt.labelKey] || opt.label || opt.value) : (opt.label || opt.value);
         const isActive = opt.value === activeVal;
         return `<button onclick="${isMode ? 'selectHistoryFilter' : 'selectHistorySort'}('${opt.value}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 text-left ${isActive ? 'bg-[rgba(var(--primary-color-rgb),0.15)] text-[var(--primary-color)] border border-[rgba(var(--primary-color-rgb),0.3)]' : 'hover:bg-[var(--secondary-color)] text-[var(--text-color)]'}"><i class="fa-solid ${opt.icon} w-4 text-center ${isActive ? 'text-[var(--primary-color)]' : 'text-[var(--subtle-text-color)]'}"></i><span class="flex-1">${label}</span>${isActive ? '<i class="fa-solid fa-check text-[var(--primary-color)] text-xs ml-auto"></i>' : ''}</button>`;
     }).join('');
-
     modal.classList.add('active'); document.body.classList.add('modal-open');
 }
-
 function closeHistoryFilterModal() {
-    document.getElementById('history-filter-modal')?.classList.remove('active');
-    document.getElementById('history-sort-modal')?.classList.remove('active');
+    closeSheet(document.getElementById('history-filter-modal'));
+    closeSheet(document.getElementById('history-sort-modal'));
+    closeSheet(document.getElementById('history-delete-modal'));
+}
+// --- HAPUS HISTORY BERDASARKAN PERIODE ---
+const historyDeleteOptions = [
+    { value: '24h', labelKey: 'delete24h', icon: 'fa-clock' },
+    { value: '7d', labelKey: 'delete7d', icon: 'fa-calendar-week' },
+    { value: '30d', labelKey: 'delete30d', icon: 'fa-calendar-days' },
+    { value: 'all', labelKey: 'deleteAll', icon: 'fa-trash-can' }
+];
+let pendingDeletePeriod = null;
+function openHistoryDeleteModal() {
+    const modal = document.getElementById('history-delete-modal');
+    const container = document.getElementById('history-delete-options');
+    if (!modal || !container) return;
+    const lang = settings.language;
+    container.innerHTML = historyDeleteOptions.map(opt => {
+        const label = translations[lang][opt.labelKey] || opt.value;
+        const isDanger = opt.value === 'all';
+        return `<button onclick="confirmHistoryDelete('${opt.value}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 text-left hover:bg-[var(--secondary-color)] ${isDanger ? 'text-[var(--error-color)]' : 'text-[var(--text-color)]'}"><i class="fa-solid ${opt.icon} w-4 text-center ${isDanger ? 'text-[var(--error-color)]' : 'text-[var(--subtle-text-color)]'}"></i><span class="flex-1">${label}</span></button>`;
+    }).join('');
+    modal.classList.add('active'); document.body.classList.add('modal-open');
+}
+function confirmHistoryDelete(period) {
+    closeHistoryFilterModal();
+    pendingDeletePeriod = period;
+    const lang = settings.language;
+    const descKeyMap = { '24h': 'deleteConfirm24h', '7d': 'deleteConfirm7d', '30d': 'deleteConfirm30d', 'all': 'deleteConfirmAll' };
+    const descEl = document.getElementById('delete-confirm-desc');
+    if (descEl) descEl.textContent = translations[lang][descKeyMap[period]] || '';
+    const modal = document.getElementById('history-delete-confirm-modal');
+    if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); }
+}
+function deleteHistoryByPeriod(period) {
+    const KEY = 'flagx-quiz-history';
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { history = []; }
+    if (period === 'all') {
+        history = [];
+    } else {
+        const periodMs = { '24h': 24 * 60 * 60 * 1000, '7d': 7 * 24 * 60 * 60 * 1000, '30d': 30 * 24 * 60 * 60 * 1000 }[period] || 0;
+        const cutoff = Date.now() - periodMs;
+        history = history.filter(h => new Date(h.date).getTime() < cutoff);
+    }
+    localStorage.setItem(KEY, JSON.stringify(history));
+    renderQuizHistory();
+    showToast(translations[settings.language].historyDeleted || 'History deleted!');
+}
+function performHistoryDelete() {
+    if (!pendingDeletePeriod) return;
+    deleteHistoryByPeriod(pendingDeletePeriod);
+    pendingDeletePeriod = null;
+    document.getElementById('history-delete-confirm-modal')?.classList.remove('active');
     document.body.classList.remove('modal-open');
 }
-
 function selectHistoryFilter(value) {
     historyActiveFilter = value;
     const lang = settings.language;
@@ -2210,7 +3556,6 @@ function selectHistoryFilter(value) {
     closeHistoryFilterModal(); 
     renderQuizHistory();
 }
-
 function selectHistorySort(value) {
     historyActiveSort = value;
     const lang = settings.language;
@@ -2221,7 +3566,6 @@ function selectHistorySort(value) {
     closeHistoryFilterModal(); 
     renderQuizHistory();
 }
-
 // ============================================================================
 // 15. AI GEMINI LOGIC (Fun Facts & Details)
 // ============================================================================
@@ -2229,11 +3573,9 @@ async function getFunFact(itemName) {
     if (!itemName) return;
     const modalTitle = document.getElementById('gemini-modal-title');
     geminiModal.classList.add('active'); document.body.classList.add('modal-open');
-
     const currentLang = settings.language || 'en';
-    geminiContentEl.innerHTML = `<div class="flex flex-col items-center justify-center gap-3 py-4 w-full"><div class="loader"></div><p class="text-[var(--primary-color)] font-semibold animate-pulse text-sm">${translations[currentLang].generatingFunFact || "Generating Fun Facts..."}</p></div>`;
+    geminiContentEl.innerHTML = `<div class="w-full flex flex-col items-center gap-2.5 py-2"><div class="skeleton-block h-4 w-full rounded"></div><div class="skeleton-block h-4 w-[85%] rounded"></div><div class="skeleton-block h-4 w-3/5 rounded"></div></div>`;
     if (modalTitle) modalTitle.textContent = `${(translations[currentLang] && translations[currentLang].funFact) ? translations[currentLang].funFact : "Fun Fact"}: ${itemName}`;
-
     const cacheKey = `funfact_${currentLang}_${itemName}`;
     const todayStr = new Date().toDateString(); 
     
@@ -2241,12 +3583,14 @@ async function getFunFact(itemName) {
     if (cachedRaw) {
         try {
             const cachedData = JSON.parse(cachedRaw);
-            if (cachedData.date === todayStr) { geminiContentEl.textContent = cachedData.fact; return; }
+            if (cachedData.date === todayStr) { await new Promise(resolve => setTimeout(resolve, SKELETON_MIN_DELAY)); geminiContentEl.textContent = cachedData.fact; return; }
         } catch (e) { console.error("Cache parsing error:", e); }
     }
-
     try {
-        const response = await fetch('/get-fun-facts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ countryName: itemName, language: currentLang }) });
+        const [response] = await Promise.all([
+            fetch('/get-fun-facts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ countryName: itemName, language: currentLang }) }),
+            new Promise(resolve => setTimeout(resolve, SKELETON_MIN_DELAY))
+        ]);
         if (!response.ok) throw new Error('Server error');
         const data = await response.json();
         geminiContentEl.textContent = data.fact;
@@ -2260,46 +3604,50 @@ async function getFunFact(itemName) {
         geminiContentEl.appendChild(errorPara);
     }
 }
-
 async function getFlagDetail(itemName, flagUrl) {
     if (!itemName) return;
     const modal = document.getElementById('detail-modal');
     const titleEl = document.getElementById('detail-modal-title');
     const flagImgEl = document.getElementById('detail-flag-img');
+    const flagPlaceholderEl = document.getElementById('detail-flag-placeholder');
     const loaderEl = document.getElementById('detail-loader');
     const dataContainer = document.getElementById('detail-data');
-
     const oldError = modal.querySelector('.error-message'); if (oldError) oldError.remove();
-
-    titleEl.textContent = itemName; flagImgEl.src = flagUrl;
+    titleEl.textContent = itemName;
+    if (flagUrl) {
+        flagImgEl.classList.remove('hidden'); flagImgEl.src = flagUrl;
+        if (flagPlaceholderEl) { flagPlaceholderEl.classList.add('hidden'); flagPlaceholderEl.classList.remove('flex'); }
+    } else {
+        flagImgEl.classList.add('hidden');
+        if (flagPlaceholderEl) { flagPlaceholderEl.classList.remove('hidden'); flagPlaceholderEl.classList.add('flex'); }
+    }
     loaderEl.classList.remove('hidden'); dataContainer.classList.add('hidden');
     modal.classList.add('active'); document.body.classList.add('modal-open');
-
     const currentLang = settings.language || 'en';
     const cacheKey = `flag_detail_${currentLang}_${itemName}`;
     const todayStr = new Date().toDateString();
-
     const renderData = (data) => {
         loaderEl.classList.add('hidden'); dataContainer.classList.remove('hidden');
         document.getElementById('detail-capital').textContent = data.capital || '-'; document.getElementById('detail-established').textContent = data.established || '-';
         document.getElementById('detail-population').textContent = data.population || '-'; document.getElementById('detail-region').textContent = data.region || '-';
         document.getElementById('detail-language').textContent = data.language || '-'; document.getElementById('detail-vexillology').textContent = data.vexillology || translations[settings.language].detailNoInfo;
     };
-
     const cachedRaw = localStorage.getItem(cacheKey);
     if (cachedRaw) {
         try {
             const cachedData = JSON.parse(cachedRaw);
-            if (cachedData.date === todayStr) { setTimeout(() => renderData(cachedData.data), 300); return; } 
+            if (cachedData.date === todayStr) { setTimeout(() => renderData(cachedData.data), SKELETON_MIN_DELAY); return; } 
             else if (!cachedData.date && typeof cachedData === 'object' && cachedData.capital) {
-                setTimeout(() => renderData(cachedData), 300);
+                setTimeout(() => renderData(cachedData), SKELETON_MIN_DELAY);
                 localStorage.setItem(cacheKey, JSON.stringify({ date: todayStr, data: cachedData })); return;
             }
         } catch (e) { console.error("Cache parsing error:", e); }
     }
-
     try {
-        const response = await fetch('/get-flag-details', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ countryName: itemName, language: currentLang }) });
+        const [response] = await Promise.all([
+            fetch('/get-flag-details', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ countryName: itemName, language: currentLang }) }),
+            new Promise(resolve => setTimeout(resolve, SKELETON_MIN_DELAY))
+        ]);
         if (!response.ok) throw new Error('API Error');
         const result = await response.json();
         localStorage.setItem(cacheKey, JSON.stringify({ date: todayStr, data: result }));
@@ -2312,7 +3660,105 @@ async function getFlagDetail(itemName, flagUrl) {
         dataContainer.parentNode.insertBefore(errorMsg, dataContainer);
     }    
 }
-
+// ============================================================================
+// 15B. FEEDBACK SYSTEM
+// ============================================================================
+let selectedFeedbackType = null;
+const FEEDBACK_COOLDOWN_KEY = 'flagx-feedback-last-submit';
+const FEEDBACK_COOLDOWN_MS = 60000;
+function openFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    if (!modal) return;
+    selectedFeedbackType = null;
+    document.querySelectorAll('.feedback-type-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('feedback-entity-wrap')?.classList.add('hidden');
+    const entityInput = document.getElementById('feedback-entity-input');
+    if (entityInput) entityInput.value = '';
+    const msgInput = document.getElementById('feedback-message-input');
+    if (msgInput) msgInput.value = '';
+    updateFeedbackCharCount();
+    document.getElementById('feedback-error-msg')?.classList.add('hidden');
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+function closeFeedbackModal() {
+    closeSheet(document.getElementById('feedback-modal'));
+}
+function selectFeedbackType(type) {
+    selectedFeedbackType = type;
+    document.querySelectorAll('.feedback-type-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.type === type);
+    });
+    const entityWrap = document.getElementById('feedback-entity-wrap');
+    if (entityWrap) entityWrap.classList.toggle('hidden', !(type === 'flag' || type === 'correction'));
+    document.getElementById('feedback-error-msg')?.classList.add('hidden');
+}
+function updateFeedbackCharCount() {
+    const input = document.getElementById('feedback-message-input');
+    const counter = document.getElementById('feedback-char-count');
+    if (!input || !counter) return;
+    const len = input.value.length;
+    counter.textContent = `${len}/500`;
+    counter.style.color = len >= 500 ? 'var(--error-color)' : 'var(--subtle-text-color)';
+}
+async function submitFeedback() {
+    const lang = settings.language;
+    const errorEl = document.getElementById('feedback-error-msg');
+    const messageInput = document.getElementById('feedback-message-input');
+    const message = messageInput ? messageInput.value.trim() : '';
+    if (!selectedFeedbackType) {
+        if (errorEl) { errorEl.textContent = translations[lang].feedbackErrorType || 'Please choose a category first.'; errorEl.classList.remove('hidden'); }
+        return;
+    }
+    if (!message) {
+        if (errorEl) { errorEl.textContent = translations[lang].feedbackErrorEmpty || 'Please write your message first.'; errorEl.classList.remove('hidden'); }
+        messageInput?.classList.add('shake-input');
+        setTimeout(() => messageInput?.classList.remove('shake-input'), 400);
+        return;
+    }
+    if (errorEl) errorEl.classList.add('hidden');
+    const lastSubmit = parseInt(localStorage.getItem(FEEDBACK_COOLDOWN_KEY) || '0');
+    const now = Date.now();
+    if (now - lastSubmit < FEEDBACK_COOLDOWN_MS) {
+        showToast(translations[lang].feedbackCooldown || 'Please wait a moment before sending again.');
+        return;
+    }
+    const submitBtn = document.getElementById('submit-feedback-btn');
+    const originalHTML = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('btn-loading');
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${translations[lang].feedbackSending || 'Sending...'}</span>`;
+    }
+    try {
+        const entityInput = document.getElementById('feedback-entity-input');
+        await addDoc(collection(db, "feedback"), {
+            type: selectedFeedbackType,
+            message: message,
+            entityName: entityInput ? entityInput.value.trim() : '',
+            userId: (auth && auth.currentUser) ? auth.currentUser.uid : null,
+            username: (auth && auth.currentUser) ? auth.currentUser.displayName : null,
+            screen: localStorage.getItem('lastActiveScreen') || 'unknown',
+            appVersion: 'v.2.5',
+            userAgent: navigator.userAgent,
+            language: lang,
+            status: 'new',
+            createdAt: new Date()
+        });
+        localStorage.setItem(FEEDBACK_COOLDOWN_KEY, String(now));
+        showToast(translations[lang].feedbackSuccess || '✅ Thank you! Feedback sent.');
+        closeFeedbackModal();
+    } catch (error) {
+        console.error('Feedback submission error:', error);
+        showToast(translations[lang].feedbackFailed || 'Failed to send. Please try again.');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.innerHTML = originalHTML;
+        }
+    }
+}
 // ============================================================================
 // 16. ONBOARDING
 // ============================================================================
@@ -2330,95 +3776,227 @@ function initOnboarding() {
         const nextBtn = document.getElementById('onboard-next-btn');
         if (nextBtn) nextBtn.textContent = n === slides.length - 1 ? (translations[settings.language].letsGoBtn || "Let's Go!") : (translations[settings.language].nextBtn || 'Next');
     }
-
     showSlide(0);
     const nextBtn = document.getElementById('onboard-next-btn');
     const skipBtn = document.getElementById('onboard-skip-btn');
     if (nextBtn) nextBtn.onclick = () => { if (currentSlide < slides.length - 1) showSlide(currentSlide + 1); else closeOnboarding(); };
     if (skipBtn) skipBtn.onclick = closeOnboarding;
 }
-
 function closeOnboarding() {
     const modal = document.getElementById('onboarding-modal');
-    if (modal) { modal.classList.remove('active'); document.body.classList.remove('modal-open'); }
+    if (modal) closeSheet(modal);
     localStorage.setItem('flagx-onboarded', '1');
 }
-
 // ============================================================================
 // 17. CENTRALIZED EVENT LISTENERS
 // ============================================================================
 function setupEventListeners() {
     // Top Bar & Menus
-    document.getElementById('theme-switcher')?.addEventListener('click', toggleTheme);
+    document.getElementById('notification-bell-btn')?.addEventListener('click', handleNotificationBellClick);
     document.getElementById('login-google-btn')?.addEventListener('click', handleLogin);
     document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+    // Desktop Sidebar & Header (profile chip lives in the header and reuses the existing
+    // hamburger drawer/profile-panel, restyled as an anchored dropdown at desktop breakpoint;
+    // Settings is a centered modal — settings-panel itself is relocated into it via
+    // relocateSettingsPanel())
+    document.getElementById('desktop-header-notif-btn')?.addEventListener('click', handleNotificationBellClick);
+    document.getElementById('desktop-header-profile-chip')?.addEventListener('click', () => { document.getElementById('profile-btn')?.click(); });
+    document.getElementById('desktop-header-settings-btn')?.addEventListener('click', () => { const m = document.getElementById('desktop-settings-modal'); if (m) { m.classList.add('active'); document.body.classList.add('modal-open'); } });
+    document.getElementById('close-desktop-settings-btn')?.addEventListener('click', () => { document.getElementById('desktop-settings-modal')?.classList.remove('active'); document.body.classList.remove('modal-open'); });
+    document.getElementById('desktop-sidebar-collapse-btn')?.addEventListener('click', toggleDesktopSidebarCollapse);
     
     // Panels & Modals Open/Close
-    if (profileBtn) profileBtn.addEventListener('click', (e) => { 
+    // sesudah
+if (profileBtn) profileBtn.addEventListener('click', (e) => { 
     e.stopPropagation(); 
-    const isActive = profilePanel.classList.contains('active'); 
-    closeAllPanels(); 
-    if (!isActive) {
-        
-        const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
-        const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
-        const level = calculateLevel(xp);
-        
-        const levelStat = document.getElementById('profile-level-stat');
-        const xpStat = document.getElementById('profile-xp-stat');
-        const streakStat = document.getElementById('profile-streak-stat');
-
-        if (levelStat) levelStat.textContent = `Lv. ${level}`;
-        if (xpStat) xpStat.textContent = xp.toLocaleString();
-
-        if (streakStat) {
-            streakStat.textContent = streak;
-            const fireIcon = streakStat.previousElementSibling; 
-            if (streak < 1) {
-                streakStat.className = "font-black text-gray-400 text-sm";
-                if (fireIcon) fireIcon.className = "fa-solid fa-fire text-gray-400 text-xs";
-            } else {
-                streakStat.className = "font-black bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500 text-sm drop-shadow-md";
-                if (fireIcon) fireIcon.className = "fa-solid fa-fire text-orange-500 text-xs animate-pulse drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]";
-            }
+    const drawer = document.getElementById('hamburger-drawer');
+    if (drawer.classList.contains('active')) { closeSheet(drawer); return; }
+    closeAllPanels();
+    
+    const xp = parseInt(localStorage.getItem('flagx-totalscore') || 0);
+    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const lang = settings.language;
+    const storedBestStreak = parseInt(localStorage.getItem('flagx-beststreak') || 0);
+    const bestStreak = Math.max(streak, storedBestStreak);
+    if (bestStreak !== storedBestStreak) localStorage.setItem('flagx-beststreak', bestStreak);
+    const bestStreakStat = document.getElementById('profile-best-streak-stat');
+    const bestStreakIcon = document.getElementById('profile-beststreak-icon');
+    if (bestStreakStat) {
+        bestStreakStat.textContent = bestStreak;
+        if (bestStreak < 1) {
+            bestStreakStat.className = "font-black text-lg leading-none text-gray-400";
+            if (bestStreakIcon) bestStreakIcon.className = "fa-solid fa-fire text-gray-400 text-sm";
+        } else {
+            bestStreakStat.className = "font-black text-lg leading-none bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500";
+            if (bestStreakIcon) bestStreakIcon.className = "fa-solid fa-fire text-orange-500 text-sm";
         }
-        profilePanel.classList.add('active'); 
-    } 
+    }
+    const totalQuizzesStat = document.getElementById('profile-total-quizzes-stat');
+    const accuracyStat = document.getElementById('profile-accuracy-stat');
+    const lifetimeCorrect = parseInt(localStorage.getItem('flagx-lifetimecorrect') || 0);
+    const lifetimeAttempted = parseInt(localStorage.getItem('flagx-lifetimeattempted') || 0);
+    const accuracyPct = lifetimeAttempted > 0 ? Math.round((lifetimeCorrect / lifetimeAttempted) * 100) : 0;
+    if (totalQuizzesStat) totalQuizzesStat.textContent = parseInt(localStorage.getItem('flagx-totalquizzes') || 0).toLocaleString();
+    if (accuracyStat) accuracyStat.textContent = lifetimeAttempted > 0 ? accuracyPct + '%' : '–';
+    const memberSinceEl = document.getElementById('profile-member-since');
+    if (memberSinceEl) memberSinceEl.textContent = (isRealUser(auth.currentUser) && auth.currentUser.metadata) ? formatMemberSince(auth.currentUser.metadata.creationTime, lang) : '';
+    const rankStat = document.getElementById('profile-rank-stat');
+    if (rankStat) {
+        rankStat.textContent = '…';
+        if (isRealUser(auth.currentUser)) {
+            const myToken = ++_rankFetchToken;
+            fetchUserRank(xp).then(rank => {
+                if (myToken !== _rankFetchToken) return;
+                if (rankStat) rankStat.textContent = rank ? `#${rank}` : '–';
+            });
+        } else {
+            rankStat.textContent = '–';
+        }
+    }
+    renderAchievementSheet();
+    renderAchievementPreviewRow();
+    drawer.classList.add('active');
+    document.body.classList.add('modal-open');
 });
-    document.getElementById('settings-btn')?.addEventListener('click', (e) => { e.stopPropagation(); const isActive = settingsPanel.classList.contains('active'); closeAllPanels(); if (!isActive) settingsPanel.classList.add('active'); });
-    if (infoBtn) infoBtn.addEventListener('click', (e) => { e.stopPropagation(); closeAllPanels(); disclaimerPanel.classList.toggle('active'); });
+    if (infoBtn) infoBtn.addEventListener('click', (e) => { e.stopPropagation(); closeAllPanels(); disclaimerPanel.classList.add('active'); document.body.classList.add('modal-open'); });
     document.getElementById('open-leaderboard-btn')?.addEventListener('click', () => { showScreen('leaderboard-screen'); loadLeaderboard(); });
     
     // Quiz Flow
     document.getElementById('end-quiz-btn')?.addEventListener('click', () => { endQuizModal.classList.add('active'); document.body.classList.add('modal-open'); });
-    document.getElementById('cancel-end-quiz-btn')?.addEventListener('click', () => { endQuizModal.classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('confirm-end-quiz-btn')?.addEventListener('click', () => { endQuizModal.classList.remove('active'); document.body.classList.remove('modal-open'); endQuiz(); });
+    document.getElementById('cancel-end-quiz-btn')?.addEventListener('click', () => { closeSheet(endQuizModal); });
+    document.getElementById('confirm-end-quiz-btn')?.addEventListener('click', () => { closeSheet(endQuizModal); endQuiz(); });
     
     // Standard Modal Close Buttons
-    document.getElementById('close-gemini-modal-btn')?.addEventListener('click', () => { geminiModal.classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('close-detail-modal-btn')?.addEventListener('click', () => { document.getElementById('detail-modal').classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('close-level-up-btn')?.addEventListener('click', () => { document.getElementById('level-up-modal').classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('close-streak-milestone-btn')?.addEventListener('click', () => { document.getElementById('streak-milestone-modal').classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('close-share-card-btn')?.addEventListener('click', () => { document.getElementById('share-card-modal').classList.remove('active'); document.body.classList.remove('modal-open'); });
+    document.getElementById('close-gemini-modal-btn')?.addEventListener('click', () => { closeSheet(geminiModal); });
+    document.getElementById('close-gemini-modal-x-btn')?.addEventListener('click', () => { closeSheet(geminiModal); });
+    document.getElementById('close-detail-modal-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('detail-modal')); });
+    document.getElementById('open-achievement-sheet-btn')?.addEventListener('click', (e) => { e.stopPropagation(); renderAchievementSheet(); document.getElementById('achievement-sheet').classList.add('active'); document.body.classList.add('modal-open'); });
+    document.getElementById('close-achievement-sheet-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('achievement-sheet')); });
+    document.getElementById('toggle-missed-btn')?.addEventListener('click', () => { document.getElementById('missed-flags-modal')?.classList.add('active'); document.body.classList.add('modal-open'); });
+    document.getElementById('close-missed-flags-modal-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('missed-flags-modal')); });
+    document.getElementById('close-detail-modal-x-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('detail-modal')); });
+    document.getElementById('close-share-card-x-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('share-card-modal')); });
+    document.getElementById('close-hamburger-drawer-btn')?.addEventListener('click', () => closeSheet(document.getElementById('hamburger-drawer')));
+    document.getElementById('close-level-info-btn')?.addEventListener('click', () => closeSheet(document.getElementById('level-info-panel')));
+    document.getElementById('close-library-sheet-btn')?.addEventListener('click', () => { closeLibraryQuickSheet(); });
+    document.querySelectorAll('.bottom-sheet-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeSheet(overlay);
+    });
+});
+// Un-hover card library kalau tap di luar card & di luar sheet/modal terkait
+document.addEventListener('click', (e) => {
+    if (!activeLibCard) return;
+    if (activeLibCard.contains(e.target)) return;
+    if (e.target.closest('#library-quick-sheet, #detail-modal, #gemini-modal')) return;
+    activeLibCard.classList.remove('card-active');
+    activeLibCard = null;
+});
+    document.getElementById('close-level-up-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('level-up-modal')); });
+    document.getElementById('close-streak-milestone-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('streak-milestone-modal')); });
+    document.getElementById('close-share-card-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('share-card-modal')); });
+    document.getElementById('close-disclaimer-x-btn')?.addEventListener('click', () => { closeSheet(disclaimerPanel); });
+    document.getElementById('close-unofficial-info-btn')?.addEventListener('click', closeUnofficialInfoModal);
+    document.getElementById('confirm-delete-history-btn')?.addEventListener('click', performHistoryDelete);
+    document.getElementById('cancel-delete-history-btn')?.addEventListener('click', () => { pendingDeletePeriod = null; closeSheet(document.getElementById('history-delete-confirm-modal')); });
     
     // Share & Download
-    document.getElementById('download-card-btn')?.addEventListener('click', () => { const canvas = document.getElementById('share-canvas'); if (!canvas) return; const a = document.createElement('a'); a.download = 'flagx-score.png'; a.href = canvas.toDataURL('image/png'); a.click(); });
-    document.getElementById('share-card-btn')?.addEventListener('click', () => { const canvas = document.getElementById('share-canvas'); if (!canvas) return; canvas.toBlob(async (blob) => { if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'flagx-score.png', { type: 'image/png' })] })) { const file = new File([blob], 'flagx-score.png', { type: 'image/png' }); navigator.share({ title: 'Flag-X Score', files: [file] }).catch(() => {}); } else { const score = document.getElementById('final-score')?.textContent || '0'; const url = window.location.href; copyScoreToClipboard(`🏆 I scored ${score} XP on Flag-X! ${url}`); } }); });
+    document.getElementById('download-card-btn')?.addEventListener('click', () => {
+    const canvas = document.getElementById('share-canvas');
+    if (!canvas) return;
+    canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        if (window.ClipboardItem && navigator.clipboard?.write) {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': Promise.resolve(blob) })
+                ]);
+                showToast(settings.language === 'id' ? '📋 Gambar disalin ke clipboard!' : '?? Image copied to clipboard!');
+                return;
+            } catch (e) {
+                console.warn('Clipboard gagal, fallback ke download:', e);
+            }
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'flagx-score.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(settings.language === 'id' ? '📥 Gambar disimpan!' : '📥 Image saved!');
+    }, 'image/png');
+});
+// GANTI listener share-card-btn
+document.getElementById('share-card-btn')?.addEventListener('click', () => {
+    const canvas = document.getElementById('share-canvas');
+    if (!canvas) return;
+    
+    const score = document.getElementById('final-score')?.textContent || '0';
+    const streak = parseInt(localStorage.getItem('flagx-streak') || 0);
+    const shareText = `🌍 Flag-X score: +${score} XP${streak > 0 ? ` | 🔥 ${streak} day streak` : ''}!\nflag-x-project.pages.dev`;
+    
+    // Gunakan toBlob() callback — user gesture context tetap terjaga
+    canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'flagx-score.png', { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+            // Share dengan gambar (Android native sheet)
+            navigator.share({ title: 'My Flag-X Score!', text: shareText, files: [file] })
+                .catch(err => { if (err.name !== 'AbortError') copyScoreToClipboard(shareText); });
+        } else if (navigator.share) {
+            // Share teks + URL saja (tanpa file)
+            navigator.share({ title: 'My Flag-X Score!', text: shareText, url: 'https://flag-x-project.pages.dev' })
+                .catch(() => copyScoreToClipboard(shareText));
+        } else {
+            // Fallback: salin teks ke clipboard
+            copyScoreToClipboard(shareText);
+        }
+    }, 'image/png');
+});
     
     // Input Mode logic
     document.getElementById('type-name-submit')?.addEventListener('click', () => { const input = document.getElementById('type-name-input'); if (input && input.value.trim()) checkAnswer(input.value.trim()); });
     document.getElementById('type-name-input')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const val = document.getElementById('type-name-input').value.trim(); if (val) checkAnswer(val); } });
     
     // Settings Interactions
-    document.getElementById('library-search-input')?.addEventListener('input', filterLibrary);
+    // Debounced search
+    let _searchDebounce;
+    document.getElementById('library-search-input')?.addEventListener('input', (e) => {
+        clearTimeout(_searchDebounce);
+        _searchDebounce = setTimeout(() => filterLibrary(e), 300);
+    });
+    // Search di screen pemilihan negara (Subdivisions/Territories/Historical)
+    document.querySelectorAll('.country-selector-search').forEach(input => {
+        let selectorDebounce;
+        input.addEventListener('input', (e) => {
+            clearTimeout(selectorDebounce);
+            selectorDebounce = setTimeout(() => filterCountrySelector(e.target), 200);
+        });
+    });
+    // Offline / Online banner
+    window.addEventListener('offline', () => showToast('⚠️ You are offline. Some features may not work.'));
+    window.addEventListener('online',  () => showToast('✅ Back online!'));
+    // PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window._pwaPrompt = e;
+        const hasPlayed = localStorage.getItem('flagx-quiz-history');
+        const dismissed = localStorage.getItem('flagx-pwa-dismissed');
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        if (hasPlayed && !dismissed && !isStandalone) {
+            setTimeout(showPWABanner, 2000);
+        }
+    });
     document.querySelectorAll('input[name="language"]').forEach(r => r.addEventListener('change', (e) => { settings.language = e.target.value; localStorage.setItem('flagx-settings', JSON.stringify(settings)); setLanguage(settings.language); updateCustomRadioUI(); }));
-    document.querySelectorAll('input[name="difficulty"]').forEach(r => { r.addEventListener('change', (e) => { const quizScreen = document.getElementById('quiz-screen'); if (quizScreen && quizScreen.classList.contains('active')) { pendingDifficulty = parseInt(e.target.value); e.target.checked = false; const currentRadio = document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`); if (currentRadio) currentRadio.checked = true; updateCustomRadioUI(); const modal = document.getElementById('switch-difficulty-modal'); if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); } } else { settings.difficulty = parseInt(e.target.value); localStorage.setItem('flagx-settings', JSON.stringify(settings)); updateCustomRadioUI(); } }); });
+    document.querySelectorAll('input[name="difficulty"]').forEach(r => { r.addEventListener('change', (e) => { const quizScreen = document.getElementById('quiz-screen'); if (quizScreen && quizScreen.classList.contains('active')) { pendingDifficulty = parseInt(e.target.value); e.target.checked = false; const currentRadio = document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`); if (currentRadio) currentRadio.checked = true; updateCustomRadioUI(); closeAllPanels(); const modal = document.getElementById('switch-difficulty-modal'); if (modal) { modal.classList.add('active'); document.body.classList.add('modal-open'); } } else { settings.difficulty = parseInt(e.target.value); localStorage.setItem('flagx-settings', JSON.stringify(settings)); updateCustomRadioUI(); closeSheet(document.getElementById('hamburger-drawer')); } }); });
     
     // Confirm Modals (Mode Switch)
-    document.getElementById('confirm-switch-btn')?.addEventListener('click', () => { document.getElementById('switch-mode-modal')?.classList.remove('active'); document.body.classList.remove('modal-open'); closeAllPanels(); _applyTypeNameModeToggle(); endQuiz(); });
-    document.getElementById('cancel-switch-btn')?.addEventListener('click', () => { document.getElementById('switch-mode-modal')?.classList.remove('active'); document.body.classList.remove('modal-open'); });
-    document.getElementById('confirm-diff-btn')?.addEventListener('click', () => { document.getElementById('switch-difficulty-modal')?.classList.remove('active'); document.body.classList.remove('modal-open'); if (pendingDifficulty !== null) { settings.difficulty = pendingDifficulty; localStorage.setItem('flagx-settings', JSON.stringify(settings)); const radio = document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`); if (radio) radio.checked = true; pendingDifficulty = null; } closeAllPanels(); endQuiz(); });
-    document.getElementById('cancel-diff-btn')?.addEventListener('click', () => { document.getElementById('switch-difficulty-modal')?.classList.remove('active'); document.body.classList.remove('modal-open'); pendingDifficulty = null; });
+    document.getElementById('confirm-switch-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('switch-mode-modal')); closeAllPanels(); _applyTypeNameModeToggle(); endQuiz(); });
+    document.getElementById('cancel-switch-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('switch-mode-modal')); });
+    document.getElementById('confirm-diff-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('switch-difficulty-modal')); if (pendingDifficulty !== null) { settings.difficulty = pendingDifficulty; localStorage.setItem('flagx-settings', JSON.stringify(settings)); const radio = document.querySelector(`input[name="difficulty"][value="${settings.difficulty}"]`); if (radio) radio.checked = true; pendingDifficulty = null; updateCustomRadioUI(); } closeAllPanels(); endQuiz(); });
+    document.getElementById('cancel-diff-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('switch-difficulty-modal')); pendingDifficulty = null; });
     
     // Profile Editing
     if(usernameInput && document.getElementById('char-count')) {
@@ -2440,15 +4018,6 @@ function setupEventListeners() {
             } catch (e) { console.error(e); showToast(translations[settings.language].toastSaveFailed); saveUsernameBtn.innerText = translations[settings.language].saveBtn; saveUsernameBtn.classList.remove('btn-loading'); }
         }
     });
-
-    // Global Click (Close panels)
-    document.addEventListener('click', (e) => {
-        const levelPanel = document.getElementById('level-info-panel'); const totalScoreBtn = document.getElementById('totalscore-container');
-        if (levelPanel && levelPanel.classList.contains('active')) if (!levelPanel.contains(e.target) && !totalScoreBtn.contains(e.target)) levelPanel.classList.remove('active');
-        if (settingsPanel && settingsPanel.classList.contains('active')) if (!settingsPanel.contains(e.target) && !e.target.closest('#settings-btn') && !e.target.closest('.modal')) settingsPanel.classList.remove('active');
-        if (profilePanel && profilePanel.classList.contains('active')) if (!profilePanel.contains(e.target) && !e.target.closest('#profile-btn') && !e.target.closest('#login-google-btn') && !e.target.closest('.modal')) profilePanel.classList.remove('active');
-    });
-
     // Scroll to Top
     const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
     if (scrollToTopBtn) {
@@ -2456,27 +4025,72 @@ function setupEventListeners() {
         scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     }
 }
-
 // ============================================================================
 // 18. INITIALIZATION
 // ============================================================================
+// --- PWA INSTALL BANNER ---
+function showPWABanner() {
+    if (document.getElementById('pwa-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.className = 'card rounded-xl p-3 flex items-center gap-2.5 shadow-xl';
+    banner.innerHTML = `
+        <div class="text-xl flex-shrink-0">📱</div>
+        <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm leading-tight">Install Flag-X</p>
+            <p class="pwa-banner-desc text-xs leading-tight" style="color:var(--subtle-text-color)">Play offline, faster access!</p>
+        </div>
+        <button onclick="installPWA()" class="btn btn-primary px-3 py-1.5 text-xs text-white font-bold flex-shrink-0">Install</button>
+        <button onclick="dismissPWA()" class="flex-shrink-0 ml-1" style="color:var(--subtle-text-color)"><i class="fa-solid fa-xmark"></i></button>`;
+    document.body.appendChild(banner);
+    void banner.offsetWidth;
+    banner.classList.add('show');
+    setTimeout(() => hidePWABanner(false), 12000);
+}
+function hidePWABanner(markDismissed) {
+    if (markDismissed) localStorage.setItem('flagx-pwa-dismissed', 'true');
+    const banner = document.getElementById('pwa-banner');
+    if (!banner) return;
+    banner.classList.remove('show');
+    banner.classList.add('hide');
+    banner.addEventListener('transitionend', () => banner.remove(), { once: true });
+    setTimeout(() => banner.remove(), 500);
+}
+function installPWA() {
+    if (window._pwaPrompt) {
+        window._pwaPrompt.prompt();
+        window._pwaPrompt.userChoice.then(c => {
+            if (c.outcome === 'accepted') showToast('🎉 Flag-X installed!');
+            localStorage.setItem('flagx-pwa-dismissed', 'true');
+            window._pwaPrompt = null;
+        });
+    }
+    document.getElementById('pwa-banner')?.remove();
+}
+function dismissPWA() {
+    hidePWABanner(true);
+}
 function initApp() {
     try {
         setupEventListeners();
         loadSettings();
-        loadTheme();
+        updateNotificationBellUI();
         loadTotalScore();
+        if (localStorage.getItem('flagx-sidebar-collapsed') === 'true') document.body.classList.add('sidebar-collapsed');
+        relocateSettingsPanel();
+        const desktopBreakpointMQ = window.matchMedia('(min-width: 1024px)');
+        if (desktopBreakpointMQ.addEventListener) desktopBreakpointMQ.addEventListener('change', relocateSettingsPanel);
+        else if (desktopBreakpointMQ.addListener) desktopBreakpointMQ.addListener(relocateSettingsPanel);
         checkDailyStreakReset();
         renderQuizModes();
         renderLibraryCategories();
+        renderHomeQuickExplore();
         displayStreak();
-        updateHomeXPBar();
         initFlagOfTheDay();
+        initDailyChallengeBanner();
+        loadHomeLeaderboardPreview();
         setTimeout(initOnboarding, 300);
-
-        const cachedPic = localStorage.getItem('cachedProfilePic');
-        if (cachedPic && profileBtn) profileBtn.innerHTML = `<img src="${cachedPic}" class="w-full h-full rounded-full object-cover">`;
-
+               
         const lastScreen = localStorage.getItem('lastActiveScreen');
         if (lastScreen === 'library-display-screen') {
             const libStateRaw = localStorage.getItem('libraryState');
@@ -2494,26 +4108,26 @@ function initApp() {
                 if(document.getElementById('res-accuracy')) document.getElementById('res-accuracy').textContent = (data.accuracy || 0) + '%';        
                 if(document.getElementById('res-avg-time')) document.getElementById('res-avg-time').textContent = data.avgTime || '-';
                 
-                document.getElementById('play-again-btn').onclick = () => { if (data.lastMode === 'bookmarks') startBookmarkQuiz(); else startQuiz(data.lastMode, data.lastSubMode); };
+                document.getElementById('play-again-btn').onclick = () => { if (data.lastMode === 'bookmarks') startBookmarkQuiz(data.bookmarkQuizType); else startQuiz(data.lastMode, data.lastSubMode); };
                 renderMissedFlags(data.missedFlags || []);      
-
                 const backToMenuBtn = document.getElementById('back-to-menu-btn');
-                if (backToMenuBtn) {
-                    if (data.lastMode === 'bookmarks') { backToMenuBtn.setAttribute('data-translate-key', 'backToBookmarks'); backToMenuBtn.textContent = translations[settings.language].backToBookmarks; backToMenuBtn.onclick = () => showBookmarksLibrary(); } 
-                    else { backToMenuBtn.setAttribute('data-translate-key', 'backToQuizModes'); backToMenuBtn.textContent = translations[settings.language].backToQuizModes; backToMenuBtn.onclick = () => showScreen('quiz-modes-screen'); }
-                }
+                const backToMenuLabel = document.getElementById('back-to-menu-label');
+                if (backToMenuBtn && backToMenuLabel) {
+                if (data.lastMode === 'bookmarks') { backToMenuLabel.setAttribute('data-translate-key', 'backToBookmarks'); backToMenuLabel.textContent = translations[settings.language].backToBookmarks; backToMenuBtn.onclick = () => showBookmarksLibrary(); } 
+                else { backToMenuLabel.setAttribute('data-translate-key', 'backToQuizModes'); backToMenuLabel.textContent = translations[settings.language].backToQuizModes; backToMenuBtn.onclick = () => showScreen('quiz-modes-screen'); }
+               }
+                const shareBtnRestore = document.getElementById('share-score-btn');
+            if (shareBtnRestore) shareBtnRestore.onclick = shareScore;
                 showScreen('results-screen');
             } else { showScreen('quiz-modes-screen'); }
         } else if (lastScreen === 'quiz-screen') { showScreen('quiz-modes-screen'); }
         else if (lastScreen === 'history-screen') { if (typeof showQuizHistory === 'function') showQuizHistory(); else { renderQuizHistory(); showScreen('history-screen'); } }
+        else if (lastScreen === 'leaderboard-screen') { showScreen('leaderboard-screen'); loadLeaderboard(); leaderboardBootHandled = true; }
         else if (lastScreen && lastScreen !== 'home-screen') showScreen(lastScreen);
         else showScreen('home-screen');
-
     } catch (error) { console.error("Error initializing app:", error); }
 }
-
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => console.log('Flag-X: Service Worker Aktif!')).catch(err => console.error('Flag-X: Service Worker Gagal:', err)); }); }
-
 // ============================================================================
 // 19. WINDOW BINDINGS (Exposing Functions to HTML Global Scope)
 // ============================================================================
@@ -2523,16 +4137,20 @@ window.showLibrary = showLibrary;
 window.showLeaderboard = function() { showScreen('leaderboard-screen'); if (typeof loadLeaderboard === 'function') loadLeaderboard(); };
 window.getFunFact = getFunFact;    
 window.getFlagDetail = getFlagDetail;  
-window.toggleTheme = toggleTheme;
 window.handleLogin = handleLogin;    
 window.switchAccount = switchAccount;
 window.handleLogout = handleLogout;
 window.toggleBookmarkUI = toggleBookmarkUI;
 window.startBookmarkQuiz = startBookmarkQuiz;
 window.showBookmarksLibrary = showBookmarksLibrary;
+window.openBookmarkQuizTypeModal = openBookmarkQuizTypeModal;
+window.closeBookmarkQuizTypeModal = closeBookmarkQuizTypeModal;
+window.selectBookmarkQuizType = selectBookmarkQuizType;
+window.openUnofficialInfoModal = openUnofficialInfoModal;
 window.shareScore = shareScore;
 window.closeOnboarding = closeOnboarding;
 window.filterLeaderboard = filterLeaderboard;
+window.setLeaderboardSort = setLeaderboardSort;
 window.showQuizHistory = showQuizHistory;
 window.generateShareCard = generateShareCard;
 window.fuzzyMatch = fuzzyMatch;
@@ -2541,6 +4159,7 @@ window.showStreakMilestoneModal = showStreakMilestoneModal;
 window.requestNotificationPermission = requestNotificationPermission;    
 window.showToast = showToast;
 window.cekLeaderboard = renderLeaderboardRows;
+window.loadHomeLeaderboardPreview = loadHomeLeaderboardPreview;
 window.toggleTypeNameMode = toggleTypeNameMode;
 window.toggleSound = toggleSound;
 window._syncDifficultyAvailability = _syncDifficultyAvailability;
@@ -2549,11 +4168,18 @@ window.openHistoryFilterModal = openHistoryFilterModal;
 window.closeHistoryFilterModal = closeHistoryFilterModal;
 window.selectHistoryFilter = selectHistoryFilter;
 window.selectHistorySort = selectHistorySort;
+window.openHistoryDeleteModal = openHistoryDeleteModal;
+window.confirmHistoryDelete = confirmHistoryDelete;
 window.openLevelInfo = openLevelInfo;
-
-// Experimental Firebase for Console HTML
-window._setDoc = setDoc; window._doc = doc; window._db = db;
-
+window.startDailyChallenge = startDailyChallenge;
+window.installPWA = installPWA;
+window.dismissPWA = dismissPWA;
+window.openFeedbackModal = openFeedbackModal;
+window.closeFeedbackModal = closeFeedbackModal;
+window.selectFeedbackType = selectFeedbackType;
+window.updateFeedbackCharCount = updateFeedbackCharCount;
+window.submitFeedback = submitFeedback;
+window.use5050Powerup = use5050Powerup;
 // ============================================================================
 // 20. ADMIN / DEV TOOLS
 // ============================================================================
@@ -2569,7 +4195,6 @@ window.devLogin = async function(namaPalsu = "Sahrul Dev Mobile", skorPalsu = 25
         showScreen('leaderboard-screen'); if (typeof loadLeaderboard === 'function') await loadLeaderboard();
     } catch (error) { console.error("❌ Gagal mendaftarkan user ke Firestore:", error); }
 };
-
 window.adminResetAllScores = async function() {
     if (!db || !auth || !auth.currentUser) { alert('⚠️ GAGAL: Kamu harus Login ke dalam game terlebih dahulu untuk mereset database.'); return; }
     if (!confirm('⚠️ SUPER ADMIN: Ini akan mereset XP, Level, Streak, dan Leaderboard (All Time & Weekly) untuk SEMUA USER di Firestore. Lanjutkan?')) return;
@@ -2585,7 +4210,8 @@ window.adminResetAllScores = async function() {
         window.location.reload();
     } catch (error) { console.error("Gagal melakukan reset:", error); alert("Error: Gagal mereset data. Cek tab Console untuk melihat detail."); }
 };
-
 // ============================================================================
 // START APP
 // ============================================================================
+initApp();
+markAppLoadingStep('appInit');
