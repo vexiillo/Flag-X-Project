@@ -2831,7 +2831,7 @@ async function requestNotificationPermission() {
             showToast(translations[lang].notifGrantedTitle || '🔔 Notifications enabled!');
             if (!messaging) return;
             // Daftarkan service worker FCM
-            const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const swReg = await navigator.serviceWorker.getRegistration('/') || await navigator.serviceWorker.register('./sw.js');
             // Ambil FCM token
             const fcmToken = await getToken(messaging, {
                 vapidKey: 'BLSoXuuYw_9rW_93NZYX6V88a370iSwzkDhAJBlgzeluiR640_q2IqxGrE4-CS9Nl4tLUA0jY3iAhPfrb4rrkhU',
