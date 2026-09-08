@@ -893,8 +893,8 @@ if (auth) {
             loadHomeLeaderboardPreview();
             return;
         }
-        // Admin-only Eruda dev console
-        const ADMIN_UID = 'wE4eP1X9iefGC6GnKIT101RqZk72';
+        // Admin-only Eruda dev console        
+        const ADMIN_UID = 'd06CnCTw9zQ0kFvh8PVKfRe6liX2';
         if (user.uid === ADMIN_UID && !window.eruda) {
             const s = document.createElement('script');
             s.src = 'https://cdn.jsdelivr.net/npm/eruda';
