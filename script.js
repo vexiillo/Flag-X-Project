@@ -2834,7 +2834,7 @@ async function requestNotificationPermission() {
             const swReg = await navigator.serviceWorker.getRegistration('/') || await navigator.serviceWorker.register('./sw.js');
             // Ambil FCM token
             const fcmToken = await getToken(messaging, {
-                vapidKey: 'BLSoXuuYw_9rW_93NZYX6V88a370iSwzkDhAJBlgzeluiR640_q2IqxGrE4-CS9Nl4tLUA0jY3iAhPfrb4rrkhU',
+                vapidKey: 'BJtkShXcEt08JLoqf-wUns7ccTQBr85arowvbY7Q2KjLM46Od9GH5YgM7jMHwd-m0aACaZjQfh0YyzauN0jeMw4',
                 serviceWorkerRegistration: swReg
             });
             if (fcmToken && auth.currentUser) {
