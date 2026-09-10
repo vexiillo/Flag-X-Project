@@ -2838,16 +2838,17 @@ async function requestNotificationPermission() {
                 serviceWorkerRegistration: swReg
             });
             if (fcmToken && auth.currentUser) {
-                // Simpan token ke Firestore agar Worker bisa baca nanti
-                await setDoc(doc(db, "users", auth.currentUser.uid), {
-                    fcmToken      : fcmToken,
-                    fcmUpdatedAt  : new Date()
-                }, { merge: true });
-            }
-            // Handle notifikasi saat app FOREGROUND
-            onMessage(messaging, (payload) => {
-                showToast(`🔥 ${payload.notification?.title}: ${payload.notification?.body}`);
-            });
+    // Simpan token ke Firestore agar Worker bisa baca nanti
+    await setDoc(doc(db, "users", auth.currentUser.uid), {
+        fcmToken      : fcmToken,
+        fcmUpdatedAt  : new Date(),
+        origin        : window.location.origin
+    }, { merge: true });
+}
+// Handle notifikasi saat app FOREGROUND
+onMessage(messaging, (payload) => {
+    showToast(`🔥 ${payload.data?.title}: ${payload.data?.body}`);
+});
         } catch (error) {
             console.error('FCM registration error:', error);
         }
