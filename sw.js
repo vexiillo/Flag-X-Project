@@ -13,14 +13,27 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || 'Flag-X 🔥';
-  const body  = payload.notification?.body  || 'Play now to keep your streak alive!';
+  const title = payload.data?.title || 'Flag-X 🔥';
+  const body  = payload.data?.body  || 'Play now to keep your streak alive!';
+  const link  = payload.data?.link  || 'https://flag-x-project.pages.dev';
   self.registration.showNotification(title, {
     body,
-    icon : '/favicon-96x96.png',
+    icon : payload.data?.icon || '/favicon-96x96.png',
     badge: '/favicon-96x96.png',
-    tag  : 'flagx-streak-reminder'
+    tag  : 'flagx-streak-reminder',
+    data : { url: link }
   });
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || 'https://flag-x-project.pages.dev';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const found = clientsArr.some((wc) => { if (wc.url === url) { wc.focus(); return true; } return false; });
+      if (!found) clients.openWindow(url);
+    })
+  );
 });
 
 const CACHE_NAME = 'flag-x-cache-final'; // Biarkan namanya tetap ini selamanya
