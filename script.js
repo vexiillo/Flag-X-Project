@@ -848,7 +848,7 @@ function getProfileMotivationText(lifetimeAttempted, accuracy, lang) {
     if (accuracy >= 50) return t.profileMotivationGood || 'Good effort! Practice more!';
     return t.profileMotivationPractice || 'Keep practicing!';
 }
-async function fetchUserRank(userXP) {
+async function fetchUserRank(userXP, isRetry = false) {
     if (!db) return null;
     try {
         const higherQuery = query(collection(db, "users"), where("totalScore", ">", userXP));
@@ -856,6 +856,10 @@ async function fetchUserRank(userXP) {
         return snap.data().count + 1;
     } catch (e) {
         console.error("Rank fetch error:", e);
+        if (!isRetry) {
+            await new Promise(r => setTimeout(r, 1000));
+            return fetchUserRank(userXP, true);
+        }
         return null;
     }
 }
@@ -877,8 +881,7 @@ if (auth) {
             updateProfileUI(null);
             if (loginBtn) loginBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
-            if (shouldLoadLeaderboard) loadLeaderboard();
-            loadHomeLeaderboardPreview();
+            if (shouldLoadLeaderboard) loadLeaderboard();            
             return;
         }
         if (user.isAnonymous) {
@@ -889,8 +892,7 @@ if (auth) {
             updateProfileUI(null);
             if (loginBtn) loginBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
-            if (shouldLoadLeaderboard) loadLeaderboard();
-            loadHomeLeaderboardPreview();
+            if (shouldLoadLeaderboard) loadLeaderboard();            
             return;
         }
         // Admin-only Eruda dev console        
@@ -918,8 +920,7 @@ if (auth) {
         
         if (loginBtn) loginBtn.classList.add('hidden');
         if (logoutBtn) logoutBtn.classList.remove('hidden');
-        if (shouldLoadLeaderboard) loadLeaderboard(); 
-        loadHomeLeaderboardPreview();
+        if (shouldLoadLeaderboard) loadLeaderboard();         
     });
 }
 // ============================================================================
