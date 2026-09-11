@@ -2763,7 +2763,7 @@ function updateStreak() {
         localStorage.setItem('flagx-streak', streak);
         const bestStreakSoFar = Math.max(streak, parseInt(localStorage.getItem('flagx-beststreak') || 0));
         localStorage.setItem('flagx-beststreak', bestStreakSoFar);
-        if (isRealUser(auth.currentUser) && db) {
+        if (auth.currentUser && db) {
             const userRef = doc(db, "users", auth.currentUser.uid);
             setDoc(userRef, { streak: streak, lastActive: new Date() }, { merge: true }).catch(e => console.error("Streak sync error:", e));
         }
