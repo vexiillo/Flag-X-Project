@@ -71,9 +71,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Batas waktu tunggu network sebelum nyerah & pakai cache — mencegah fetch()
-// nyangkut tanpa batas kalau koneksi lagi stall (mis. abis app di-background
-// lalu dibuka lagi, radio device butuh waktu nyambung ulang).
+// Batas waktu tunggu network sebelum nyerah — dipakai kalau TIDAK ada cache
+// sama sekali (mis. request pertama kali) sehingga tetap harus nunggu network.
 const NETWORK_TIMEOUT_MS = 6000;
 function fetchWithTimeout(request, timeoutMs) {
   const controller = new AbortController();
@@ -81,8 +80,16 @@ function fetchWithTimeout(request, timeoutMs) {
   return fetch(request, { signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
-// 3. Fetch: Strategi Campuran (Network-First untuk Kode, Cache-First untuk Gambar)
+// 3. Fetch: Strategi Campuran (Stale-While-Revalidate untuk Kode, Cache-First untuk Gambar)
 self.addEventListener('fetch', (event) => {
+  // PATCH 5: Cache API cuma boleh nyimpen request method GET (POST/PUT/PATCH
+  // bikin cache.put() throw). Request non-GET (refresh token Firebase Auth,
+  // getDoc/setDoc/getCountFromServer Firestore, dll) HARUS dilewatin langsung
+  // ke network tanpa disentuh sama sekali oleh SW ini.
+  if (event.request.method !== 'GET') {
+    return; // biarin browser handle fetch ini secara normal, SW gak ikut campur
+  }
+
   const url = new URL(event.request.url);
 
   // A. STRATEGI GAMBAR (Tetap Cache-First sesuai keinginanmu)
@@ -98,21 +105,26 @@ self.addEventListener('fetch', (event) => {
       })
     );
   } 
-  // B. STRATEGI FILE UTAMA (Network-First: Cek Internet dulu baru Cache)
+  // B. STRATEGI FILE UTAMA (Stale-While-Revalidate: kasih cache LANGSUNG kalau
+  // ada, update cache di belakang layar. Ini yang bikin app gak pernah nunggu
+  // network pas dibuka lagi dari background — beda dari network-first sebelumnya
+  // yang bisa nyangkut ~6 detik PER FILE pas radio device belum nyambung ulang.)
   else {
     event.respondWith(
-      fetchWithTimeout(event.request, NETWORK_TIMEOUT_MS)
-        .then((networkResponse) => {
-          // Jika internet ok, simpan hasil terbaru ke cache
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
+      caches.open(CACHE_NAME).then((cache) =>
+        cache.match(event.request).then((cachedResponse) => {
+          const networkFetch = fetchWithTimeout(event.request, NETWORK_TIMEOUT_MS)
+            .then((networkResponse) => {
+              cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            })
+            .catch(() => cachedResponse);
+
+          // Ada di cache? Kasih itu SEKARANG JUGA, gak usah nunggu network.
+          // Network tetap jalan di belakang layar buat update cache sesi berikutnya.
+          return cachedResponse || networkFetch;
         })
-        .catch(() => {
-          // Jika internet mati (offline), baru ambil dari memori
-          return caches.match(event.request);
-        })
+      )
     );
   }
 });
