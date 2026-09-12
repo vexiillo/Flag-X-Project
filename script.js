@@ -730,6 +730,7 @@ let _confirmActionCallback = null;
 function openConfirmActionModal({ icon, title, desc, confirmLabel, onConfirm }) {
     const modal = document.getElementById('confirm-action-modal');
     if (!modal) return;
+    closeAllPanels();
     document.getElementById('confirm-action-icon').className = `fa-solid ${icon} text-xl`;
     document.getElementById('confirm-action-title').textContent = title;
     document.getElementById('confirm-action-desc').textContent = desc;
