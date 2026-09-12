@@ -208,6 +208,9 @@ const translations = {
         achievementSheetTitle: "Achievements", homeQuickExplore: "Quick Explore",
         leaderboardStreak: "Streak", navHistory: "History", switchModalTitle: "Switch Quiz Mode?", switchModalDesc: "Changing the input type mid-game will reset all of your current quiz progress.",
         confirmSwitchBtn: "Yes, Reset", cancelSwitchBtn: "Cancel", notifModalTitle: "Enable Reminders?", notifModalDesc: "We'll send you a daily notification so your Streak doesn't break!",
+        confirmLogoutTitle: "Log Out?", confirmLogoutDesc: "You'll need to log in again to save your progress to the leaderboard.", confirmLogoutBtn: "Yes, Log Out",
+        confirmSwitchAccTitle: "Switch Account?", confirmSwitchAccDesc: "You'll be logged out of this account and asked to sign in with another one.", confirmSwitchAccBtn: "Yes, Switch",
+        overlayBlockedTitle: "Permission Blocked", overlayBlockedText: "Looks like another app running on your screen is stopping this permission popup from working properly — it's just a safety measure so nothing sneaky can happen behind the scenes.\n\nTry closing any floating bubbles or widgets first, then tap the bell icon to try again. Nothing floating around? Check your phone's app settings for anything with \"display over other apps\" turned on and switch it off. Still stuck? A quick restart usually clears it right up.",
         notifLaterBtn: "Maybe Later", notifAllowBtn: "Allow", historyEmptyTitle: "No History Yet", historyEmptyDesc: "Play your first quiz and become a flag master!",
         streakLegendary: "Legendary dedication! 🏆", streakOnFire: "You're on fire! Keep it going!", streakWeekly: "One week streak! Amazing consistency!", streakBonusSub: "Applied to all quiz XP while streak lasts",
         leaderboardNoData: "No data for this period.", leaderboardNoDataSub: "Be the first to claim the top spot on the leaderboard!", notifGrantedTitle: "Flag-X Reminder Active!",
@@ -296,6 +299,9 @@ const translations = {
         achievementSheetTitle: "Achievement", homeQuickExplore: "Jelajah Cepat",
         leaderboardStreak: "Streak", navHistory: "Riwayat", switchModalTitle: "Ganti Mode Kuis?", switchModalDesc: "Mengubah jenis input kuis di tengah permainan akan memuat ulang seluruh progres kuis berjalan Anda.",
         confirmSwitchBtn: "Ya, Reset", cancelSwitchBtn: "Batal", notifModalTitle: "Aktifkan Pengingat?", notifModalDesc: "Kami akan mengirimkan notifikasi harian agar Streak kamu tidak hangus dan terus berlanjut!",
+        confirmLogoutTitle: "Keluar Akun?", confirmLogoutDesc: "Kamu perlu login lagi buat nyimpen progress ke leaderboard.", confirmLogoutBtn: "Ya, Keluar",
+        confirmSwitchAccTitle: "Ganti Akun?", confirmSwitchAccDesc: "Kamu bakal logout dari akun ini dan diminta masuk pakai akun lain.", confirmSwitchAccBtn: "Ya, Ganti",
+        overlayBlockedTitle: "Izin Diblokir", overlayBlockedText: "Sepertinya ada aplikasi lain yang aktif di layarmu, jadi izin notifikasi ini gak bisa muncul dengan semestinya — ini cuma langkah pengamanan biar gak ada yang bisa \"menipu\" di baliknya.\n\nCoba tutup dulu bubble atau widget melayang yang mungkin lagi aktif, terus tap ikon lonceng buat coba lagi. Gak ada yang keliatan? Cek pengaturan aplikasi di HP-mu, cari yang punya izin \"tampil di atas aplikasi lain\" dan matiin yang gak perlu. Masih belum berhasil? Coba restart HP-nya, biasanya itu langsung beres.",
         notifLaterBtn: "Nanti Saja", notifAllowBtn: "Izinkan", historyEmptyTitle: "Belum Ada Riwayat", historyEmptyDesc: "Mainkan kuis pertamamu dan jadilah master bendera!",
         streakLegendary: "Dedikasi luar biasa! 🏆", streakOnFire: "Kamu luar biasa! Terus pertahankan!", streakWeekly: "Satu minggu berturut-turut! Konsistensi yang menakjubkan!",
         streakBonusSub: "Berlaku untuk semua XP kuis selama streak aktif", leaderboardNoData: "Tidak ada data untuk periode ini.", leaderboardNoDataSub: "Jadilah yang pertama meraih posisi teratas di papan peringkat!",
@@ -720,6 +726,29 @@ const handleLogin = async (e) => {
         }
     }
 };
+let _confirmActionCallback = null;
+function openConfirmActionModal({ icon, title, desc, confirmLabel, onConfirm }) {
+    const modal = document.getElementById('confirm-action-modal');
+    if (!modal) return;
+    document.getElementById('confirm-action-icon').className = `fa-solid ${icon} text-xl`;
+    document.getElementById('confirm-action-title').textContent = title;
+    document.getElementById('confirm-action-desc').textContent = desc;
+    document.getElementById('confirm-action-yes-btn').textContent = confirmLabel;
+    _confirmActionCallback = onConfirm;
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+function confirmSwitchAccount() {
+    const lang = settings.language;
+    openConfirmActionModal({
+        icon: 'fa-users-between-lines',
+        title: translations[lang].confirmSwitchAccTitle,
+        desc: translations[lang].confirmSwitchAccDesc,
+        confirmLabel: translations[lang].confirmSwitchAccBtn,
+        onConfirm: switchAccount
+    });
+}
+window.confirmSwitchAccount = confirmSwitchAccount;
 async function switchAccount() {
     try {
         const provider = new GoogleAuthProvider();
@@ -2823,7 +2852,15 @@ async function requestNotificationPermission() {
         if (!('Notification' in window)) return;
         try {
             const permission = await Notification.requestPermission();
-            if (permission !== 'granted') return;
+            if (permission !== 'granted') {
+                // Status masih 'default' (bukan 'denied') = kemungkinan besar tap-nya
+                // gak kehitung karena keblokir overlay app lain, bukan user sengaja nolak.
+                if (permission === 'default') {
+                    document.getElementById('notif-overlay-blocked-modal')?.classList.add('active');
+                    document.body.classList.add('modal-open');
+                }
+                return;
+            }
             // Update dot & toast SEGERA setelah izin diberikan — jangan digantungkan pada
             // keberhasilan registrasi FCM token, karena itu bisa gagal karena banyak faktor
             // di luar kendali (dukungan browser, jaringan, dll).
@@ -3796,7 +3833,26 @@ function setupEventListeners() {
     // Top Bar & Menus
     document.getElementById('notification-bell-btn')?.addEventListener('click', handleNotificationBellClick);
     document.getElementById('login-google-btn')?.addEventListener('click', handleLogin);
-    document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+        const lang = settings.language;
+        openConfirmActionModal({
+            icon: 'fa-right-from-bracket',
+            title: translations[lang].confirmLogoutTitle,
+            desc: translations[lang].confirmLogoutDesc,
+            confirmLabel: translations[lang].confirmLogoutBtn,
+            onConfirm: handleLogout
+        });
+    });
+    document.getElementById('confirm-action-yes-btn')?.addEventListener('click', () => {
+        const cb = _confirmActionCallback;
+        closeSheet(document.getElementById('confirm-action-modal'));
+        _confirmActionCallback = null;
+        if (typeof cb === 'function') cb();
+    });
+    document.getElementById('confirm-action-cancel-btn')?.addEventListener('click', () => {
+        closeSheet(document.getElementById('confirm-action-modal'));
+        _confirmActionCallback = null;
+    });
     // Desktop Sidebar & Header (profile chip lives in the header and reuses the existing
     // hamburger drawer/profile-panel, restyled as an anchored dropdown at desktop breakpoint;
     // Settings is a centered modal — settings-panel itself is relocated into it via
@@ -3899,6 +3955,10 @@ document.addEventListener('click', (e) => {
     document.getElementById('close-share-card-btn')?.addEventListener('click', () => { closeSheet(document.getElementById('share-card-modal')); });
     document.getElementById('close-disclaimer-x-btn')?.addEventListener('click', () => { closeSheet(disclaimerPanel); });
     document.getElementById('close-unofficial-info-btn')?.addEventListener('click', closeUnofficialInfoModal);
+    document.getElementById('close-overlay-blocked-btn')?.addEventListener('click', () => {
+        document.getElementById('notif-overlay-blocked-modal')?.classList.remove('active');
+        document.body.classList.remove('modal-open');
+    });
     document.getElementById('confirm-delete-history-btn')?.addEventListener('click', performHistoryDelete);
     document.getElementById('cancel-delete-history-btn')?.addEventListener('click', () => { pendingDeletePeriod = null; closeSheet(document.getElementById('history-delete-confirm-modal')); });
     
