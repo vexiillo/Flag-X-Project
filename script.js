@@ -3319,7 +3319,7 @@ function renderQuizHistory() {
     
     if (history.length === 0) {
         list.innerHTML = `
-            <div class="col-span-full text-center py-12 text-subtle flex flex-col items-center justify-center animate-fadeIn w-full mt-8">
+            <div class="history-empty-state col-span-full text-center py-12 text-subtle flex flex-col items-center justify-center animate-fadeIn w-full mt-8">
                 <i class="fa-solid fa-clock-rotate-left text-5xl mb-4 opacity-40"></i>
                 <p class="font-bold text-xl mb-1">${translations[settings.language].historyEmptyTitle || 'No History Yet'}</p>
                 <p class="text-sm">${translations[settings.language].historyEmptyDesc || 'Play your first quiz and become a flag master!'}</p>
