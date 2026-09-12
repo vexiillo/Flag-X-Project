@@ -717,7 +717,12 @@ const handleLogin = async (e) => {
     try {
         await signInWithPopup(auth, googleProvider);
         showToast(translations[settings.language].toastLoginSuccess);
-        if (profilePanel) profilePanel.classList.remove('active');
+        // Selalu balik ke home-screen abis login berhasil (baik dari hamburger
+        // drawer maupun leaderboard) — biar gak ada panel yang nampilin data
+        // basi (rank, member since, dll) dari sebelum login.
+        closeAllPanels();
+        stopLeaderboardCountdown();
+        showScreen('home-screen');
     } catch (error) {
         console.error("Login Error:", error);
         if (profilePanel) profilePanel.classList.remove('active');
