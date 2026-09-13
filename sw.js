@@ -19,10 +19,10 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(title, {
     body,
     icon : payload.data?.icon || '/favicon-96x96.png',
-    badge: '/favicon-96x96.png',
+    badge: '/badge-96x96.png',
     tag  : 'flagx-streak-reminder',
     data : { url: link }
-  });
+});
 });
 
 self.addEventListener('notificationclick', (event) => {
