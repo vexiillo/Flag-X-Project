@@ -1,6 +1,5 @@
 // --- OFFICIAL COUNTRIES ---
 // --- ASIA ---
-
 const centralAsiaCountries = [
   { name: "Kazakhstan", capital: "Astana", flag: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Flag_of_Kazakhstan.svg" },
   { name: "Kyrgyzstan", capital: "Bishkek", flag: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Flag_of_Kyrgyzstan.svg" },
@@ -8,7 +7,6 @@ const centralAsiaCountries = [
   { name: "Turkmenistan", capital: "Ashgabat", flag: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Flag_of_Turkmenistan.svg" },
   { name: "Uzbekistan", capital: "Tashkent", flag: "https://upload.wikimedia.org/wikipedia/commons/8/84/Flag_of_Uzbekistan.svg" }
 ];
-
 const eastAsiaCountries = [
   { name: "China", capital: "Beijing", flag: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_the_People%27s_Republic_of_China.svg" },
   { name: "Japan", capital: "Tokyo", flag: "https://upload.wikimedia.org/wikipedia/en/9/9e/Flag_of_Japan.svg" },
@@ -17,10 +15,9 @@ const eastAsiaCountries = [
   { name: "South Korea", capital: "Seoul", flag: "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg" },
   { name: "Taiwan", capital: "Taipei", flag: "https://upload.wikimedia.org/wikipedia/commons/7/72/Flag_of_the_Republic_of_China.svg" }
 ];
-
 const southAsiaCountries = [
   { name: "Afghanistan", capital: "Kabul", flag: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_the_Taliban.svg" },
-  { name: "Bangladesh", capital: "Dhaka", flag: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svg" },
+  { name: "Bangladesh", capital: "Dhaka", flag: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Flag_of_Bangladesh.svgh" },
   { name: "Bhutan", capital: "Thimphu", flag: "https://upload.wikimedia.org/wikipedia/commons/9/91/Flag_of_Bhutan.svg" },
   { name: "India", capital: "New Delhi", flag: "https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg" },
   { name: "Maldives", capital: "Malé", flag: "https://upload.wikimedia.org/wikipedia/commons/0/0f/Flag_of_Maldives.svg" },
@@ -28,7 +25,6 @@ const southAsiaCountries = [
   { name: "Pakistan", capital: "Islamabad", flag: "https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg" },
   { name: "Sri Lanka", capital: "Sri Jayawardenepura Kotte", flag: "https://upload.wikimedia.org/wikipedia/commons/1/11/Flag_of_Sri_Lanka.svg" }
 ];
-
 const southeastAsiaCountries = [
   { name: "Brunei", capital: "Bandar Seri Begawan", flag: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Flag_of_Brunei.svg" },
   { name: "Cambodia", capital: "Phnom Penh", flag: "https://upload.wikimedia.org/wikipedia/commons/8/83/Flag_of_Cambodia.svg" },
@@ -42,7 +38,6 @@ const southeastAsiaCountries = [
   { name: "Timor Leste (East Timor)", capital: "Dili", flag: "https://upload.wikimedia.org/wikipedia/commons/2/26/Flag_of_East_Timor.svg" },
   { name: "Vietnam", capital: "Hanoi", flag: "https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg" }
 ];
-
 const westAsiaCountries = [
   { name: "Armenia", capital: "Yerevan", flag: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Flag_of_Armenia.svg" },
   { name: "Azerbaijan", capital: "Baku", flag: "https://upload.wikimedia.org/wikipedia/commons/d/dd/Flag_of_Azerbaijan.svg" },
@@ -64,8 +59,8 @@ const westAsiaCountries = [
   { name: "United Arab Emirates", capital: "Abu Dhabi", flag: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_United_Arab_Emirates.svg" },
   { name: "Yemen", capital: "Sanaʽa", flag: "https://upload.wikimedia.org/wikipedia/commons/8/89/Flag_of_Yemen.svg" }
 ];
-// --- EUROPE ---
 
+// --- EUROPE ---
 const northernEuropeCountries = [
   { name: "Denmark", capital: "Copenhagen", flag: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Flag_of_Denmark.svg" },
   { name: "Estonia", capital: "Tallinn", flag: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Flag_of_Estonia.svg" },
@@ -78,7 +73,6 @@ const northernEuropeCountries = [
   { name: "Sweden", capital: "Stockholm", flag: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg" },
   { name: "United Kingdom", capital: "London", flag: "https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/960px-Flag_of_the_United_Kingdom.svg.png" }
 ];
-
 const westernEuropeCountries = [
   { name: "Austria", capital: "Vienna", flag: "https://upload.wikimedia.org/wikipedia/commons/4/41/Flag_of_Austria.svg" },
   { name: "Belgium", capital: "Brussels", flag: "https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Belgium.svg" },
@@ -90,7 +84,6 @@ const westernEuropeCountries = [
   { name: "Netherlands", capital: "Amsterdam", flag: "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg" },
   { name: "Switzerland", capital: "Bern", flag: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Switzerland.svg" }
 ];
-
 const southernEuropeCountries = [
   { name: "Albania", capital: "Tirana", flag: "https://upload.wikimedia.org/wikipedia/commons/3/36/Flag_of_Albania.svg" },
   { name: "Andorra", capital: "Andorra la Vella", flag: "https://upload.wikimedia.org/wikipedia/commons/1/19/Flag_of_Andorra.svg" },
@@ -108,7 +101,6 @@ const southernEuropeCountries = [
   { name: "Spain", capital: "Madrid", flag: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg" },
   { name: "Vatican City", capital: "Vatican City", flag: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Flag_of_Vatican_City_%282023%E2%80%93present%29.svg" }
 ];
-
 const easternEuropeCountries = [
   { name: "Belarus", capital: "Minsk", flag: "https://upload.wikimedia.org/wikipedia/commons/8/85/Flag_of_Belarus.svg" },
   { name: "Bulgaria", capital: "Sofia", flag: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Bulgaria.svg" },
@@ -121,6 +113,7 @@ const easternEuropeCountries = [
   { name: "Slovakia", capital: "Bratislava", flag: "https://upload.wikimedia.org/wikipedia/commons/e/e6/Flag_of_Slovakia.svg" },
   { name: "Ukraine", capital: "Kyiv", flag: "https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Ukraine.svg" }
 ];
+
 // --- AFRICA ---
 const northernAfricaCountries = [
   { name: "Algeria", capital: "Algiers", flag: "https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_Algeria.svg" },
@@ -131,7 +124,6 @@ const northernAfricaCountries = [
   { name: "Sudan", capital: "Khartoum", flag: "https://upload.wikimedia.org/wikipedia/commons/0/01/Flag_of_Sudan.svg" },
   { name: "Tunisia", capital: "Tunis", flag: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg" }
 ];
-
 const westernAfricaCountries = [
   { name: "Benin", capital: "Porto-Novo", flag: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Benin.svg" },
   { name: "Burkina Faso", capital: "Ouagadougou", flag: "https://upload.wikimedia.org/wikipedia/commons/3/31/Flag_of_Burkina_Faso.svg" },
@@ -149,7 +141,6 @@ const westernAfricaCountries = [
   { name: "Sierra Leone", capital: "Freetown", flag: "https://upload.wikimedia.org/wikipedia/commons/1/17/Flag_of_Sierra_Leone.svg" },
   { name: "Togo", capital: "Lomé", flag: "https://upload.wikimedia.org/wikipedia/commons/6/68/Flag_of_Togo.svg" }
 ];
-
 const centralAfricaCountries = [
   { name: "Cameroon", capital: "Yaoundé", flag: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Flag_of_Cameroon.svg" },
   { name: "Central African Republic", capital: "Bangui", flag: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Flag_of_the_Central_African_Republic.svg" },
@@ -160,7 +151,6 @@ const centralAfricaCountries = [
   { name: "Gabon", capital: "Libreville", flag: "https://upload.wikimedia.org/wikipedia/commons/0/04/Flag_of_Gabon.svg" },
   { name: "São Tomé and Príncipe", capital: "São Tomé", flag: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_S%C3%A3o_Tom%C3%A9_and_Pr%C3%ADncipe.svg" }
 ];
-
 const easternAfricaCountries = [
   { name: "Burundi", capital: "Gitega", flag: "https://upload.wikimedia.org/wikipedia/commons/5/50/Flag_of_Burundi.svg" },
   { name: "Comoros", capital: "Moroni", flag: "https://upload.wikimedia.org/wikipedia/commons/9/94/Flag_of_the_Comoros.svg" },
@@ -178,7 +168,6 @@ const easternAfricaCountries = [
   { name: "Tanzania", capital: "Dodoma", flag: "https://upload.wikimedia.org/wikipedia/commons/3/38/Flag_of_Tanzania.svg" },
   { name: "Uganda", capital: "Kampala", flag: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Flag_of_Uganda.svg" }
 ];
-
 const southernAfricaCountries = [
   { name: "Angola", capital: "Luanda", flag: "https://upload.wikimedia.org/wikipedia/commons/9/9d/Flag_of_Angola.svg" },
   { name: "Botswana", capital: "Gaborone", flag: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_Botswana.svg" },
@@ -190,6 +179,7 @@ const southernAfricaCountries = [
   { name: "Zambia", capital: "Lusaka", flag: "https://upload.wikimedia.org/wikipedia/commons/0/06/Flag_of_Zambia.svg" },
   { name: "Zimbabwe", capital: "Harare", flag: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Flag_of_Zimbabwe.svg" }
 ];
+
 // --- OCEANIA ---
 const oceaniaCountries = [
   { name: "Australia", capital: "Canberra", flag: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg" },
@@ -207,6 +197,7 @@ const oceaniaCountries = [
   { name: "Tuvalu", capital: "Funafuti", flag: "https://upload.wikimedia.org/wikipedia/commons/3/38/Flag_of_Tuvalu.svg" },
   { name: "Vanuatu", capital: "Port Vila", flag: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Vanuatu.svg" }
 ];
+
 // --- AMERICAS ---
 const northAmericaCountries = [
   { name: "Antigua and Barbuda", capital: "St. John's", flag: "https://upload.wikimedia.org/wikipedia/commons/8/89/Flag_of_Antigua_and_Barbuda.svg" },
@@ -233,7 +224,6 @@ const northAmericaCountries = [
   { name: "Trinidad and Tobago", capital: "Port of Spain", flag: "https://upload.wikimedia.org/wikipedia/commons/6/64/Flag_of_Trinidad_and_Tobago.svg" },
   { name: "United States", capital: "Washington, D.C.", flag: "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" }
 ];
-
 const southAmericaCountries = [
   { name: "Argentina", capital: "Buenos Aires", flag: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg" },
   { name: "Bolivia", capital: "Sucre", flag: "https://upload.wikimedia.org/wikipedia/commons/4/48/Flag_of_Bolivia.svg" },
@@ -250,32 +240,31 @@ const southAmericaCountries = [
 ];
 
 // --- PROSES PENGGABUNGAN & EXPORT LENGKAP ---
-
 export const officialCountriesRaw = [
   // ASIA
-  ...centralAsiaCountries.map(f => ({ ...f, region: "Asia", subRegion: "Central Asia" })),
-  ...eastAsiaCountries.map(f => ({ ...f, region: "Asia", subRegion: "East Asia" })),
-  ...southAsiaCountries.map(f => ({ ...f, region: "Asia", subRegion: "South Asia" })),
-  ...southeastAsiaCountries.map(f => ({ ...f, region: "Asia", subRegion: "Southeast Asia" })),
-  ...westAsiaCountries.map(f => ({ ...f, region: "Asia", subRegion: "West Asia" })),
+  ...centralAsiaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Asia", subRegion: "Central Asia" })),
+  ...eastAsiaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Asia", subRegion: "East Asia" })),
+  ...southAsiaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Asia", subRegion: "South Asia" })),
+  ...southeastAsiaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Asia", subRegion: "Southeast Asia" })),
+  ...westAsiaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Asia", subRegion: "West Asia" })),
 
   // EUROPE
-  ...easternEuropeCountries.map(f => ({ ...f, region: "Europe", subRegion: "Eastern Europe" })),
-  ...northernEuropeCountries.map(f => ({ ...f, region: "Europe", subRegion: "Northern Europe" })),
-  ...southernEuropeCountries.map(f => ({ ...f, region: "Europe", subRegion: "Southern Europe" })),
-  ...westernEuropeCountries.map(f => ({ ...f, region: "Europe", subRegion: "Western Europe" })),
+  ...easternEuropeCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Europe", subRegion: "Eastern Europe" })),
+  ...northernEuropeCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Europe", subRegion: "Northern Europe" })),
+  ...southernEuropeCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Europe", subRegion: "Southern Europe" })),
+  ...westernEuropeCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Europe", subRegion: "Western Europe" })),
 
   // AFRICA
-  ...centralAfricaCountries.map(f => ({ ...f, region: "Africa", subRegion: "Central Africa" })),
-  ...easternAfricaCountries.map(f => ({ ...f, region: "Africa", subRegion: "Eastern Africa" })),
-  ...northernAfricaCountries.map(f => ({ ...f, region: "Africa", subRegion: "Northern Africa" })),
-  ...southernAfricaCountries.map(f => ({ ...f, region: "Africa", subRegion: "Southern Africa" })),
-  ...westernAfricaCountries.map(f => ({ ...f, region: "Africa", subRegion: "Western Africa" })),
+  ...centralAfricaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Africa", subRegion: "Central Africa" })),
+  ...easternAfricaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Africa", subRegion: "Eastern Africa" })),
+  ...northernAfricaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Africa", subRegion: "Northern Africa" })),
+  ...southernAfricaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Africa", subRegion: "Southern Africa" })),
+  ...westernAfricaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Africa", subRegion: "Western Africa" })),
 
   // AMERICAS
-  ...northAmericaCountries.map(f => ({ ...f, region: "Americas", subRegion: "North America & Caribbean" })),
-  ...southAmericaCountries.map(f => ({ ...f, region: "Americas", subRegion: "South America" })),
+  ...northAmericaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Americas", subRegion: "North America & Caribbean" })),
+  ...southAmericaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Americas", subRegion: "South America" })),
 
   // OCEANIA
-  ...oceaniaCountries.map(f => ({ ...f, region: "Oceania", subRegion: "Oceania" }))
+  ...oceaniaCountries.map(f => ({ source: "Wikimedia Commons", ...f, region: "Oceania", subRegion: "Oceania" }))
 ];
