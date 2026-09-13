@@ -1005,6 +1005,7 @@ function handleNotificationBellClick() {
     }
     if (Notification.permission === 'granted') {
         showToast(translations[lang].notifAlreadyActive);
+        registerFcmToken(); // pastikan token tetap ke-sync walau izinnya granted dari luar app (mis. lewat ikon 🔕 Chrome)
         return;
     }
     if (Notification.permission === 'denied') {
@@ -2115,6 +2116,7 @@ function showLibrary(category, subCategory = null) {
     }
     let currentType = null; 
     let isFirstHeading = true;
+    const bmarkSet = loadBookmarks(); // Dipindah ke luar loop — sebelumnya ke-panggil ULANG buat SETIAP flag (ratusan kali per buka Library)
     data.forEach(item => {
         if (item.type && item.type !== currentType) {
             currentType = item.type;
@@ -2142,7 +2144,6 @@ function showLibrary(category, subCategory = null) {
         const card = document.createElement('div');
         card.className = 'card lib-flag-card rounded-lg p-2 text-center flex flex-col items-center animate-fadeIn relative overflow-hidden';
         card.dataset.name = item.name.toLowerCase();
-        const bmarkSet = loadBookmarks();
         const isStarred = bmarkSet.has(item.name);
         const flagVisual = hasFlagImage(item)
             ? `<img src="${item.flag}" alt="${item.name} flag" class="flag-img w-full h-full object-cover transition-opacity duration-300" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Dead+Link'; this.style.opacity=1;" onload="this.style.opacity=1" />`
@@ -3245,6 +3246,28 @@ function checkDailyStreakReset() {
         }
     }
 }
+async function registerFcmToken() {
+    if (!messaging) return;
+    try {
+        const swReg = await navigator.serviceWorker.getRegistration('/') || await navigator.serviceWorker.register('./sw.js');
+        const fcmToken = await getToken(messaging, {
+            vapidKey: 'BJtkShXcEt08JLoqf-wUns7ccTQBr85arowvbY7Q2KjLM46Od9GH5YgM7jMHwd-m0aACaZjQfh0YyzauN0jeMw4',
+            serviceWorkerRegistration: swReg
+        });
+        if (fcmToken && auth.currentUser) {
+            await setDoc(doc(db, "users", auth.currentUser.uid), {
+                fcmToken      : fcmToken,
+                fcmUpdatedAt  : new Date(),
+                origin        : window.location.origin
+            }, { merge: true });
+        }
+        onMessage(messaging, (payload) => {
+            showToast(`🔥 ${payload.data?.title}: ${payload.data?.body}`);
+        });
+    } catch (error) {
+        console.error('FCM registration error:', error);
+    }
+}
 async function requestNotificationPermission() {
     const notifModal = document.getElementById('notification-modal');
     if (notifModal) notifModal.classList.add('active');
@@ -3268,26 +3291,7 @@ async function requestNotificationPermission() {
             const lang = settings.language;
             updateNotificationBellUI();
             showToast(translations[lang].notifGrantedTitle || '🔔 Notifications enabled!');
-            if (!messaging) return;
-            // Daftarkan service worker FCM
-            const swReg = await navigator.serviceWorker.getRegistration('/') || await navigator.serviceWorker.register('./sw.js');
-            // Ambil FCM token
-            const fcmToken = await getToken(messaging, {
-                vapidKey: 'BJtkShXcEt08JLoqf-wUns7ccTQBr85arowvbY7Q2KjLM46Od9GH5YgM7jMHwd-m0aACaZjQfh0YyzauN0jeMw4',
-                serviceWorkerRegistration: swReg
-            });
-            if (fcmToken && auth.currentUser) {
-    // Simpan token ke Firestore agar Worker bisa baca nanti
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-        fcmToken      : fcmToken,
-        fcmUpdatedAt  : new Date(),
-        origin        : window.location.origin
-    }, { merge: true });
-}
-// Handle notifikasi saat app FOREGROUND
-onMessage(messaging, (payload) => {
-    showToast(`🔥 ${payload.data?.title}: ${payload.data?.body}`);
-});
+            await registerFcmToken();
         } catch (error) {
             console.error('FCM registration error:', error);
         }
